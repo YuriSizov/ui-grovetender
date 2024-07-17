@@ -4,9 +4,10 @@
 # Provided under MIT                              #
 ###################################################
 
-## A generic button. Represents UI items that can be focused, clicked, toggled, either with a text,
-## an icon, or both.
-class_name ButtonItem extends BaseUIItem
+## A panel UI element, which can be used as a background or foreground plane element. Configurable with
+## background and border properties, or with a 9-patch texture.
+# TODO: Implement support for 9-patch textures.
+class_name PanelElement extends BaseUIElement
 
 ## The flag that enables background drawing.
 @export var draw_background: bool = true
@@ -22,14 +23,14 @@ class_name ButtonItem extends BaseUIItem
 
 
 func render() -> void:
-	var hotspot_control := get_owner_control()
-	var item_rect := get_rect_in_hotspot()
+	var canvas_control := get_control()
+	var element_rect := get_rect_in_control()
 	
 	if draw_background:
-		hotspot_control.draw_rect(item_rect, background_color)
+		canvas_control.draw_rect(element_rect, background_color)
 	
 	if draw_border:
-		hotspot_control.draw_rect(item_rect, border_color, false, border_width)
+		canvas_control.draw_rect(element_rect, border_color, false, border_width)
 
 
 func get_gizmos() -> Array[BaseGizmo]:
@@ -37,7 +38,7 @@ func get_gizmos() -> Array[BaseGizmo]:
 	
 	# Basic property gizmos.
 	var size_gizmo := SizeGizmo.new()
-	size_gizmo.connect_to_item(self)
+	size_gizmo.connect_to_element(self)
 	gizmos.push_back(size_gizmo)
 	
 	# TODO: Implement constraints, snapping, alignment.
@@ -45,7 +46,7 @@ func get_gizmos() -> Array[BaseGizmo]:
 	size_gizmo.side_size_changed.connect(_resize_by_side)
 	
 	var position_gizmo := PositionGizmo.new()
-	position_gizmo.connect_to_item(self)
+	position_gizmo.connect_to_element(self)
 	gizmos.push_back(position_gizmo)
 	
 	# TODO: Implement constraints, snapping, alignment.
@@ -57,7 +58,7 @@ func get_gizmos() -> Array[BaseGizmo]:
 # Helpers.
 
 func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
-	var center_rect := Rect2(position, size)
+	var center_rect := rect.get_center_rect()
 	
 	match corner:
 		CORNER_TOP_LEFT:
@@ -73,11 +74,11 @@ func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
 			center_rect.size += Vector2(-delta.x, delta.y) 
 			center_rect.position += delta / 2.0
 	
-	set_rect(center_rect)
+	rect.set_size_and_position(center_rect)
 
 
 func _resize_by_side(side: Side, delta: Vector2) -> void:
-	var center_rect := Rect2(position, size)
+	var center_rect := rect.get_center_rect()
 	
 	match side:
 		SIDE_LEFT:
@@ -93,8 +94,8 @@ func _resize_by_side(side: Side, delta: Vector2) -> void:
 			center_rect.size.y += delta.y
 			center_rect.position.y += delta.y / 2.0
 	
-	set_rect(center_rect)
+	rect.set_size_and_position(center_rect)
 
 
 func _reposition_by_center(delta: Vector2) -> void:
-	set_position(position + delta)
+	rect.position += delta

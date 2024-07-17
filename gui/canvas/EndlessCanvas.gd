@@ -7,12 +7,21 @@
 ## The endless canvas on which the entire project is laid out.
 class_name EndlessCanvas extends Control
 
-var _hotspots: Array[CanvasHotspot] = []
-var _selected_items: Array[BaseUIItem] = []
+var _current_canvas: UICanvas = null
 
-@onready var _hotspot_container: Control = %Hotspots
+var _drawn_elements: Array[CanvasUIElement] = []
+var _selected_elements: Array[BaseUIElement] = []
+
+@onready var _element_container: Control = %Elements
 @onready var _gizmos_container: CanvasGizmos = %Gizmos
 @onready var _context_menu: PopupMenu = %ContextMenu
+
+
+func _ready() -> void:
+	_edit_current_canvas()
+	
+	if not Engine.is_editor_hint():
+		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -20,62 +29,60 @@ func _gui_input(event: InputEvent) -> void:
 		var mb := event as InputEventMouseButton
 		
 		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_create_item(mb.position)
+			_try_select_element(mb.position)
 		if mb.pressed && mb.button_index == MOUSE_BUTTON_RIGHT:
-			_select_item(mb.position)
+			_create_element(mb.position)
 
 
-# Item management.
+# Canvas management.
 
-func _create_item(at_position: Vector2) -> void:
-	var hotspot_data := _find_or_create_hotspot(at_position)
-	var item := ButtonItem.new()
-	item.position = at_position
+func _edit_current_canvas() -> void:
+	if _current_canvas:
+		_current_canvas.element_created.disconnect(_add_canvas_element)
 	
-	hotspot_data.assign_item(item)
+	_current_canvas = Controller.get_current_canvas()
+	
+	if _current_canvas:
+		_current_canvas.element_created.connect(_add_canvas_element)
 
 
-func _select_item(at_position: Vector2) -> void:
-	# TODO: Support multiple selection modes, adding and subtracting items from the selection.
-	_selected_items.clear()
+# Element management.
+
+func _create_element(at_position: Vector2) -> void:
+	if not Controller.current_project || not _current_canvas:
+		return
 	
-	var hotspot_data := _find_hotspot(at_position)
-	if hotspot_data:
-		for ui_item in hotspot_data.items:
-			if ui_item.get_rect().has_point(at_position):
-				_selected_items.push_back(ui_item)
-				break # For now, select the first match only.
+	_current_canvas.create_element(ElementType.ELEMENT_PANEL, at_position)
+
+
+func _add_canvas_element(element: BaseUIElement) -> void:
+	var canvas_element := CanvasUIElement.new()
+	canvas_element.data = element
 	
+	_element_container.add_child(canvas_element)
+	_drawn_elements.push_back(canvas_element)
+	
+	# Auto-select the added element.
+	_selected_elements.clear()
+	_selected_elements.push_back(element)
 	_update_gizmos()
 
 
-# Hotspot management.
-
-func _find_hotspot(at_position: Vector2) -> Hotspot:
-	for hotspot_control in _hotspots:
-		if not hotspot_control.is_visible_on_screen():
-			continue
+func _try_select_element(at_position: Vector2) -> void:
+	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
+	# TODO: Add support for multi-element selections.
+	_selected_elements.clear()
+	
+	for element in _drawn_elements:
+		if not element.is_visible_on_screen() || not element.data:
+			return
 		
-		if hotspot_control.get_rect().has_point(at_position):
-			return hotspot_control.data
+		var element_rect := element.data.rect.get_boundary_rect()
+		if element_rect.has_point(at_position):
+			_selected_elements.push_back(element.data)
+			break # For now, select the first match only.
 	
-	return null
-
-
-func _find_or_create_hotspot(at_position: Vector2) -> Hotspot:
-	var hotspot_data := _find_hotspot(at_position)
-	if hotspot_data:
-		return hotspot_data
-	
-	hotspot_data = Controller.current_project.create_hotspot(at_position)
-	
-	var hotspot_control := CanvasHotspot.new()
-	hotspot_control.data = hotspot_data
-	
-	_hotspot_container.add_child(hotspot_control)
-	_hotspots.push_back(hotspot_control)
-	
-	return hotspot_data
+	_update_gizmos()
 
 
 # Gizmo management.
@@ -83,14 +90,14 @@ func _find_or_create_hotspot(at_position: Vector2) -> Hotspot:
 func _update_gizmos() -> void:
 	_gizmos_container.clear_gizmos()
 	
-	if _selected_items.size() == 0:
+	if _selected_elements.size() == 0:
 		return
 	
-	# TODO: Support gizmos for multiple selected items.
-	if _selected_items.size() > 1:
+	# TODO: Support gizmos for multiple selected elements.
+	if _selected_elements.size() > 1:
 		return
 	
-	var selected_item := _selected_items[0]
-	var active_gizmos := selected_item.get_gizmos()
+	var selected_element := _selected_elements[0]
+	var active_gizmos := selected_element.get_gizmos()
 	
 	_gizmos_container.set_gizmos(active_gizmos)

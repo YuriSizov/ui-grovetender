@@ -4,7 +4,7 @@
 # Provided under MIT                              #
 ###################################################
 
-## A gizmo for editing the position of an item or a group of items.
+## A gizmo for editing the position of an element or a group of elements.
 class_name PositionGizmo extends BaseGizmo
 
 signal position_changed(delta: Vector2)
@@ -13,6 +13,11 @@ const TRIGGER_AREA_WIDTH := 24.0
 var _center_handle: Rect2 = Rect2()
 
 var _grabbing: bool = false
+
+
+func _init() -> void:
+	super()
+	name = &"PositionGizmo"
 
 
 func _ready() -> void:

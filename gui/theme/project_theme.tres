@@ -1,7 +1,3 @@
 [gd_resource type="Theme" format=3 uid="uid://jgqsy0ei8blc"]
 
 [resource]
-CanvasHotspot/base_type = &"Control"
-CanvasHotspot/colors/background_color = Color(1, 1, 1, 0.156863)
-CanvasHotspot/colors/border_color = Color(1, 1, 1, 0.235294)
-CanvasHotspot/constants/border_size = 2

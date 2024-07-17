@@ -4,7 +4,7 @@
 # Provided under MIT                              #
 ###################################################
 
-## A gizmo for editing the size of an item or a group of items.
+## A gizmo for editing the size of an element or a group of elements.
 class_name SizeGizmo extends BaseGizmo
 
 signal corner_size_changed(corner: Corner, delta: Vector2)
@@ -27,6 +27,7 @@ var _grabbing: bool = false
 
 func _init() -> void:
 	super()
+	name = &"SizeGizmo"
 	
 	_corner_handles.resize(4)
 	_side_handles.resize(4)

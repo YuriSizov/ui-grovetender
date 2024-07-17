@@ -4,15 +4,10 @@
 # Provided under MIT                              #
 ###################################################
 
-## Project data.
-class_name Project extends Resource
+class_name ElementType extends Object
 
-## A collection of canvases in this project.
-@export var canvases: Array[UICanvas] = []
-
-
-func create_new_canvas() -> UICanvas:
-	var canvas := UICanvas.new()
-	canvases.push_back(canvas)
-	
-	return canvas
+const ELEMENT_BASE  := 0
+const ELEMENT_PANEL := 1
+const ELEMENT_TEXT  := 2
+const ELEMENT_ICON  := 3
+const MAX           := 4
