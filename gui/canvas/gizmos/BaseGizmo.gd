@@ -13,6 +13,7 @@ signal grabbed()
 signal released()
 
 var _reference_element: BaseUIElement = null
+var _grabbing: bool = false
 
 
 func _init() -> void:
@@ -44,7 +45,35 @@ func update_rect_by_element() -> void:
 	size = element_rect.size
 
 
+# Interactions.
+
+func is_grabbing() -> bool:
+	return _grabbing
+
+
+func set_grabbing(value: bool) -> void:
+	if _grabbing == value:
+		return
+	
+	_grabbing = value
+	if _grabbing:
+		grabbed.emit()
+	else:
+		released.emit()
+
+
 # Implementation.
+
+## Returns whether the interactive parts of the gizmo are being hovered.
+func is_hovering(_mouse_position: Vector2) -> bool:
+	return false
+
+
+## Returns the cursor shape based on the position from the input event. Extending classes implement
+## this method.
+func get_hovered_cursor_shape(_mouse_position: Vector2) -> CursorShape:
+	return Control.CURSOR_ARROW
+
 
 ## Returns whether the incoming input event can be handled, e.g. mouse is hovering over the trigger
 ## area. Extending classes implement this method.

@@ -22,7 +22,6 @@ enum ResizeType {
 
 var _resize_type: ResizeType = ResizeType.NONE
 var _resize_index: int = -1
-var _grabbing: bool = false
 
 
 func _init() -> void:
@@ -99,42 +98,77 @@ func _update_handles() -> void:
 	_side_handles[SIDE_BOTTOM].size = Vector2(size.x - base_size.x * 2, base_size.y * 2)
 
 
+# Implementation.
+
+
+func is_hovering(mouse_position: Vector2) -> bool:
+	_resize_type = ResizeType.NONE
+	_resize_index = -1
+	
+	# First, test the rough area of this gizmo to exclude all obviously wrong events.
+	var rough_rect := Rect2(position, size).grow(TRIGGER_AREA_WIDTH)
+	if not rough_rect.has_point(mouse_position):
+		return false
+	
+	# Then, test corner handles, they take priority over sides.
+	for i in 4:
+		var handle := _corner_handles[i]
+		if handle.has_point(mouse_position):
+			_resize_type = ResizeType.CORNER
+			_resize_index = i
+			return true
+	
+	# Finally, test side handles.
+	for i in 4:
+		var handle := _side_handles[i]
+		if handle.has_point(mouse_position):
+			_resize_type = ResizeType.SIDE
+			_resize_index = i
+			return true
+	
+	return false
+
+
+func get_hovered_cursor_shape(mouse_position: Vector2) -> CursorShape:
+	if _resize_type == ResizeType.NONE || _resize_index < 0:
+		return super(mouse_position)
+	
+	if _resize_type == ResizeType.CORNER:
+		match _resize_index:
+			CORNER_TOP_LEFT:
+				return Control.CURSOR_FDIAGSIZE
+			CORNER_TOP_RIGHT:
+				return Control.CURSOR_BDIAGSIZE
+			CORNER_BOTTOM_RIGHT:
+				return Control.CURSOR_FDIAGSIZE
+			CORNER_BOTTOM_LEFT:
+				return Control.CURSOR_BDIAGSIZE
+			
+	elif _resize_type == ResizeType.SIDE:
+		match _resize_index:
+			SIDE_LEFT:
+				return Control.CURSOR_HSIZE
+			SIDE_TOP:
+				return Control.CURSOR_VSIZE
+			SIDE_RIGHT:
+				return Control.CURSOR_HSIZE
+			SIDE_BOTTOM:
+				return Control.CURSOR_VSIZE
+	
+	return super(mouse_position)
+
+
 func can_handle_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
 		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_resize_type = ResizeType.NONE
-			_resize_index = -1
-			
-			var mouse_position := mb.global_position
-			
-			# First, test the rough area of this gizmo to exclude all obviously wrong events.
-			var rough_rect := Rect2(position, size).grow(TRIGGER_AREA_WIDTH)
-			if not rough_rect.has_point(mouse_position):
+			if _resize_type == ResizeType.NONE || _resize_index < 0:
 				return false
-			
-			# Then, test corner handles, they take priority over sides.
-			for i in 4:
-				var handle := _corner_handles[i]
-				if handle.has_point(mouse_position):
-					_resize_type = ResizeType.CORNER
-					_resize_index = i
-					return true
-			
-			# Finally, test side handles.
-			for i in 4:
-				var handle := _side_handles[i]
-				if handle.has_point(mouse_position):
-					_resize_type = ResizeType.SIDE
-					_resize_index = i
-					return true
-		
-		elif _grabbing && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			return true
-	
-	if _grabbing && event is InputEventMouseMotion:
-		return true
+			
+		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			return true
 	
 	return false
 
@@ -146,17 +180,15 @@ func handle_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
-		if not _grabbing && mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_grabbing = true
-			grabbed.emit()
+		if not is_grabbing() && mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			set_grabbing(true)
 		
-		elif _grabbing && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			_resize_type = ResizeType.NONE
 			_resize_index = -1
-			_grabbing = false
-			released.emit()
+			set_grabbing(false)
 	
-	if _grabbing && event is InputEventMouseMotion:
+	if is_grabbing() && event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		
 		match _resize_type:

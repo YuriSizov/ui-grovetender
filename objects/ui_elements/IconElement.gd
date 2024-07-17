@@ -5,3 +5,6 @@
 ###################################################
 
 class_name IconElement extends BaseUIElement
+
+## The texture/image of the icon.
+@export var icon: Texture2D = null

@@ -12,8 +12,6 @@ signal position_changed(delta: Vector2)
 const TRIGGER_AREA_WIDTH := 24.0
 var _center_handle: Rect2 = Rect2()
 
-var _grabbing: bool = false
-
 
 func _init() -> void:
 	super()
@@ -45,6 +43,18 @@ func _update_handles() -> void:
 	_center_handle.size = base_size * 2
 
 
+# Implementation.
+
+func is_hovering(mouse_position: Vector2) -> bool:
+	if _center_handle.has_point(mouse_position):
+		return true
+	return false
+
+
+func get_hovered_cursor_shape(_mouse_position: Vector2) -> CursorShape:
+	return Control.CURSOR_DRAG
+
+
 func can_handle_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
@@ -54,11 +64,8 @@ func can_handle_input(event: InputEvent) -> bool:
 			if _center_handle.has_point(mouse_position):
 				return true
 			
-		elif _grabbing && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			return true
-	
-	if _grabbing && event is InputEventMouseMotion:
-		return true
 	
 	return false
 
@@ -67,14 +74,12 @@ func handle_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
-		if not _grabbing && mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_grabbing = true
-			grabbed.emit()
+		if not is_grabbing() && mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			set_grabbing(true)
 		
-		elif _grabbing && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_grabbing = false
-			released.emit()
+		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			set_grabbing(false)
 	
-	if _grabbing && event is InputEventMouseMotion:
+	if is_grabbing() && event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		position_changed.emit(mm.relative)
