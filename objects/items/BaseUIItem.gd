@@ -13,12 +13,15 @@ signal rect_changed()
 var owner_id: int = 0
 
 ## The size of the UI item.
-@export var size: Vector2 = Vector2(80, 80):
-	set = set_size
+@export var size: Vector2:
+	set = set_size, get = get_size
 ## The center position of the UI item.
-@export var position: Vector2 = Vector2.ZERO:
-	set = set_position
+@export var position: Vector2:
+	set = set_position, get = get_position
 
+# Internal values for size and position, used to set values without triggering the setter.
+var _size: Vector2 = Vector2(80, 80)
+var _position: Vector2 = Vector2.ZERO
 # Cached position used for rendering and input handling.
 var _topleft_position: Vector2 = Vector2.ZERO
 
@@ -47,29 +50,39 @@ func get_owner_control() -> CanvasHotspot:
 # Position and sizing.
 
 func _update_topleft_position() -> void:
-	_topleft_position = position - size / 2.0
+	_topleft_position = _position - _size / 2.0
 
 
 ## Sets the size of this UI item.
 func set_size(value: Vector2) -> void:
-	size = value
+	_size = value
 	_update_topleft_position()
 	
 	rect_changed.emit()
+
+
+## Returns the size of this UI item.
+func get_size() -> Vector2:
+	return _size
 
 
 ## Sets the center position of this UI item.
 func set_position(value: Vector2) -> void:
-	position = value
+	_position = value
 	_update_topleft_position()
 	
 	rect_changed.emit()
 
 
+## Returns the center position of this UI item.
+func get_position() -> Vector2:
+	return _position
+
+
 ## Sets both center position and size at the same time for this UI item.
 func set_rect(value: Rect2) -> void:
-	size = value.size
-	position = value.position
+	_size = value.size
+	_position = value.position
 	_update_topleft_position()
 	
 	rect_changed.emit()
@@ -77,7 +90,7 @@ func set_rect(value: Rect2) -> void:
 
 ## Returns the base area for this UI item.
 func get_rect() -> Rect2:
-	return Rect2(_topleft_position, size)
+	return Rect2(_topleft_position, _size)
 
 
 ## Returns the are for this UI item, relative to the owner hotspot.
@@ -87,7 +100,7 @@ func get_rect_in_hotspot() -> Rect2:
 		return Rect2()
 	
 	var owner_rect := owner_hotspot.get_rect()
-	return Rect2(_topleft_position - owner_rect.position, size)
+	return Rect2(_topleft_position - owner_rect.position, _size)
 
 
 # Implementation.

@@ -35,19 +35,32 @@ func _init() -> void:
 func _ready() -> void:
 	_update_handles()
 	
-	resized.connect(_update_handles)
+	item_rect_changed.connect(_update_handles)
 
 
 func _draw() -> void:
-	var gizmo_rect := Rect2(Vector2.ZERO, size)
+	var visual_padding := -TRIGGER_AREA_WIDTH / 2.0
 	
-	draw_rect(gizmo_rect, Color.BLUE, false, 2.0)
+	for i in 4:
+		var handle := _side_handles[i]
+		
+		var handle_rect := Rect2()
+		handle_rect.position = handle.position - position
+		handle_rect.size = handle.size
+		
+		if i % 2 == 0:
+			handle_rect = handle_rect.grow_individual(visual_padding, 0, visual_padding, 0)
+		else:
+			handle_rect = handle_rect.grow_individual(0, visual_padding, 0, visual_padding)
+		
+		draw_rect(handle_rect, Color.WHITE)
+		draw_rect(handle_rect, Color.BLUE, false, 2.0)
 	
 	for handle in _corner_handles:
 		var handle_rect := Rect2()
 		handle_rect.position = handle.position - position
 		handle_rect.size = handle.size
-		handle_rect = handle_rect.grow(-TRIGGER_AREA_WIDTH / 2.0)
+		handle_rect = handle_rect.grow(visual_padding)
 		
 		draw_rect(handle_rect, Color.WHITE)
 		draw_rect(handle_rect, Color.BLACK, false, 2.0)
@@ -72,7 +85,17 @@ func _update_handles() -> void:
 	
 	# Side handles.
 	
-	pass
+	_side_handles[SIDE_LEFT].position = position + Vector2(-base_size.x, base_size.y)
+	_side_handles[SIDE_LEFT].size = Vector2(base_size.x * 2, size.y - base_size.y * 2)
+	
+	_side_handles[SIDE_RIGHT].position = position + Vector2(size.x, 0) + Vector2(-base_size.x, base_size.y)
+	_side_handles[SIDE_RIGHT].size = Vector2(base_size.x * 2, size.y - base_size.y * 2)
+	
+	_side_handles[SIDE_TOP].position = position + Vector2(base_size.x, -base_size.y)
+	_side_handles[SIDE_TOP].size = Vector2(size.x - base_size.x * 2, base_size.y * 2)
+	
+	_side_handles[SIDE_BOTTOM].position = position + Vector2(0, size.y) + Vector2(base_size.x, -base_size.y)
+	_side_handles[SIDE_BOTTOM].size = Vector2(size.x - base_size.x * 2, base_size.y * 2)
 
 
 func can_handle_input(event: InputEvent) -> bool:
@@ -109,7 +132,7 @@ func can_handle_input(event: InputEvent) -> bool:
 		elif _grabbing && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			return true
 	
-	if event is InputEventMouseMotion && _grabbing:
+	if _grabbing && event is InputEventMouseMotion:
 		return true
 	
 	return false
@@ -132,7 +155,7 @@ func handle_input(event: InputEvent) -> void:
 			_grabbing = false
 			released.emit()
 	
-	if event is InputEventMouseMotion && _grabbing:
+	if _grabbing && event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		
 		match _resize_type:

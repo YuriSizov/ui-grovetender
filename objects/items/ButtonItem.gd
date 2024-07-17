@@ -37,32 +37,64 @@ func get_gizmos() -> Array[BaseGizmo]:
 	
 	# Basic property gizmos.
 	var size_gizmo := SizeGizmo.new()
-	size_gizmo.set_rect_by_item(self)
+	size_gizmo.connect_to_item(self)
 	gizmos.push_back(size_gizmo)
 	
-	size_gizmo.corner_size_changed.connect(func(corner: Corner, delta: Vector2) -> void:
-		var center_rect := Rect2(position, size)
-		
-		match corner:
-			CORNER_TOP_LEFT:
-				center_rect.size -= delta # Inverted on both axes.
-				center_rect.position += delta / 2.0
-			CORNER_TOP_RIGHT:
-				center_rect.size += Vector2(delta.x, -delta.y) 
-				center_rect.position += delta / 2.0
-			CORNER_BOTTOM_RIGHT:
-				center_rect.size += delta
-				center_rect.position += delta / 2.0
-			CORNER_BOTTOM_LEFT:
-				center_rect.size += Vector2(-delta.x, delta.y) 
-				center_rect.position += delta / 2.0
-		
-		set_rect(center_rect)
-		size_gizmo.set_rect_by_item(self)
-	)
+	# TODO: Implement constraints, snapping, alignment.
+	size_gizmo.corner_size_changed.connect(_resize_by_corner)
+	size_gizmo.side_size_changed.connect(_resize_by_side)
 	
 	var position_gizmo := PositionGizmo.new()
-	position_gizmo.set_rect_by_item(self)
+	position_gizmo.connect_to_item(self)
 	gizmos.push_back(position_gizmo)
 	
+	# TODO: Implement constraints, snapping, alignment.
+	position_gizmo.position_changed.connect(_reposition_by_center)
+	
 	return gizmos
+
+
+# Helpers.
+
+func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
+	var center_rect := Rect2(position, size)
+	
+	match corner:
+		CORNER_TOP_LEFT:
+			center_rect.size -= delta # Inverted on both axes.
+			center_rect.position += delta / 2.0
+		CORNER_TOP_RIGHT:
+			center_rect.size += Vector2(delta.x, -delta.y) 
+			center_rect.position += delta / 2.0
+		CORNER_BOTTOM_RIGHT:
+			center_rect.size += delta
+			center_rect.position += delta / 2.0
+		CORNER_BOTTOM_LEFT:
+			center_rect.size += Vector2(-delta.x, delta.y) 
+			center_rect.position += delta / 2.0
+	
+	set_rect(center_rect)
+
+
+func _resize_by_side(side: Side, delta: Vector2) -> void:
+	var center_rect := Rect2(position, size)
+	
+	match side:
+		SIDE_LEFT:
+			center_rect.size.x -= delta.x
+			center_rect.position.x += delta.x / 2.0
+		SIDE_RIGHT:
+			center_rect.size.x += delta.x
+			center_rect.position.x += delta.x / 2.0
+		SIDE_TOP:
+			center_rect.size.y -= delta.y
+			center_rect.position.y += delta.y / 2.0
+		SIDE_BOTTOM:
+			center_rect.size.y += delta.y
+			center_rect.position.y += delta.y / 2.0
+	
+	set_rect(center_rect)
+
+
+func _reposition_by_center(delta: Vector2) -> void:
+	set_position(position + delta)
