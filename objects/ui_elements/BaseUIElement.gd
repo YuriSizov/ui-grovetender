@@ -50,8 +50,8 @@ func render() -> void:
 	pass
 
 
-## Initializes and returns a set of gizmos for editing this UI element. Extending classes override
-## this method, but must call super() most of the time.
+## Initializes and returns a set of gizmos for editing this UI element. Gizmos with lower indices
+## are handled first. Extending classes override this method, but must call super() most of the time.
 func get_gizmos() -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	

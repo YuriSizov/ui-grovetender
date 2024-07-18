@@ -31,7 +31,8 @@ func _gui_input(event: InputEvent) -> void:
 		
 		# If we aren't grabbing or clicking anything, then just check for hover and new cursor shape.
 		for gizmo: BaseGizmo in get_children():
-			if gizmo.is_hovering(event.global_position):
+			gizmo.check_hovering(event.global_position)
+			if gizmo.is_hovering():
 				var cursor_shape := gizmo.get_hovered_cursor_shape(event.global_position)
 				_update_cursor_shape(cursor_shape)
 				return
@@ -66,7 +67,8 @@ func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
 		add_child(gizmo)
 		
 		# Update the cursor immediately, if the new gizmo is hovered.
-		if gizmo.is_hovering(mouse_position):
+		gizmo.check_hovering(mouse_position)
+		if gizmo.is_hovering():
 			var cursor_shape := gizmo.get_hovered_cursor_shape(mouse_position)
 			_update_cursor_shape(cursor_shape)
 		

@@ -13,12 +13,18 @@ signal grabbed()
 signal released()
 
 var _reference_element: BaseUIElement = null
+var _hovering: bool = false
 var _grabbing: bool = false
 
 
 func _init() -> void:
 	name = &"BaseGizmo"
 	mouse_filter = MOUSE_FILTER_IGNORE
+
+
+func _ready() -> void:
+	_update_handles()
+	item_rect_changed.connect(_update_handles)
 
 
 # Position and sizing.
@@ -41,16 +47,36 @@ func update_rect_by_element() -> void:
 		return
 	
 	var element_rect := _reference_element.rect.get_boundary_rect()
+	var position_changed := position != element_rect.position
+	var size_changed := size != element_rect.size
+	
 	position = element_rect.position
 	size = element_rect.size
+	
+	# Inexplicably, Godot doesn't trigger item_rect_changed when position changes, but not the size.
+	if not size_changed && position_changed:
+		item_rect_changed.emit()
 
 
 # Interactions.
 
+func is_hovering() -> bool:
+	return _hovering
+
+
+func set_hovering(value: bool) -> void:
+	if _hovering == value:
+		return
+	
+	_hovering = value
+
+
+## Returns whether this gizmo is being currently grabbed.
 func is_grabbing() -> bool:
 	return _grabbing
 
 
+## Marks, or unmarks, this gizmo as being currently grabbed.
 func set_grabbing(value: bool) -> void:
 	if _grabbing == value:
 		return
@@ -64,9 +90,16 @@ func set_grabbing(value: bool) -> void:
 
 # Implementation.
 
-## Returns whether the interactive parts of the gizmo are being hovered.
-func is_hovering(_mouse_position: Vector2) -> bool:
-	return false
+## Called when it's an opportune time to update gizmo's handles/interactive areas. Extending classes
+## implement this method.
+func _update_handles() -> void:
+	pass
+
+
+## Checks whether the interactive parts of the gizmo are being hovered. Extending classes implement
+## this method.
+func check_hovering(_mouse_position: Vector2) -> void:
+	return
 
 
 ## Returns the cursor shape based on the position from the input event. Extending classes implement
