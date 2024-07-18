@@ -8,6 +8,8 @@
 class_name BaseUIElement extends Resource
 
 signal rect_changed()
+@warning_ignore("unused_signal") # Used in extending classes.
+signal redraw_needed()
 
 ## The instance ID of the control. Runtime only.
 var control_id: int = 0

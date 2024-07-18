@@ -29,12 +29,14 @@ func set_data(value: BaseUIElement) -> void:
 	if data:
 		data.control_id = 0
 		data.rect_changed.disconnect(_on_data_rect_changed)
+		data.redraw_needed.disconnect(queue_redraw)
 	
 	data = value
 	
 	if data:
 		data.control_id = get_instance_id()
 		data.rect_changed.connect(_on_data_rect_changed)
+		data.redraw_needed.connect(queue_redraw)
 		_on_data_rect_changed()
 
 

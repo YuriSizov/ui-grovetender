@@ -99,5 +99,4 @@ func _update_gizmos() -> void:
 	
 	var selected_element := _selected_elements[0]
 	var active_gizmos := selected_element.get_gizmos()
-	
 	_gizmos_container.set_gizmos(active_gizmos)

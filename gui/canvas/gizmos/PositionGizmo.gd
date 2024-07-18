@@ -46,6 +46,8 @@ func _process(_delta: float) -> void:
 		queue_redraw() # Redraw constantly when hovering.
 
 
+# Implementation.
+
 func _update_handles() -> void:
 	var handle_trigger_size := get_theme_constant("handle_trigger_size")
 	var base_size := Vector2(handle_trigger_size, handle_trigger_size)
@@ -53,8 +55,6 @@ func _update_handles() -> void:
 	_center_handle.position = position + size / 2.0 - base_size
 	_center_handle.size = base_size * 2
 
-
-# Implementation.
 
 func check_hovering(mouse_position: Vector2) -> void:
 	if is_hovering():

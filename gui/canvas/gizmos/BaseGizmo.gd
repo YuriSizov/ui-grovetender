@@ -60,10 +60,12 @@ func update_rect_by_element() -> void:
 
 # Interactions.
 
+## Returns whether this gizmo is being currently hovered.
 func is_hovering() -> bool:
 	return _hovering
 
 
+## Marks, or unmarks, this gizmo as being currently hovered.
 func set_hovering(value: bool) -> void:
 	if _hovering == value:
 		return

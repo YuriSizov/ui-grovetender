@@ -22,6 +22,8 @@ class_name PanelElement extends BaseUIElement
 @export var border_width: float = 2.0
 
 
+# Implementation.
+
 func render() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
@@ -31,3 +33,47 @@ func render() -> void:
 	
 	if draw_border:
 		canvas_control.draw_rect(element_rect, border_color, false, border_width)
+
+
+func get_gizmos() -> Array[BaseGizmo]:
+	var gizmos := super()
+	
+	var properties_gizmo := PropertiesGizmo.new()
+	properties_gizmo.connect_to_element(self)
+	gizmos.push_front(properties_gizmo)
+	
+	var background_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_background", _toggle_draw_background)
+	background_property.label = "Background"
+	properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "background_color", _set_background_color)
+	
+	var border_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_border", _toggle_draw_border)
+	border_property.label = "Border"
+	properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "border_color", _set_border_color)
+	
+	return gizmos
+
+
+# Helpers.
+
+func _toggle_draw_background(value: bool) -> void:
+	if draw_background == value:
+		return
+		
+	draw_background = value
+	redraw_needed.emit()
+
+
+func _set_background_color(value: Color) -> void:
+	pass
+
+
+func _toggle_draw_border(value: bool) -> void:
+	if draw_border == value:
+		return
+		
+	draw_border = value
+	redraw_needed.emit()
+
+
+func _set_border_color(value: Color) -> void:
+	pass
