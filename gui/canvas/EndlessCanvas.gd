@@ -7,6 +7,14 @@
 ## The endless canvas on which the entire project is laid out.
 class_name EndlessCanvas extends Control
 
+enum EditingMode {
+	DIMENSIONAL_TOOLS,
+	STYLING_TOOLS,
+	BEHAVIOR_TOOLS,
+	ANIMATION_TOOLS,
+}
+var _editing_mode: EditingMode = EditingMode.DIMENSIONAL_TOOLS
+
 var _current_canvas: UICanvas = null
 
 var _drawn_elements: Array[CanvasUIElement] = []
@@ -14,11 +22,13 @@ var _selected_elements: Array[BaseUIElement] = []
 
 @onready var _element_container: Control = %Elements
 @onready var _gizmos_container: CanvasGizmos = %Gizmos
-@onready var _context_menu: PopupMenu = %ContextMenu
+var _editing_mode_buttons := preload("res://gui/canvas/editing_mode_button_group.tres")
 
 
 func _ready() -> void:
 	_edit_current_canvas()
+	
+	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -44,6 +54,19 @@ func _edit_current_canvas() -> void:
 	
 	if _current_canvas:
 		_current_canvas.element_created.connect(_add_canvas_element)
+
+
+func _change_editing_mode(new_mode: EditingMode) -> void:
+	if _editing_mode == new_mode:
+		return
+	
+	_editing_mode = new_mode
+	_update_gizmos()
+
+
+func _change_editing_mode_by_button(button: Button) -> void:
+	var button_index := button.get_index()
+	_change_editing_mode(button_index)
 
 
 # Element management.
@@ -98,5 +121,5 @@ func _update_gizmos() -> void:
 		return
 	
 	var selected_element := _selected_elements[0]
-	var active_gizmos := selected_element.get_gizmos()
+	var active_gizmos := selected_element.get_gizmos(_editing_mode)
 	_gizmos_container.set_gizmos(active_gizmos)

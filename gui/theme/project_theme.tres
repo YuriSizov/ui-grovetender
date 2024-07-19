@@ -1,4 +1,40 @@
-[gd_resource type="Theme" load_steps=13 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=14 format=3 uid="uid://jgqsy0ei8blc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plgh6"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.721836, 0.852997, 0.956087, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dnsyu"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.882376, 0.943537, 0.991911, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xd33u"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.631777, 0.773709, 0.874314, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -38,6 +74,17 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shuin"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.613856, 0.674603, 0.725712, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yxr7m"]
 bg_color = Color(1, 1, 1, 0)
@@ -102,43 +149,18 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 corner_detail = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plnuc"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0.721836, 0.852997, 0.956087, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fn2sy"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0.882376, 0.943537, 0.991911, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fonsm"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0.631777, 0.773709, 0.874314, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 4
-
 [resource]
+ButtonPropertyEditor/base_type = &"PropertyEditor"
+ButtonPropertyEditor/styles/panel = SubResource("StyleBoxFlat_plgh6")
+ButtonPropertyEditor/styles/panel_hover = SubResource("StyleBoxFlat_dnsyu")
+ButtonPropertyEditor/styles/panel_pressed = SubResource("StyleBoxFlat_xd33u")
+ColorPropertyEditor/base_type = &"ButtonPropertyEditor"
+ColorPropertyEditor/constants/color_preview_x = 32
+ColorPropertyEditor/constants/color_preview_y = 24
+ColorPropertyEditor/constants/picker_offset_x = 8
+ColorPropertyEditor/constants/picker_offset_y = 0
+EditingModeButtons/base_type = &"HBoxContainer"
+EditingModeButtons/constants/separation = 12
 PositionGizmo/base_type = &"Control"
 PositionGizmo/constants/center_handle_size = 16
 PositionGizmo/constants/handle_trigger_size = 24
@@ -147,14 +169,16 @@ PositionGizmo/styles/center_handle_hover = SubResource("StyleBoxFlat_37vs7")
 PositionGizmo/styles/center_handle_pressed = SubResource("StyleBoxFlat_2fit0")
 PropertiesGizmo/base_type = &"Control"
 PropertiesGizmo/constants/base_offset_x = 16
-PropertiesGizmo/constants/base_offset_y = 0
-PropertiesGizmo/constants/prop_separation = 12
+PropertiesGizmo/constants/base_offset_y = 16
+PropertiesGizmo/constants/prop_separation = 8
 PropertyEditor/base_type = &"Object"
 PropertyEditor/colors/font_color = Color(0, 0, 0, 1)
 PropertyEditor/colors/font_shadow_color = Color(1, 1, 1, 0.470588)
 PropertyEditor/constants/font_shadow_offset_x = -2
 PropertyEditor/constants/font_shadow_offset_y = -2
 PropertyEditor/font_sizes/font_size = 18
+SimpleColorPicker/base_type = &"PanelContainer"
+SimpleColorPicker/styles/panel = SubResource("StyleBoxFlat_shuin")
 SizeGizmo/base_type = &"Control"
 SizeGizmo/constants/corner_handle_size = 12
 SizeGizmo/constants/handle_trigger_size = 12
@@ -165,7 +189,4 @@ SizeGizmo/styles/corner_handle_pressed = SubResource("StyleBoxFlat_m50em")
 SizeGizmo/styles/side_handle = SubResource("StyleBoxFlat_y3acj")
 SizeGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_pldae")
 SizeGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_4g0e6")
-TogglePropertyEditor/base_type = &"PropertyEditor"
-TogglePropertyEditor/styles/panel = SubResource("StyleBoxFlat_plnuc")
-TogglePropertyEditor/styles/panel_hover = SubResource("StyleBoxFlat_fn2sy")
-TogglePropertyEditor/styles/panel_pressed = SubResource("StyleBoxFlat_fonsm")
+TogglePropertyEditor/base_type = &"ButtonPropertyEditor"

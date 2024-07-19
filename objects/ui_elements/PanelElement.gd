@@ -12,14 +12,35 @@ class_name PanelElement extends BaseUIElement
 ## The flag that enables background drawing.
 @export var draw_background: bool = true
 ## The color of the background.
-@export var background_color: Color = Color.ANTIQUE_WHITE
+@export var background_color: Color = Color.WHITE
 
 ## The flag that enables border drawing.
 @export var draw_border: bool = false
 ## The color of the border.
 @export var border_color: Color = Color.BLACK
 ## The width/size of the border.
-@export var border_width: float = 2.0
+@export var border_width: int = 2
+
+## The flag that enables shadow drawing.
+@export var draw_shadow: bool = false
+## The color of the shadow.
+@export var shadow_color: Color = Color(0, 0, 0, 0.4)
+## The offset of the shadow from the panel position.
+@export var shadow_offset: Vector2 = Vector2(2.0, 2.0)
+## The size of the shadow, expanding upon the size of the base panel.
+@export var shadow_size: Vector2i = Vector2i(8, 8)
+
+var _base_style: StyleBoxFlat = StyleBoxFlat.new()
+var _border_style: StyleBoxFlat = StyleBoxFlat.new()
+var _shadow_style: StyleBoxFlat = StyleBoxFlat.new()
+
+
+func _init() -> void:
+	super()
+	
+	_update_base_style()
+	_update_border_style()
+	_update_shadow_style()
 
 
 # Implementation.
@@ -28,32 +49,46 @@ func render() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
 	
+	if draw_shadow:
+		var shadow_rect = element_rect
+		shadow_rect.position += shadow_offset
+		canvas_control.draw_style_box(_shadow_style, shadow_rect)
+	
 	if draw_background:
-		canvas_control.draw_rect(element_rect, background_color)
+		canvas_control.draw_style_box(_base_style, element_rect)
 	
 	if draw_border:
-		canvas_control.draw_rect(element_rect, border_color, false, border_width)
+		canvas_control.draw_style_box(_border_style, element_rect)
 
 
-func get_gizmos() -> Array[BaseGizmo]:
-	var gizmos := super()
+func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
+	var gizmos := super(editing_mode)
 	
-	var properties_gizmo := PropertiesGizmo.new()
-	properties_gizmo.connect_to_element(self)
-	gizmos.push_front(properties_gizmo)
-	
-	var background_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_background", _toggle_draw_background)
-	background_property.label = "Background"
-	properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "background_color", _set_background_color)
-	
-	var border_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_border", _toggle_draw_border)
-	border_property.label = "Border"
-	properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "border_color", _set_border_color)
+	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
+		var properties_gizmo := PropertiesGizmo.new()
+		properties_gizmo.connect_to_element(self)
+		gizmos.push_front(properties_gizmo)
+		
+		var background_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_background", _toggle_draw_background)
+		background_property.label = "Background"
+		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "background_color", _set_background_color)
+		
+		var border_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_border", _toggle_draw_border)
+		border_property.label = "Border"
+		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "border_color", _set_border_color)
+		
+		var shadow_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_shadow", _toggle_draw_shadow)
+		shadow_property.label = "Shadow"
+		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "shadow_color", _set_shadow_color)
 	
 	return gizmos
 
 
 # Helpers.
+
+func _update_base_style() -> void:
+	_base_style.bg_color = background_color
+
 
 func _toggle_draw_background(value: bool) -> void:
 	if draw_background == value:
@@ -64,7 +99,18 @@ func _toggle_draw_background(value: bool) -> void:
 
 
 func _set_background_color(value: Color) -> void:
-	pass
+	if background_color == value:
+		return
+	background_color = value
+	
+	_update_base_style()
+	redraw_needed.emit()
+
+
+func _update_border_style() -> void:
+	_border_style.bg_color = Color(0, 0, 0, 0)
+	_border_style.border_color = border_color
+	_border_style.set_border_width_all(border_width)
 
 
 func _toggle_draw_border(value: bool) -> void:
@@ -76,4 +122,45 @@ func _toggle_draw_border(value: bool) -> void:
 
 
 func _set_border_color(value: Color) -> void:
-	pass
+	if border_color == value:
+		return
+	border_color = value
+	
+	_update_border_style()
+	redraw_needed.emit()
+
+
+func _update_shadow_style() -> void:
+	_shadow_style.bg_color = shadow_color
+	_shadow_style.border_color = Color(shadow_color.r, shadow_color.g, shadow_color.b, 0.0)
+	_shadow_style.border_blend = true
+	
+	# TODO: This value should be affected by the corner radius of the main panel and the shadow size.
+	_shadow_style.set_corner_radius_all(8)
+	
+	_shadow_style.expand_margin_left = shadow_size.x
+	_shadow_style.expand_margin_right = shadow_size.x
+	_shadow_style.expand_margin_top = shadow_size.y
+	_shadow_style.expand_margin_bottom = shadow_size.y
+	
+	_shadow_style.border_width_left = shadow_size.x
+	_shadow_style.border_width_right = shadow_size.x
+	_shadow_style.border_width_top = shadow_size.y
+	_shadow_style.border_width_bottom = shadow_size.y
+
+
+func _toggle_draw_shadow(value: bool) -> void:
+	if draw_shadow == value:
+		return
+		
+	draw_shadow = value
+	redraw_needed.emit()
+
+
+func _set_shadow_color(value: Color) -> void:
+	if shadow_color == value:
+		return
+	shadow_color = value
+	
+	_update_shadow_style()
+	redraw_needed.emit()

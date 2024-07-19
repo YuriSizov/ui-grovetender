@@ -8,9 +8,10 @@
 class_name PropertiesGizmo extends BaseGizmo
 
 var _base_rect: Rect2 = Rect2()
-var _properties: Array[PropertyEditor] = []
 
-var _hovered_property: int = -1
+var _properties: Array[PropertyEditor] = []
+var _hovered_property: PropertyEditor = null
+var _editing_property: PropertyEditor = null
 
 
 func _init() -> void:
@@ -18,20 +19,6 @@ func _init() -> void:
 	name = &"PropertiesGizmo"
 	theme_type_variation = &"PropertiesGizmo"
 
-
-func _draw() -> void:
-	var prop_separation := get_theme_constant("prop_separation")
-	var prop_position := _base_rect.position - position
-	
-	for property in _properties:
-		property.render(prop_position)
-		
-		prop_position.y += property.get_size().y + prop_separation
-
-
-func _process(_delta: float) -> void:
-	if is_hovering():
-		queue_redraw() # Redraw constantly when hovering.
 
 # Implementation.
 
@@ -42,19 +29,47 @@ func _update_handles() -> void:
 	)
 	var prop_separation := get_theme_constant("prop_separation")
 	
-	_base_rect.position = position + Vector2(size.x, 0) + base_offset
 	_base_rect.size = Vector2(0, prop_separation * (_properties.size() - 1))
 	
+	# Contribute sizes of individual property editors to the combined size.
 	for property in _properties:
-		var prop_size := property.get_size()
+		var prop_size := property.get_combined_minimum_size()
 		_base_rect.size.y += prop_size.y
 		
 		if prop_size.x > _base_rect.size.x:
 			_base_rect.size.x = prop_size.x
 	
+	# Position the gizmo to the right of the object.
+	_base_rect.position = position + Vector2(size.x, 0) + base_offset
+	# If it doesn't fit to the right, position it to the left instead.
 	var window_size := get_window().size
 	if (_base_rect.position.x + _base_rect.size.x + base_offset.x) > window_size.x:
-		_base_rect.position = position - Vector2(_base_rect.size.x, 0) - base_offset
+		_base_rect.position.x = position.x - _base_rect.size.x - base_offset.x
+	
+	# Center the gizmo vertically.
+	_base_rect.position.y = position.y + size.y / 2.0 - _base_rect.size.y / 2.0
+	
+	# If the gizmo goes off screen, adjust for that.
+	
+	if (_base_rect.position.x - base_offset.x) < 0:
+		_base_rect.position.x = base_offset.x
+	if (_base_rect.position.x + _base_rect.size.x + base_offset.x) > window_size.x:
+		_base_rect.position.x -= (_base_rect.position.x + _base_rect.size.x + base_offset.x) - window_size.x
+	
+	if (_base_rect.position.y - base_offset.y) < 0:
+		_base_rect.position.y = base_offset.y
+	if (_base_rect.position.y + _base_rect.size.y + base_offset.y) > window_size.y:
+		_base_rect.position.y -= (_base_rect.position.y + _base_rect.size.y + base_offset.y) - window_size.y
+	
+	# Update sizes and positions of property editors.
+	var prop_position := _base_rect.position
+	for property in _properties:
+		var prop_size := property.get_combined_minimum_size()
+		property.size.x = _base_rect.size.x
+		property.size.y = prop_size.y
+		property.global_position = prop_position
+		
+		prop_position.y += prop_size.y + prop_separation
 	
 	queue_redraw()
 
@@ -67,34 +82,27 @@ func check_hovering(mouse_position: Vector2) -> void:
 	if _base_rect.has_point(mouse_position):
 		
 		# Check which property we're hovering over and update its state.
-		var next_hovered_property := _hovered_property
-		
-		var prop_separation := get_theme_constant("prop_separation")
-		var prop_rect := Rect2()
-		prop_rect.position = _base_rect.position
-		
-		for i in _properties.size():
-			var property := _properties[i]
-			prop_rect.size = property.get_size()
-			
+		var next_hovered_property: PropertyEditor = null
+		for property in _properties:
+			var prop_rect := property.get_global_rect()
 			if prop_rect.has_point(mouse_position):
-				next_hovered_property = i
+				next_hovered_property = property
 				break
-			
-			prop_rect.position.y += prop_rect.size.y + prop_separation
 		
 		if next_hovered_property != _hovered_property:
-			if _hovered_property >= 0:
-				_properties[_hovered_property].set_hovering(false)
+			if _hovered_property:
+				_hovered_property.set_hovering(false)
 			
 			_hovered_property = next_hovered_property
-			_properties[_hovered_property].set_hovering(true)
+			
+			if _hovered_property:
+				_hovered_property.set_hovering(true)
 		
 		set_hovering(true)
 	else:
-		if _hovered_property >= 0:
-			_properties[_hovered_property].set_hovering(false)
-			_hovered_property = -1
+		if _hovered_property:
+			_hovered_property.set_hovering(false)
+			_hovered_property = null
 		
 		set_hovering(false)
 
@@ -103,12 +111,15 @@ func get_hovered_cursor_shape(mouse_position: Vector2) -> CursorShape:
 	if not is_hovering():
 		return super(mouse_position)
 	
-	if _hovered_property >= 0:
+	if _hovered_property:
 		return Control.CURSOR_POINTING_HAND
 	return Control.CURSOR_ARROW
 
 
 func can_handle_input(event: InputEvent) -> bool:
+	if _editing_property:
+		return true # If one of the editors is active, we consume the event eagerly.
+	
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
@@ -124,6 +135,10 @@ func can_handle_input(event: InputEvent) -> bool:
 
 
 func handle_input(event: InputEvent) -> void:
+	if _editing_property:
+		_editing_property.handle_input(event)
+		return
+	
 	if not is_hovering():
 		return
 	
@@ -136,9 +151,8 @@ func handle_input(event: InputEvent) -> void:
 		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			set_grabbing(false)
 	
-	if _hovered_property >= 0:
-		var property := _properties[_hovered_property]
-		property.handle_input(event)
+	if _hovered_property:
+		_hovered_property.handle_input(event)
 
 
 # Property management.
@@ -154,11 +168,19 @@ func add_property_editor(property_type: int, property_name: String, property_set
 			prop_editor = TogglePropertyEditor.new(_reference_element, property_name, property_setter)
 		
 		PropertyEditorType.PROPERTY_COLOR:
-			pass
+			prop_editor = ColorPropertyEditor.new(_reference_element, property_name, property_setter)
 	
 	if prop_editor:
-		prop_editor.owner_control = self
 		_properties.push_back(prop_editor)
-		queue_redraw()
+		add_child(prop_editor)
+		
+		prop_editor.editing_started.connect(func() -> void:
+			_editing_property = prop_editor
+			set_grabbing(true)
+		)
+		prop_editor.editing_stopped.connect(func() -> void:
+			_editing_property = null
+			set_grabbing(false)
+		)
 	
 	return prop_editor

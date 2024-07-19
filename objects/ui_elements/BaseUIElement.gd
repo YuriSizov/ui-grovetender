@@ -54,24 +54,24 @@ func render() -> void:
 
 ## Initializes and returns a set of gizmos for editing this UI element. Gizmos with lower indices
 ## are handled first. Extending classes override this method, but must call super() most of the time.
-func get_gizmos() -> Array[BaseGizmo]:
+func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
-	# Basic property gizmos.
-	var size_gizmo := SizeGizmo.new()
-	size_gizmo.connect_to_element(self)
-	gizmos.push_back(size_gizmo)
-	
-	# TODO: Implement constraints, snapping, alignment.
-	size_gizmo.corner_size_changed.connect(_resize_by_corner)
-	size_gizmo.side_size_changed.connect(_resize_by_side)
-	
-	var position_gizmo := PositionGizmo.new()
-	position_gizmo.connect_to_element(self)
-	gizmos.push_back(position_gizmo)
-	
-	# TODO: Implement constraints, snapping, alignment.
-	position_gizmo.position_changed.connect(_reposition_by_center)
+	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
+		var size_gizmo := SizeGizmo.new()
+		size_gizmo.connect_to_element(self)
+		gizmos.push_back(size_gizmo)
+		
+		# TODO: Implement constraints, snapping, alignment.
+		size_gizmo.corner_size_changed.connect(_resize_by_corner)
+		size_gizmo.side_size_changed.connect(_resize_by_side)
+		
+		var position_gizmo := PositionGizmo.new()
+		position_gizmo.connect_to_element(self)
+		gizmos.push_back(position_gizmo)
+		
+		# TODO: Implement constraints, snapping, alignment.
+		position_gizmo.position_changed.connect(_reposition_by_center)
 	
 	return gizmos
 

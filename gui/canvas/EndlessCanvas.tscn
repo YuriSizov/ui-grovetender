@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://heg310gps336"]
+[gd_scene load_steps=4 format=3 uid="uid://heg310gps336"]
 
 [ext_resource type="Script" path="res://gui/canvas/EndlessCanvas.gd" id="1_y0kqo"]
 [ext_resource type="Script" path="res://gui/canvas/CanvasGizmos.gd" id="2_44lot"]
+[ext_resource type="ButtonGroup" uid="uid://qrhc1kujnngh" path="res://gui/canvas/editing_mode_button_group.tres" id="3_63ns4"]
 
 [node name="EndlessCanvas" type="Control"]
 layout_mode = 3
@@ -33,6 +34,45 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("2_44lot")
 
-[node name="ContextMenu" type="PopupMenu" parent="."]
+[node name="EditingModeButtons" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_bottom = -24.0
+grow_vertical = 0
+theme_type_variation = &"EditingModeButtons"
+
+[node name="DimensionalTools" type="Button" parent="EditingModeButtons"]
 unique_name_in_owner = true
-allow_search = false
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("3_63ns4")
+text = "DT"
+
+[node name="StylingTools" type="Button" parent="EditingModeButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("3_63ns4")
+text = "ST"
+
+[node name="BehaviorTool" type="Button" parent="EditingModeButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("3_63ns4")
+text = "BT"
+
+[node name="AnimationTool" type="Button" parent="EditingModeButtons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("3_63ns4")
+text = "AT"
