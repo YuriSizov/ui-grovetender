@@ -8,7 +8,7 @@ class_name TogglePropertyEditor extends ButtonPropertyEditor
 
 
 func _init(_object: Object, _name: String, _setter: Callable) -> void:
-	super(PropertyEditorType.PROPERTY_TOGGLE, _object, _name, _setter)
+	super(_object, _name, _setter)
 	
 	theme_type_variation = &"TogglePropertyEditor"
 
@@ -32,13 +32,20 @@ func _draw() -> void:
 		background_panel.content_margin_top
 	)
 	var label_color := get_theme_color("font_color")
-	var label_shadow_position := label_position + Vector2(
+	var label_shadow_offset := Vector2(
 		get_theme_constant("font_shadow_offset_x"),
 		get_theme_constant("font_shadow_offset_y")
 	)
 	var label_shadow_color := get_theme_color("font_shadow_color")
+	var label_outline_size := get_theme_constant("font_outline_size")
+	var label_outline_color := get_theme_color("font_outline_color")
 	
-	_label_text_buffer.draw(get_canvas_item(), label_shadow_position, label_shadow_color)
+	if label_shadow_offset.x > 0 || label_shadow_offset.y > 0:
+		_label_text_buffer.draw(get_canvas_item(), label_position + label_shadow_offset, label_shadow_color)
+	
+	if label_outline_size > 0:
+		_label_text_buffer.draw_outline(get_canvas_item(), label_position, label_outline_size, label_outline_color)
+	
 	_label_text_buffer.draw(get_canvas_item(), label_position, label_color)
 
 

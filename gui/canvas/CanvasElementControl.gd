@@ -5,7 +5,7 @@
 ###################################################
 
 ## A proxy element for rendering UI elements.
-class_name CanvasUIElement extends Control
+class_name CanvasElementControl extends Control
 
 ## The data resource for the rendered UI element.
 @export var data: BaseUIElement = null:
@@ -13,7 +13,7 @@ class_name CanvasUIElement extends Control
 
 
 func _init() -> void:
-	name = &"CanvasUIElement"
+	name = &"CanvasElementControl"
 	mouse_filter = MOUSE_FILTER_IGNORE
 
 
@@ -21,33 +21,41 @@ func _draw() -> void:
 	if not data || not is_visible_on_screen():
 		return
 	
-	data.render()
+	data.draw()
 
 
 ## Sets the UI element data.
 func set_data(value: BaseUIElement) -> void:
 	if data:
-		data.control_id = 0
+		data.clear_control_id()
 		data.rect_changed.disconnect(_on_data_rect_changed)
-		data.redraw_needed.disconnect(queue_redraw)
+		data.properties_changed.disconnect(queue_redraw)
 	
 	data = value
 	
 	if data:
-		data.control_id = get_instance_id()
+		data.set_control_id(get_instance_id())
 		data.rect_changed.connect(_on_data_rect_changed)
-		data.redraw_needed.connect(queue_redraw)
+		data.properties_changed.connect(queue_redraw)
 		_on_data_rect_changed()
 
 
 # Position and sizing.
 
 func _on_data_rect_changed() -> void:
-	var element_rect := data.rect.get_boundary_rect()
+	var element_rect := data.rect.get_bounding_rect()
 	position = element_rect.position
 	size = element_rect.size
 	
 	queue_redraw()
+
+
+func is_selectable(at_position: Vector2) -> bool:
+	if not data:
+		return false
+	
+	var element_rect := data.rect.get_bounding_rect()
+	return element_rect.has_point(at_position)
 
 
 ## Returns whether this proxy control is currently visible on screen.

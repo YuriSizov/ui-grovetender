@@ -13,7 +13,7 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouse:
 		# When there is a grabbed gizmo, we pass events to it directly.
 		if _grabbed_gizmo:
-			var cursor_shape := _grabbed_gizmo.get_hovered_cursor_shape(event.global_position)
+			var cursor_shape := _grabbed_gizmo.get_hovering_cursor_shape(event.global_position)
 			_update_cursor_shape(cursor_shape)
 			_grabbed_gizmo.handle_input(event)
 			accept_event()
@@ -23,7 +23,7 @@ func _gui_input(event: InputEvent) -> void:
 		# siblings.
 		for gizmo: BaseGizmo in get_children():
 			if gizmo.can_handle_input(event):
-				var cursor_shape := gizmo.get_hovered_cursor_shape(event.global_position)
+				var cursor_shape := gizmo.get_hovering_cursor_shape(event.global_position)
 				_update_cursor_shape(cursor_shape)
 				gizmo.handle_input(event)
 				accept_event()
@@ -31,9 +31,8 @@ func _gui_input(event: InputEvent) -> void:
 		
 		# If we aren't grabbing or clicking anything, then just check for hover and new cursor shape.
 		for gizmo: BaseGizmo in get_children():
-			gizmo.check_hovering(event.global_position)
-			if gizmo.is_hovering():
-				var cursor_shape := gizmo.get_hovered_cursor_shape(event.global_position)
+			if gizmo.test_hovering(event.global_position):
+				var cursor_shape := gizmo.get_hovering_cursor_shape(event.global_position)
 				_update_cursor_shape(cursor_shape)
 				return
 	
@@ -44,6 +43,10 @@ func _update_grabbed_gizmo(gizmo: BaseGizmo) -> void:
 	_grabbed_gizmo = gizmo
 
 
+# TODO: Ideally Godot should have an overridable counter-part to get_cursor_shape exposed to scripting.
+# If this ever happens, this can be simplified by simply implementing the method in gizmo code. For now,
+# we have to change this node's property. Setting the cursor shape directly via DisplayServer is impossible
+# as well, because Viewport logic overrides it with the node property below. So we have to set the property.
 func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 	if mouse_default_cursor_shape == cursor_shape:
 		return
@@ -52,6 +55,8 @@ func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 
 
 func clear_gizmos() -> void:
+	_grabbed_gizmo = null
+	
 	for gizmo: BaseGizmo in get_children():
 		gizmo.grabbed.disconnect(_update_grabbed_gizmo.bind(gizmo))
 		gizmo.released.disconnect(_update_grabbed_gizmo.bind(null))
@@ -67,9 +72,8 @@ func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
 		add_child(gizmo)
 		
 		# Update the cursor immediately, if the new gizmo is hovered.
-		gizmo.check_hovering(mouse_position)
-		if gizmo.is_hovering():
-			var cursor_shape := gizmo.get_hovered_cursor_shape(mouse_position)
+		if gizmo.test_hovering(mouse_position):
+			var cursor_shape := gizmo.get_hovering_cursor_shape(mouse_position)
 			_update_cursor_shape(cursor_shape)
 		
 		gizmo.grabbed.connect(_update_grabbed_gizmo.bind(gizmo))

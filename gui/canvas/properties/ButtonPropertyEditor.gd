@@ -12,8 +12,8 @@ signal button_released()
 var _pressed: bool = false
 
 
-func _init(_type: int, _object: Object, _name: String, _setter: Callable) -> void:
-	super(_type, _object, _name, _setter)
+func _init(_object: Object, _name: String, _setter: Callable) -> void:
+	super(_object, _name, _setter)
 	
 	theme_type_variation = &"ButtonPropertyEditor"
 

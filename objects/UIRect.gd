@@ -55,6 +55,11 @@ func set_position(value: Vector2) -> void:
 	emit_changed()
 
 
+## Returns both center position and size of this rectangle as a Rect2 object.
+func get_size_and_position() -> Rect2:
+	return Rect2(position, size)
+
+
 ## Sets both center position and size at the same time for this rectangle.
 func set_size_and_position(value: Rect2) -> void:
 	_size = value.size
@@ -63,10 +68,6 @@ func set_size_and_position(value: Rect2) -> void:
 	emit_changed()
 
 
-func get_center_rect() -> Rect2:
-	return Rect2(position, size)
-
-
-## Returns the base area for this rectangle.
-func get_boundary_rect() -> Rect2:
+## Returns the area for this rectangle used in rendering and input.
+func get_bounding_rect() -> Rect2:
 	return Rect2(_topleft_position, _size)

@@ -11,27 +11,24 @@ var _color_picker: SimpleColorPicker = null
 
 
 func _init(_object: Object, _name: String, _setter: Callable) -> void:
-	super(PropertyEditorType.PROPERTY_COLOR, _object, _name, _setter)
+	super(_object, _name, _setter)
 	
 	theme_type_variation = &"ColorPropertyEditor"
 	
 	_color_picker = COLOR_PICKER_SCENE.instantiate()
 	_color_picker.visible = false
 	add_child(_color_picker)
+	_color_picker.set_anchors_and_offsets_preset(PRESET_TOP_LEFT)
 
 
 func _ready() -> void:
 	button_released.connect(func() -> void:
-		var picker_offset := Vector2(
-			get_theme_constant("picker_offset_x"),
-			get_theme_constant("picker_offset_y")
-		) + Vector2(size.x, 0)
-		
-		_color_picker.position = picker_offset
-		_color_picker.get_picker().color = object.get(prop_name)
 		_color_picker.visible = not _color_picker.visible
 		
 		if _color_picker.visible:
+			_update_picker_position()
+			_color_picker.get_picker().color = object.get(prop_name)
+			
 			editing_started.emit()
 		else:
 			editing_stopped.emit()
@@ -43,6 +40,8 @@ func _ready() -> void:
 		
 		queue_redraw()
 	)
+	
+	get_window().size_changed.connect(_update_picker_position)
 
 
 func _draw() -> void:
@@ -75,6 +74,29 @@ func _get_minimum_size() -> Vector2:
 	combined_size.y += background_panel.content_margin_top + background_panel.content_margin_bottom
 	
 	return combined_size
+
+
+# Helpers.
+
+func _update_picker_position() -> void:
+	if not _color_picker.visible:
+		return
+	
+	var picker_offset := Vector2(
+		get_theme_constant("picker_offset_x"),
+		get_theme_constant("picker_offset_y")
+	)
+	var picker_position := Vector2(
+		0 - picker_offset.x - _color_picker.size.x,
+		0
+	)
+	
+	var window_size := get_window().size
+	var picker_end_position := global_position.y + picker_position.y + _color_picker.size.y + picker_offset.y
+	if picker_end_position > window_size.y:
+		picker_position.y -= picker_end_position - window_size.y
+	
+	_color_picker.position = picker_position
 
 
 # Implementation.

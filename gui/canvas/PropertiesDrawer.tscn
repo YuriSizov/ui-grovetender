@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3 uid="uid://cc6qxmnlw1a6s"]
+
+[ext_resource type="Script" path="res://gui/canvas/PropertiesDrawer.gd" id="1_u56on"]
+
+[node name="PropertiesDrawer" type="PanelContainer"]
+custom_minimum_size = Vector2(360, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"PropertiesDrawer"
+script = ExtResource("1_u56on")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"PropertiesDrawerTitle"
+text = "Nothing Selected"
+horizontal_alignment = 2
+
+[node name="Properties" type="VBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 2

@@ -49,24 +49,18 @@ func _process(_delta: float) -> void:
 # Implementation.
 
 func _update_handles() -> void:
-	var handle_trigger_size := get_theme_constant("handle_trigger_size")
+	var handle_trigger_size := get_theme_constant("handle_trigger_size") / 2.0
 	var base_size := Vector2(handle_trigger_size, handle_trigger_size)
 	
-	_center_handle.position = position + size / 2.0 - base_size
+	_center_handle.position = position - base_size
 	_center_handle.size = base_size * 2
 
 
-func check_hovering(mouse_position: Vector2) -> void:
-	if is_hovering():
-		queue_redraw() # Queue a forced redraw in case we're exiting the gizmo right now.
-	
-	if _center_handle.has_point(mouse_position):
-		set_hovering(true)
-	else:
-		set_hovering(false)
+func _is_hovering_at(mouse_position: Vector2) -> bool:
+	return _center_handle.has_point(mouse_position)
 
 
-func get_hovered_cursor_shape(mouse_position: Vector2) -> CursorShape:
+func get_hovering_cursor_shape(mouse_position: Vector2) -> CursorShape:
 	if not is_hovering():
 		return super(mouse_position)
 	
@@ -103,4 +97,5 @@ func handle_input(event: InputEvent) -> void:
 	
 	if is_grabbing() && event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
-		position_changed.emit(mm.relative)
+		var relative := mm.relative / EndlessCanvas.get_instance().get_elements_scale()
+		position_changed.emit(relative)

@@ -9,12 +9,16 @@ class_name BaseUIElement extends Resource
 
 signal rect_changed()
 @warning_ignore("unused_signal") # Used in extending classes.
-signal redraw_needed()
+signal properties_changed()
+
+## The unique name of this UI element.
+@export var element_name: String = "BaseElement0"
+## The rectangle defining the size and position of this UI element.
+@export var rect: UIRect = UIRect.new()
 
 ## The instance ID of the control. Runtime only.
-var control_id: int = 0
+var _control_id: int = 0
 
-@export var rect: UIRect = UIRect.new()
 
 
 func _init() -> void:
@@ -23,11 +27,25 @@ func _init() -> void:
 
 # Metadata.
 
-func get_control() -> CanvasUIElement:
-	if not is_instance_id_valid(control_id):
+## Returns the Control node responsible for rendering of this UI element.
+func get_control() -> CanvasElementControl:
+	if not is_instance_id_valid(_control_id):
 		return null
 	
-	return instance_from_id(control_id)
+	return instance_from_id(_control_id)
+
+
+## Sets the Control node responsible for rendering this UI element by its instance ID.
+func set_control_id(instance_id: int) -> void:
+	if not is_instance_id_valid(instance_id):
+		return
+
+	_control_id = instance_id
+
+
+## Clears the Control node responsible for renderingt this UI element.
+func clear_control_id() -> void:
+	_control_id = 0
 
 
 # Position and sizing.
@@ -38,17 +56,16 @@ func get_rect_in_control() -> Rect2:
 	if not control:
 		return Rect2()
 	
-	var owner_rect := control.get_rect()
-	var local_position := rect.get_boundary_rect()
-	local_position.position -= owner_rect.position
+	var bounding_rect := rect.get_bounding_rect()
+	bounding_rect.position -= control.position
 	
-	return local_position
+	return bounding_rect
 
 
 # Implementation.
 
 ## Renders this UI element. Extending classes override this method.
-func render() -> void:
+func draw() -> void:
 	pass
 
 
@@ -76,10 +93,21 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	return gizmos
 
 
-# Helpers.
+func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
+	var properties: Array[PropertyEditor] = []
+	
+	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
+		# TODO: Add a property editor for size.
+		# TODO: Add a property editor for position, when it's an offset inside a composite element.
+		pass
+	
+	return properties
+
+
+# Properties.
 
 func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
-	var center_rect := rect.get_center_rect()
+	var center_rect := rect.get_size_and_position()
 	
 	match corner:
 		CORNER_TOP_LEFT:
@@ -112,7 +140,7 @@ func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
 
 
 func _resize_by_side(side: Side, delta: Vector2) -> void:
-	var center_rect := rect.get_center_rect()
+	var center_rect := rect.get_size_and_position()
 	
 	match side:
 		SIDE_LEFT:

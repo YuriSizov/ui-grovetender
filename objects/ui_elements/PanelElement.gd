@@ -30,6 +30,8 @@ class_name PanelElement extends BaseUIElement
 ## The size of the shadow, expanding upon the size of the base panel.
 @export var shadow_size: Vector2i = Vector2i(8, 8)
 
+# Runtime properties and rendering data.
+
 var _base_style: StyleBoxFlat = StyleBoxFlat.new()
 var _border_style: StyleBoxFlat = StyleBoxFlat.new()
 var _shadow_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -45,7 +47,7 @@ func _init() -> void:
 
 # Implementation.
 
-func render() -> void:
+func draw() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
 	
@@ -61,30 +63,29 @@ func render() -> void:
 		canvas_control.draw_style_box(_border_style, element_rect)
 
 
-func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
-	var gizmos := super(editing_mode)
+func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
+	var properties := super(editing_mode)
 	
 	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
-		var properties_gizmo := PropertiesGizmo.new()
-		properties_gizmo.connect_to_element(self)
-		gizmos.push_front(properties_gizmo)
-		
-		var background_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_background", _toggle_draw_background)
+		var background_property := TogglePropertyEditor.new(self, "draw_background", _toggle_draw_background)
 		background_property.label = "Background"
-		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "background_color", _set_background_color)
+		properties.push_back(background_property)
+		properties.push_back(ColorPropertyEditor.new(self, "background_color", _set_background_color))
 		
-		var border_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_border", _toggle_draw_border)
+		var border_property := TogglePropertyEditor.new(self, "draw_border", _toggle_draw_border)
 		border_property.label = "Border"
-		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "border_color", _set_border_color)
+		properties.push_back(border_property)
+		properties.push_back(ColorPropertyEditor.new(self, "border_color", _set_border_color))
 		
-		var shadow_property := properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_TOGGLE, "draw_shadow", _toggle_draw_shadow)
+		var shadow_property := TogglePropertyEditor.new(self, "draw_shadow", _toggle_draw_shadow)
 		shadow_property.label = "Shadow"
-		properties_gizmo.add_property_editor(PropertyEditorType.PROPERTY_COLOR, "shadow_color", _set_shadow_color)
+		properties.push_back(shadow_property)
+		properties.push_back(ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color))
 	
-	return gizmos
+	return properties
 
 
-# Helpers.
+# Properties.
 
 func _update_base_style() -> void:
 	_base_style.bg_color = background_color
@@ -95,7 +96,7 @@ func _toggle_draw_background(value: bool) -> void:
 		return
 		
 	draw_background = value
-	redraw_needed.emit()
+	properties_changed.emit()
 
 
 func _set_background_color(value: Color) -> void:
@@ -104,7 +105,7 @@ func _set_background_color(value: Color) -> void:
 	background_color = value
 	
 	_update_base_style()
-	redraw_needed.emit()
+	properties_changed.emit()
 
 
 func _update_border_style() -> void:
@@ -118,7 +119,7 @@ func _toggle_draw_border(value: bool) -> void:
 		return
 		
 	draw_border = value
-	redraw_needed.emit()
+	properties_changed.emit()
 
 
 func _set_border_color(value: Color) -> void:
@@ -127,7 +128,7 @@ func _set_border_color(value: Color) -> void:
 	border_color = value
 	
 	_update_border_style()
-	redraw_needed.emit()
+	properties_changed.emit()
 
 
 func _update_shadow_style() -> void:
@@ -154,7 +155,7 @@ func _toggle_draw_shadow(value: bool) -> void:
 		return
 		
 	draw_shadow = value
-	redraw_needed.emit()
+	properties_changed.emit()
 
 
 func _set_shadow_color(value: Color) -> void:
@@ -163,4 +164,4 @@ func _set_shadow_color(value: Color) -> void:
 	shadow_color = value
 	
 	_update_shadow_style()
-	redraw_needed.emit()
+	properties_changed.emit()

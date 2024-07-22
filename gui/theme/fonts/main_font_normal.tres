@@ -1,0 +1,11 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://dew0v0pshnv38"]
+
+[ext_resource type="FontFile" uid="uid://ce35uqvkdkhya" path="res://gui/theme/fonts/NotoSans-VariableFont_wdth,wght.ttf" id="1_ir8cq"]
+
+[resource]
+base_font = ExtResource("1_ir8cq")
+variation_opentype = {
+2003072104: 100,
+2003265652: 600
+}
+spacing_glyph = 1

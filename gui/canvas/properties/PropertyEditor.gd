@@ -6,13 +6,12 @@
 
 class_name PropertyEditor extends Control
 
+@warning_ignore("unused_signal") # Used in extending classes.
 signal editing_started()
 signal editing_stopped()
 
 ## The object that owns the property.
 var object: Object = null
-## The type of the property editor.
-var prop_type: int = PropertyEditorType.PROPERTY_TOGGLE
 ## The name of the property in the object.
 var prop_name: String = "":
 	set = set_prop_name
@@ -27,14 +26,22 @@ var _label_text_buffer: TextLine = TextLine.new()
 var _hovering: bool = false
 
 
-func _init(_type: int, _object: Object, _name: String, _setter: Callable) -> void:
+func _init(_object: Object, _name: String, _setter: Callable) -> void:
 	object = _object
-	prop_type = _type
 	prop_name = _name
 	prop_setter = _setter
 	
-	mouse_filter = MOUSE_FILTER_IGNORE
+	mouse_filter = MOUSE_FILTER_PASS
 	theme_type_variation = &"PropertyEditor"
+	
+	mouse_entered.connect(func() -> void:
+		_hovering = true
+		queue_redraw()
+	)
+	mouse_exited.connect(func() -> void:
+		_hovering = false
+		queue_redraw()
+	)
 
 
 func _notification(what: int) -> void:
@@ -88,22 +95,9 @@ func is_hovering() -> bool:
 	return _hovering
 
 
-## Marks, or unmarks, this property editor as being currently hovered.
-func set_hovering(value: bool) -> void:
-	if _hovering == value:
-		return
-	_hovering = value
-	
-	if _hovering:
-		mouse_entered.emit()
-	else:
-		mouse_exited.emit()
-	queue_redraw()
-
-
 # Implementation.
 
-## Called when editing state must be exited due to external circumstances, e.g. a click outside.
+## Called when the editing state must be exited due to external circumstances, e.g. a click outside.
 func _cancel_editing() -> void:
 	editing_stopped.emit()
 

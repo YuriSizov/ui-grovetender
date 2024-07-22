@@ -13,6 +13,10 @@ signal grabbed()
 signal released()
 
 var _reference_element: BaseUIElement = null
+var _element_global_position: Vector2 = Vector2.ZERO
+var _element_global_size: Vector2 = Vector2.ZERO
+var _element_global_rect: Rect2 = Rect2()
+
 var _hovering: bool = false
 var _grabbing: bool = false
 
@@ -20,42 +24,58 @@ var _grabbing: bool = false
 func _init() -> void:
 	name = &"BaseGizmo"
 	mouse_filter = MOUSE_FILTER_IGNORE
+	
+	EndlessCanvas.get_instance().canvas_transformed.connect(_update_rect_by_element)
 
 
 func _ready() -> void:
 	_update_handles()
-	item_rect_changed.connect(_update_handles)
 
 
 # Position and sizing.
 
-## Connects this gizmo to the given UI element's changes.
-func connect_to_element(element: BaseUIElement) -> void:
-	if _reference_element:
-		_reference_element.rect_changed.disconnect(update_rect_by_element)
-	
-	_reference_element = element
-	update_rect_by_element()
-	
-	if _reference_element:
-		_reference_element.rect_changed.connect(update_rect_by_element)
-
-
-## Sets the position and size of this gizmo according to the connected UI element.
-func update_rect_by_element() -> void:
+func _update_rect_by_element() -> void:
 	if not _reference_element:
 		return
 	
-	var element_rect := _reference_element.rect.get_boundary_rect()
-	var position_changed := position != element_rect.position
-	var size_changed := size != element_rect.size
+	var canvas_position := _reference_element.rect.get_position()
+	_element_global_position = EndlessCanvas.get_instance().from_canvas_coordinates(canvas_position)
 	
-	position = element_rect.position
-	size = element_rect.size
+	var canvas_size := _reference_element.rect.get_size()
+	_element_global_size = canvas_size * EndlessCanvas.get_instance().get_elements_scale()
 	
-	# Inexplicably, Godot doesn't trigger item_rect_changed when position changes, but not the size.
-	if not size_changed && position_changed:
-		item_rect_changed.emit()
+	var canvas_rect := _reference_element.rect.get_bounding_rect()
+	canvas_rect.position = EndlessCanvas.get_instance().from_canvas_coordinates(canvas_rect.position)
+	canvas_rect.size = canvas_rect.size * EndlessCanvas.get_instance().get_elements_scale()
+	_element_global_rect = canvas_rect
+	
+	position = get_element_global_position()
+	_update_handles()
+	queue_redraw()
+
+
+## Connects this gizmo to the given UI element's changes.
+func connect_to_element(element: BaseUIElement) -> void:
+	if _reference_element:
+		_reference_element.rect_changed.disconnect(_update_rect_by_element)
+	
+	_reference_element = element
+	_update_rect_by_element()
+	
+	if _reference_element:
+		_reference_element.rect_changed.connect(_update_rect_by_element)
+
+
+func get_element_global_position() -> Vector2:
+	return _element_global_position
+
+
+func get_element_global_size() -> Vector2:
+	return _element_global_size
+
+
+func get_element_global_rect() -> Rect2:
+	return _element_global_rect
 
 
 # Interactions.
@@ -65,12 +85,17 @@ func is_hovering() -> bool:
 	return _hovering
 
 
-## Marks, or unmarks, this gizmo as being currently hovered.
-func set_hovering(value: bool) -> void:
-	if _hovering == value:
-		return
+## Tests whether interactive parts of this gizmo are being currently hovered, and returns the
+## result. See also [method _is_hovering_at].
+func test_hovering(mouse_position: Vector2) -> bool:
+	if _hovering:
+		queue_redraw() # Queue a forced redraw in case we're exiting the gizmo right now.
 	
-	_hovering = value
+	var new_value := _is_hovering_at(mouse_position)
+	if new_value != _hovering:
+		_hovering = new_value
+	
+	return _hovering
 
 
 ## Returns whether this gizmo is being currently grabbed.
@@ -98,15 +123,14 @@ func _update_handles() -> void:
 	pass
 
 
-## Checks whether the interactive parts of the gizmo are being hovered. Extending classes implement
-## this method.
-func check_hovering(_mouse_position: Vector2) -> void:
-	return
+## Called to update the hovered status of this gizmo. Extending classes implement this method.
+func _is_hovering_at(_mouse_position: Vector2) -> bool:
+	return false
 
 
 ## Returns the cursor shape based on the position from the input event. Extending classes implement
 ## this method.
-func get_hovered_cursor_shape(_mouse_position: Vector2) -> CursorShape:
+func get_hovering_cursor_shape(_mouse_position: Vector2) -> CursorShape:
 	return Control.CURSOR_ARROW
 
 
