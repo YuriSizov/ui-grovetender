@@ -33,8 +33,8 @@ var _elements_offset: Vector2 = Vector2.ZERO
 var _canvas_dragging: bool = false
 var _canvas_drag_position: Vector2 = Vector2.ZERO
 
-@onready var _element_container: Control = %Elements
-@onready var _gizmos_container: CanvasGizmos = %Gizmos
+@onready var _element_container: Control = %CanvasElements
+@onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
 
 var _editing_mode_buttons := preload("res://gui/canvas/editing_mode_button_group.tres")

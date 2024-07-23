@@ -8,6 +8,8 @@ class_name CanvasGizmos extends Control
 
 var _grabbed_gizmo: BaseGizmo = null
 
+@onready var _gizmo_container: Control = %Gizmos
+
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouse:
@@ -21,8 +23,8 @@ func _gui_input(event: InputEvent) -> void:
 		
 		# This back-propagates the event to children, which allows us to handle or pass events between
 		# siblings.
-		for gizmo: BaseGizmo in get_children():
-			if gizmo.can_handle_input(event):
+		for gizmo: BaseGizmo in _gizmo_container.get_children():
+			if gizmo.is_visible_in_tree() && gizmo.can_handle_input(event):
 				var cursor_shape := gizmo.get_hovering_cursor_shape(event.global_position)
 				_update_cursor_shape(cursor_shape)
 				gizmo.handle_input(event)
@@ -30,13 +32,24 @@ func _gui_input(event: InputEvent) -> void:
 				return
 		
 		# If we aren't grabbing or clicking anything, then just check for hover and new cursor shape.
-		for gizmo: BaseGizmo in get_children():
-			if gizmo.test_hovering(event.global_position):
+		for gizmo: BaseGizmo in _gizmo_container.get_children():
+			if gizmo.is_visible_in_tree() && gizmo.test_hovering(event.global_position):
 				var cursor_shape := gizmo.get_hovering_cursor_shape(event.global_position)
 				_update_cursor_shape(cursor_shape)
 				return
 	
 	_update_cursor_shape(Control.CURSOR_ARROW)
+
+
+func _get_tooltip(at_position: Vector2) -> String:
+	if _grabbed_gizmo:
+		return ""
+	
+	for gizmo: BaseGizmo in _gizmo_container.get_children():
+		if gizmo.is_visible_in_tree() && gizmo.is_hovering():
+			return gizmo.get_tooltip(at_position)
+	
+	return ""
 
 
 func _update_grabbed_gizmo(gizmo: BaseGizmo) -> void:
@@ -57,11 +70,11 @@ func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 func clear_gizmos() -> void:
 	_grabbed_gizmo = null
 	
-	for gizmo: BaseGizmo in get_children():
+	for gizmo: BaseGizmo in _gizmo_container.get_children():
 		gizmo.grabbed.disconnect(_update_grabbed_gizmo.bind(gizmo))
 		gizmo.released.disconnect(_update_grabbed_gizmo.bind(null))
 		
-		remove_child(gizmo)
+		_gizmo_container.remove_child(gizmo)
 		gizmo.queue_free()
 
 
@@ -69,7 +82,7 @@ func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
 	var mouse_position := get_global_mouse_position()
 	
 	for gizmo in new_gizmos:
-		add_child(gizmo)
+		_gizmo_container.add_child(gizmo)
 		
 		# Update the cursor immediately, if the new gizmo is hovered.
 		if gizmo.test_hovering(mouse_position):

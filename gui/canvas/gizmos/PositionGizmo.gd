@@ -12,8 +12,8 @@ signal position_changed(delta: Vector2)
 var _center_handle: Rect2 = Rect2()
 
 
-func _init() -> void:
-	super()
+func _init(element: BaseUIElement) -> void:
+	super(element)
 	name = &"PositionGizmo"
 	theme_type_variation = &"PositionGizmo"
 
@@ -49,6 +49,12 @@ func _draw() -> void:
 func _process(_delta: float) -> void:
 	if is_hovering():
 		queue_redraw() # Redraw constantly when hovering.
+
+
+func _get_tooltip(_at_position: Vector2) -> String:
+	if is_hovering():
+		return "Move"
+	return ""
 
 
 # Implementation.

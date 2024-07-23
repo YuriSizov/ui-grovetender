@@ -21,14 +21,16 @@ var _hovering: bool = false
 var _grabbing: bool = false
 
 
-func _init() -> void:
+func _init(element: BaseUIElement) -> void:
 	name = &"BaseGizmo"
 	mouse_filter = MOUSE_FILTER_IGNORE
 	
+	_connect_to_element(element)
 	EndlessCanvas.get_instance().canvas_transformed.connect(_update_rect_by_element)
 
 
 func _ready() -> void:
+	_update_rect_by_element()
 	_update_handles()
 
 
@@ -54,16 +56,22 @@ func _update_rect_by_element() -> void:
 	queue_redraw()
 
 
-## Connects this gizmo to the given UI element's changes.
-func connect_to_element(element: BaseUIElement) -> void:
+func _connect_to_element(element: BaseUIElement) -> void:
 	if _reference_element:
 		_reference_element.rect_changed.disconnect(_update_rect_by_element)
 	
 	_reference_element = element
-	_update_rect_by_element()
 	
 	if _reference_element:
 		_reference_element.rect_changed.connect(_update_rect_by_element)
+
+
+## Connects this gizmo to the given UI element's changes.
+func connect_to_element(element: BaseUIElement) -> void:
+	_connect_to_element(element)
+	
+	if is_node_ready():
+		_update_rect_by_element()
 
 
 func get_element_global_position() -> Vector2:

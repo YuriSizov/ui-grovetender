@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://heg310gps336"]
 
 [ext_resource type="Script" path="res://gui/EndlessCanvas.gd" id="1_y0kqo"]
-[ext_resource type="Script" path="res://gui/canvas/CanvasGizmos.gd" id="2_44lot"]
+[ext_resource type="PackedScene" uid="uid://b4ife7qpjx4gw" path="res://gui/canvas/CanvasGizmos.tscn" id="2_506oc"]
 [ext_resource type="ButtonGroup" uid="uid://qrhc1kujnngh" path="res://gui/canvas/editing_mode_button_group.tres" id="3_63ns4"]
 [ext_resource type="PackedScene" uid="uid://cc6qxmnlw1a6s" path="res://gui/canvas/PropertiesDrawer.tscn" id="4_amokm"]
 
@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_y0kqo")
 
-[node name="Elements" type="Control" parent="."]
+[node name="CanvasElements" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -24,16 +24,9 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Gizmos" type="Control" parent="."]
+[node name="CanvasGizmos" parent="." instance=ExtResource("2_506oc")]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
-script = ExtResource("2_44lot")
 
 [node name="CanvasOverlay" type="MarginContainer" parent="."]
 layout_mode = 1

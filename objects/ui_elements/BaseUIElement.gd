@@ -75,18 +75,14 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
 	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
-		var size_gizmo := SizeGizmo.new()
-		size_gizmo.connect_to_element(self)
+		var size_gizmo := SizeGizmo.new(self)
 		gizmos.push_back(size_gizmo)
-		
 		# TODO: Implement constraints, snapping, alignment.
 		size_gizmo.corner_size_changed.connect(_resize_by_corner)
 		size_gizmo.side_size_changed.connect(_resize_by_side)
 		
-		var position_gizmo := PositionGizmo.new()
-		position_gizmo.connect_to_element(self)
+		var position_gizmo := PositionGizmo.new(self)
 		gizmos.push_back(position_gizmo)
-		
 		# TODO: Implement constraints, snapping, alignment.
 		position_gizmo.position_changed.connect(_reposition_by_center)
 	

@@ -23,8 +23,8 @@ var _resize_type: ResizeType = ResizeType.NONE
 var _resize_index: int = -1
 
 
-func _init() -> void:
-	super()
+func _init(element: BaseUIElement) -> void:
+	super(element)
 	name = &"SizeGizmo"
 	theme_type_variation = &"SizeGizmo"
 	
@@ -116,6 +116,35 @@ func _draw() -> void:
 func _process(_delta: float) -> void:
 	if is_hovering():
 		queue_redraw() # Redraw constantly when hovering.
+
+
+func _get_tooltip(_at_position: Vector2) -> String:
+	if not is_hovering():
+		return ""
+	
+	if _resize_type == ResizeType.CORNER:
+		match _resize_index:
+			CORNER_TOP_LEFT:
+				return "Resize by top-left corner"
+			CORNER_TOP_RIGHT:
+				return "Resize by top-right corner"
+			CORNER_BOTTOM_RIGHT:
+				return "Resize by bottom-right corner"
+			CORNER_BOTTOM_LEFT:
+				return "Resize by bottom-left corner"
+			
+	elif _resize_type == ResizeType.SIDE:
+		match _resize_index:
+			SIDE_LEFT:
+				return "Resize by left side"
+			SIDE_TOP:
+				return "Resize by top side"
+			SIDE_RIGHT:
+				return "Resize by right side"
+			SIDE_BOTTOM:
+				return "Resize by bottom side"
+	
+	return ""
 
 
 # Implementation.
