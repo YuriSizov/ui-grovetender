@@ -48,12 +48,7 @@ shadow_color = Color(0, 0, 0, 0.117647)
 shadow_size = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.727236, 0.8271, 0.779398, 0.54902)
+bg_color = Color(0.72549, 0.827451, 0.780392, 0.54902)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -61,12 +56,7 @@ corner_radius_bottom_left = 2
 corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_37vs7"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.72549, 0.827451, 0.780392, 1)
+bg_color = Color(0.72549, 0.827451, 0.780392, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -74,12 +64,7 @@ corner_radius_bottom_left = 2
 corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2fit0"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.488469, 0.618724, 0.560567, 1)
+bg_color = Color(0.490196, 0.619608, 0.560784, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -99,13 +84,8 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yxr7m"]
-bg_color = Color(1, 1, 1, 0)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.345098, 0.658824, 0.882353, 0.54902)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ka6dp"]
+bg_color = Color(0.54621, 0.774571, 0.947929, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -113,12 +93,7 @@ corner_radius_bottom_left = 2
 corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0wlwl"]
-bg_color = Color(1, 1, 1, 0)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.424398, 0.658089, 0.804443, 1)
+bg_color = Color(0.423529, 0.658824, 0.803922, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -126,40 +101,30 @@ corner_radius_bottom_left = 2
 corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m50em"]
-bg_color = Color(1, 1, 1, 0)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.189177, 0.483515, 0.681635, 1)
+bg_color = Color(0.188235, 0.482353, 0.682353, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 corner_detail = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y3acj"]
-bg_color = Color(0.345098, 0.658824, 0.882353, 0.54902)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bf384"]
+bg_color = Color(0.54621, 0.774571, 0.947929, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ry4p3"]
+bg_color = Color(0.423529, 0.658824, 0.803922, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 corner_detail = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pldae"]
-bg_color = Color(0.424398, 0.658089, 0.804443, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4g0e6"]
-bg_color = Color(0.189177, 0.483515, 0.681635, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tilfi"]
+bg_color = Color(0.188235, 0.482353, 0.682353, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 corner_detail = 4
 
 [resource]
@@ -183,7 +148,8 @@ ColorPropertyEditor/constants/picker_offset_y = 8
 EditingModeButtons/base_type = &"HBoxContainer"
 EditingModeButtons/constants/separation = 12
 PositionGizmo/base_type = &"Control"
-PositionGizmo/constants/center_handle_size = 16
+PositionGizmo/constants/center_handle_size = 24
+PositionGizmo/constants/center_handle_thickness = 4
 PositionGizmo/constants/handle_trigger_size = 48
 PositionGizmo/styles/center_handle = SubResource("StyleBoxFlat_mn3ld")
 PositionGizmo/styles/center_handle_hover = SubResource("StyleBoxFlat_37vs7")
@@ -209,14 +175,16 @@ PropertyEditor/font_sizes/font_size = 18
 SimpleColorPicker/base_type = &"PanelContainer"
 SimpleColorPicker/styles/panel = SubResource("StyleBoxFlat_shuin")
 SizeGizmo/base_type = &"Control"
-SizeGizmo/constants/corner_handle_size = 12
+SizeGizmo/constants/corner_handle_size = 16
+SizeGizmo/constants/corner_handle_thickness = 4
 SizeGizmo/constants/handle_trigger_size = 24
-SizeGizmo/constants/side_handle_size = 4
-SizeGizmo/styles/corner_handle = SubResource("StyleBoxFlat_yxr7m")
+SizeGizmo/constants/side_handle_percent = 50
+SizeGizmo/constants/side_handle_thickness = 4
+SizeGizmo/styles/corner_handle = SubResource("StyleBoxFlat_ka6dp")
 SizeGizmo/styles/corner_handle_hover = SubResource("StyleBoxFlat_0wlwl")
 SizeGizmo/styles/corner_handle_pressed = SubResource("StyleBoxFlat_m50em")
-SizeGizmo/styles/side_handle = SubResource("StyleBoxFlat_y3acj")
-SizeGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_pldae")
-SizeGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_4g0e6")
+SizeGizmo/styles/side_handle = SubResource("StyleBoxFlat_bf384")
+SizeGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_ry4p3")
+SizeGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_tilfi")
 TogglePropertyEditor/base_type = &"ButtonPropertyEditor"
 TogglePropertyEditor/font_sizes/font_size = 18

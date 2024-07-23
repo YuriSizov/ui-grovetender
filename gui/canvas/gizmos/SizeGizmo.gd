@@ -22,8 +22,6 @@ enum ResizeType {
 var _resize_type: ResizeType = ResizeType.NONE
 var _resize_index: int = -1
 
-var _corner_styleboxes: Array[StyleBox] = []
-
 
 func _init() -> void:
 	super()
@@ -34,111 +32,35 @@ func _init() -> void:
 	_side_handles.resize(4)
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_THEME_CHANGED:
-		_update_theme()
-
-
-func _update_theme() -> void:
-	_corner_styleboxes.clear()
-	_corner_styleboxes.resize(4 * 3)
-	
-	# Make the styleboxes into arrow shapes, pointing in corresponding directions.
-	
-	var corner_handle_default := get_theme_stylebox("corner_handle")
-	var corner_handle_hover := get_theme_stylebox("corner_handle_hover")
-	var corner_handle_pressed := get_theme_stylebox("corner_handle_pressed")
-	
-	for i in 4:
-		var corner_arrow_default: StyleBoxFlat = corner_handle_default.duplicate()
-		var corner_arrow_hover: StyleBoxFlat = corner_handle_hover.duplicate()
-		var corner_arrow_pressed: StyleBoxFlat = corner_handle_pressed.duplicate()
-		
-		# Only draw the sides which form an arrow in the corresponding direction.
-		
-		if i == CORNER_TOP_RIGHT || i == CORNER_BOTTOM_RIGHT:
-			corner_arrow_default.border_width_left = 0
-			corner_arrow_hover.border_width_left = 0
-			corner_arrow_pressed.border_width_left = 0
-		
-		if i == CORNER_TOP_LEFT || i == CORNER_BOTTOM_LEFT:
-			corner_arrow_default.border_width_right = 0
-			corner_arrow_hover.border_width_right = 0
-			corner_arrow_pressed.border_width_right = 0
-		
-		if i == CORNER_BOTTOM_LEFT || i == CORNER_BOTTOM_RIGHT:
-			corner_arrow_default.border_width_top = 0
-			corner_arrow_hover.border_width_top = 0
-			corner_arrow_pressed.border_width_top = 0
-		
-		if i == CORNER_TOP_LEFT || i == CORNER_TOP_RIGHT:
-			corner_arrow_default.border_width_bottom = 0
-			corner_arrow_hover.border_width_bottom = 0
-			corner_arrow_pressed.border_width_bottom = 0
-		
-		# Avoid bending artifacts on partially rendered corners.
-		
-		if i == CORNER_TOP_LEFT || i == CORNER_BOTTOM_RIGHT:
-			corner_arrow_default.corner_radius_top_right = 0
-			corner_arrow_default.corner_radius_bottom_left = 0
-			corner_arrow_hover.corner_radius_top_right = 0
-			corner_arrow_hover.corner_radius_bottom_left = 0
-			corner_arrow_pressed.corner_radius_top_right = 0
-			corner_arrow_pressed.corner_radius_bottom_left = 0
-		
-		elif i == CORNER_TOP_RIGHT || i == CORNER_BOTTOM_LEFT:
-			corner_arrow_default.corner_radius_top_left = 0
-			corner_arrow_default.corner_radius_bottom_right = 0
-			corner_arrow_hover.corner_radius_top_left = 0
-			corner_arrow_hover.corner_radius_bottom_right = 0
-			corner_arrow_pressed.corner_radius_top_left = 0
-			corner_arrow_pressed.corner_radius_bottom_right = 0
-		
-		_corner_styleboxes[i * 3 + 0] = corner_arrow_default
-		_corner_styleboxes[i * 3 + 1] = corner_arrow_hover
-		_corner_styleboxes[i * 3 + 2] = corner_arrow_pressed
-
-
 func _draw() -> void:
+	# Side handles.
+	
 	var side_handle_default := get_theme_stylebox("side_handle")
 	var side_handle_hover := get_theme_stylebox("side_handle_hover")
 	var side_handle_pressed := get_theme_stylebox("side_handle_pressed")
-	var side_handle_size := get_theme_constant("side_handle_size")
 	
-	var corner_handle_default := get_theme_stylebox("corner_handle")
-	var corner_handle_hover := get_theme_stylebox("corner_handle_hover")
-	var corner_handle_pressed := get_theme_stylebox("corner_handle_pressed")
-	var corner_handle_size := get_theme_constant("corner_handle_size")
+	var side_handle_ratio := get_theme_constant("side_handle_percent") / 100.0
+	var side_handle_thickness := get_theme_constant("side_handle_thickness")
 	
-	# Side handles.
 	for i in 4:
-		var handle := _side_handles[i]
-		
+		var handle_data := _side_handles[i]
+		var handle_base := get_element_global_side(i) - position
 		var visual_rect := Rect2()
-		visual_rect.position = handle.position - position
-		visual_rect.size = handle.size
 		
 		if i % 2 == 0: # Left/Right.
-			var handle_padding_x := -(visual_rect.size.x - side_handle_size) / 2.0
-			var handle_padding_y := -(visual_rect.size.y / 4.0)
-			visual_rect = visual_rect.grow_individual(handle_padding_x, handle_padding_y, handle_padding_x, handle_padding_y)
+			visual_rect.size = Vector2(side_handle_thickness, handle_data.size.y * side_handle_ratio)
 		else: # Top/Bottom.
-			var handle_padding_x := -(visual_rect.size.x / 4.0)
-			var handle_padding_y := -(visual_rect.size.y - side_handle_size) / 2.0
-			visual_rect = visual_rect.grow_individual(handle_padding_x, handle_padding_y, handle_padding_x, handle_padding_y)
-		
-		if visual_rect.size.x < 0 || visual_rect.size.y < 0:
-			continue
+			visual_rect.size = Vector2(handle_data.size.x * side_handle_ratio, side_handle_thickness)
 		
 		match i:
 			SIDE_LEFT:
-				visual_rect.position.x -= visual_rect.size.x / 2.0
+				visual_rect.position = handle_base - Vector2(visual_rect.size.x, visual_rect.size.y / 2.0)
 			SIDE_RIGHT:
-				visual_rect.position.x += visual_rect.size.x / 2.0
+				visual_rect.position = handle_base - Vector2(0, visual_rect.size.y / 2.0)
 			SIDE_TOP:
-				visual_rect.position.y -= visual_rect.size.y / 2.0
+				visual_rect.position = handle_base - Vector2(visual_rect.size.x / 2.0, visual_rect.size.y)
 			SIDE_BOTTOM:
-				visual_rect.position.y += visual_rect.size.y / 2.0
+				visual_rect.position = handle_base - Vector2(visual_rect.size.x / 2.0, 0)
 		
 		if is_hovering() && _resize_type == ResizeType.SIDE && _resize_index == i:
 			if is_grabbing():
@@ -149,48 +71,46 @@ func _draw() -> void:
 			draw_style_box(side_handle_default, visual_rect)
 	
 	# Corner handles.
+	
+	var corner_handle_default := get_theme_stylebox("corner_handle")
+	var corner_handle_hover := get_theme_stylebox("corner_handle_hover")
+	var corner_handle_pressed := get_theme_stylebox("corner_handle_pressed")
+	
+	var corner_handle_size := get_theme_constant("corner_handle_size")
+	var corner_handle_thickness := get_theme_constant("corner_handle_thickness")
+	
 	for i in 4:
-		var handle = _corner_handles[i]
+		var handle_base := get_element_global_corner(i) - position
 		
-		var visual_rect := Rect2()
-		visual_rect.position = handle.position - position
-		visual_rect.size = Vector2(corner_handle_size, corner_handle_size)
-		var visual_offset := Vector2.ONE
+		var horizontal_rect := Rect2()
+		horizontal_rect.size = Vector2(corner_handle_size, corner_handle_thickness)
+		var vertical_rect := Rect2()
+		vertical_rect.size = Vector2(corner_handle_thickness, corner_handle_size)
 		
 		match i:
 			CORNER_TOP_LEFT:
-				visual_rect.position += Vector2(handle.size.x, handle.size.y) / 2.0
-				visual_offset.x = -1
-				visual_offset.y = -1
+				horizontal_rect.position = handle_base - Vector2(vertical_rect.size.x, horizontal_rect.size.y)
+				vertical_rect.position = handle_base - Vector2(vertical_rect.size.x, horizontal_rect.size.y)
 			CORNER_TOP_RIGHT:
-				visual_rect.position += Vector2(0, handle.size.y) / 2.0
-				visual_offset.x = 1
-				visual_offset.y = -1
+				horizontal_rect.position = handle_base - Vector2(horizontal_rect.size.x - vertical_rect.size.x, horizontal_rect.size.y)
+				vertical_rect.position = handle_base - Vector2(0, horizontal_rect.size.y)
 			CORNER_BOTTOM_RIGHT:
-				visual_rect.position += Vector2(0, 0) / 2.0
-				visual_offset.x = 1
-				visual_offset.y = 1
+				horizontal_rect.position = handle_base - Vector2(horizontal_rect.size.x - vertical_rect.size.x, 0)
+				vertical_rect.position = handle_base - Vector2(0, vertical_rect.size.y - horizontal_rect.size.y)
 			CORNER_BOTTOM_LEFT:
-				visual_rect.position += Vector2(handle.size.x, 0) / 2.0
-				visual_offset.x = -1
-				visual_offset.y = 1
+				horizontal_rect.position = handle_base - Vector2(vertical_rect.size.x, 0)
+				vertical_rect.position = handle_base - Vector2(vertical_rect.size.x, vertical_rect.size.y - horizontal_rect.size.y)
 		
 		if is_hovering() && _resize_type == ResizeType.CORNER && _resize_index == i:
 			if is_grabbing():
-				var border_width := (corner_handle_pressed as StyleBoxFlat).border_width_left
-				visual_rect.position += visual_offset * border_width
-				
-				draw_style_box(_corner_styleboxes[i * 3 + 2], visual_rect)
+				draw_style_box(corner_handle_pressed, horizontal_rect)
+				draw_style_box(corner_handle_pressed, vertical_rect)
 			else:
-				var border_width := (corner_handle_hover as StyleBoxFlat).border_width_left
-				visual_rect.position += visual_offset * border_width
-				
-				draw_style_box(_corner_styleboxes[i * 3 + 1], visual_rect)
+				draw_style_box(corner_handle_hover, horizontal_rect)
+				draw_style_box(corner_handle_hover, vertical_rect)
 		else:
-			var border_width := (corner_handle_default as StyleBoxFlat).border_width_left
-			visual_rect.position += visual_offset * border_width
-			
-			draw_style_box(_corner_styleboxes[i * 3 + 0], visual_rect)
+			draw_style_box(corner_handle_default, horizontal_rect)
+			draw_style_box(corner_handle_default, vertical_rect)
 
 
 func _process(_delta: float) -> void:
@@ -207,31 +127,19 @@ func _update_handles() -> void:
 	
 	# Corner handles.
 	
-	_corner_handles[CORNER_TOP_LEFT].position = position + Vector2(-half_element_size.x, -half_element_size.y) - base_size
-	_corner_handles[CORNER_TOP_LEFT].size = base_size * 2
-	
-	_corner_handles[CORNER_TOP_RIGHT].position = position + Vector2(half_element_size.x, -half_element_size.y) - base_size
-	_corner_handles[CORNER_TOP_RIGHT].size = base_size * 2
-	
-	_corner_handles[CORNER_BOTTOM_RIGHT].position = position + Vector2(half_element_size.x, half_element_size.y) - base_size
-	_corner_handles[CORNER_BOTTOM_RIGHT].size = base_size * 2
-	
-	_corner_handles[CORNER_BOTTOM_LEFT].position = position + Vector2(-half_element_size.x, half_element_size.y) - base_size
-	_corner_handles[CORNER_BOTTOM_LEFT].size = base_size * 2
+	for i in 4:
+		_corner_handles[i].position = get_element_global_corner(i) - base_size
+		_corner_handles[i].size = base_size * 2
 	
 	# Side handles.
 	
-	_side_handles[SIDE_LEFT].position = position + Vector2(-half_element_size.x, -half_element_size.y) + Vector2(-base_size.x, base_size.y)
-	_side_handles[SIDE_LEFT].size = Vector2(base_size.x * 2, (half_element_size.y - base_size.y) * 2).max(Vector2.ZERO)
-	
-	_side_handles[SIDE_RIGHT].position = position + Vector2(half_element_size.x, -half_element_size.y) + Vector2(-base_size.x, base_size.y)
-	_side_handles[SIDE_RIGHT].size = Vector2(base_size.x * 2, (half_element_size.y - base_size.y) * 2).max(Vector2.ZERO)
-	
-	_side_handles[SIDE_TOP].position = position + Vector2(-half_element_size.x, -half_element_size.y) + Vector2(base_size.x, -base_size.y)
-	_side_handles[SIDE_TOP].size = Vector2((half_element_size.x - base_size.x) * 2, base_size.y * 2).max(Vector2.ZERO)
-	
-	_side_handles[SIDE_BOTTOM].position = position + Vector2(-half_element_size.x, half_element_size.y) + Vector2(base_size.x, -base_size.y)
-	_side_handles[SIDE_BOTTOM].size = Vector2((half_element_size.x - base_size.x) * 2, base_size.y * 2).max(Vector2.ZERO)
+	for i in 4:
+		if i % 2 == 0: # Left/Right.
+			_side_handles[i].position = get_element_global_side(i) - Vector2(base_size.x, half_element_size.y - base_size.y)
+			_side_handles[i].size = Vector2(base_size.x * 2, (half_element_size.y - base_size.y) * 2).max(Vector2.ZERO)
+		else: # Top/Bottom.
+			_side_handles[i].position = get_element_global_side(i) - Vector2(half_element_size.x - base_size.x, base_size.y)
+			_side_handles[i].size = Vector2((half_element_size.x - base_size.x) * 2, base_size.y * 2).max(Vector2.ZERO)
 
 
 func _is_hovering_at(mouse_position: Vector2) -> bool:

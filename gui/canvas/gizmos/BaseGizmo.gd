@@ -78,6 +78,34 @@ func get_element_global_rect() -> Rect2:
 	return _element_global_rect
 
 
+func get_element_global_corner(corner: Corner) -> Vector2:
+	match corner:
+		CORNER_TOP_LEFT:
+			return _element_global_rect.position
+		CORNER_TOP_RIGHT:
+			return Vector2(_element_global_rect.end.x, _element_global_rect.position.y)
+		CORNER_BOTTOM_RIGHT:
+			return _element_global_rect.end
+		CORNER_BOTTOM_LEFT:
+			return Vector2(_element_global_rect.position.x, _element_global_rect.end.y)
+	
+	return _element_global_position
+
+
+func get_element_global_side(side: Side) -> Vector2:
+	match side:
+		SIDE_LEFT:
+			return _element_global_rect.position + Vector2(0, _element_global_rect.size.y / 2.0)
+		SIDE_TOP:
+			return _element_global_rect.position + Vector2(_element_global_rect.size.x / 2.0, 0)
+		SIDE_RIGHT:
+			return _element_global_rect.end - Vector2(0, _element_global_rect.size.y / 2.0)
+		SIDE_BOTTOM:
+			return _element_global_rect.end - Vector2(_element_global_rect.size.x / 2.0, 0)
+	
+	return _element_global_position
+
+
 # Interactions.
 
 ## Returns whether this gizmo is being currently hovered.

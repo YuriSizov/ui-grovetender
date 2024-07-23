@@ -22,23 +22,28 @@ func _draw() -> void:
 	var center_handle_default := get_theme_stylebox("center_handle")
 	var center_handle_hover := get_theme_stylebox("center_handle_hover")
 	var center_handle_pressed := get_theme_stylebox("center_handle_pressed")
+	
 	var center_handle_size := get_theme_constant("center_handle_size")
+	var center_handle_thickness := get_theme_constant("center_handle_thickness")
 	
-	var handle_rect := Rect2()
-	handle_rect.position = _center_handle.position - position
-	handle_rect.size = _center_handle.size
+	var horizontal_rect := Rect2()
+	horizontal_rect.size = Vector2(center_handle_size, center_handle_thickness)
+	horizontal_rect.position = Vector2.ZERO - horizontal_rect.size / 2.0
 	
-	var handle_padding_x := -(handle_rect.size.x - center_handle_size) / 2.0
-	var handle_padding_y := -(handle_rect.size.y - center_handle_size) / 2.0
-	handle_rect = handle_rect.grow_individual(handle_padding_x, handle_padding_y, handle_padding_x, handle_padding_y)
+	var vertical_rect := Rect2()
+	vertical_rect.size = Vector2(center_handle_thickness, center_handle_size)
+	vertical_rect.position = Vector2.ZERO - vertical_rect.size / 2.0
 	
 	if is_hovering():
 		if is_grabbing():
-			draw_style_box(center_handle_pressed, handle_rect)
+			draw_style_box(center_handle_pressed, horizontal_rect)
+			draw_style_box(center_handle_pressed, vertical_rect)
 		else:
-			draw_style_box(center_handle_hover, handle_rect)
+			draw_style_box(center_handle_hover, horizontal_rect)
+			draw_style_box(center_handle_hover, vertical_rect)
 	else:
-		draw_style_box(center_handle_default, handle_rect)
+		draw_style_box(center_handle_default, horizontal_rect)
+		draw_style_box(center_handle_default, vertical_rect)
 
 
 func _process(_delta: float) -> void:
