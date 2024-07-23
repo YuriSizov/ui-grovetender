@@ -9,6 +9,7 @@ class_name BorderStyleGizmo extends BaseGizmo
 
 signal width_changed(side: Side, delta: float)
 signal width_all_changed(side: Side, delta: float)
+signal width_opposite_changed(side: Side, delta: float)
 
 var _side_handles: Array[Rect2] = []
 var _side_index: int = -1
@@ -68,20 +69,7 @@ func _get_tooltip(_at_position: Vector2) -> String:
 	if not is_hovering():
 		return ""
 	
-	if not Input.is_key_pressed(KEY_CTRL): # Hold Ctrl to adjust individual sides instead.
-		return "Adjust thickness of the border"
-	
-	match _side_index:
-		SIDE_LEFT:
-			return "Adjust thickness of the left-side border"
-		SIDE_TOP:
-			return "Adjust thickness of the top-side border"
-		SIDE_RIGHT:
-			return "Adjust thickness of the right-side border"
-		SIDE_BOTTOM:
-			return "Adjust thickness of the bottom-side border"
-	
-	return ""
+	return "Adjust thickness of the border.\nHold Ctrl to adjust all borders.\nHold Alt to adjust opposite borders."
 
 
 # Implementation.
@@ -176,7 +164,13 @@ func handle_input(event: InputEvent) -> void:
 		else:
 			relative_side = relative.y
 		
-		if Input.is_key_pressed(KEY_CTRL): # Hold Ctrl to adjust individual sides instead.
-			width_changed.emit(_side_index, relative_side)
-		else:
+		# Hold Ctrl to adjust all sides at the same time.
+		if Input.is_key_pressed(KEY_CTRL):
 			width_all_changed.emit(_side_index, relative_side)
+		
+		# Hold Alt to adjust opposite sides at the same time.
+		elif Input.is_key_pressed(KEY_ALT):
+			width_opposite_changed.emit(_side_index, relative_side)
+		
+		else:
+			width_changed.emit(_side_index, relative_side)

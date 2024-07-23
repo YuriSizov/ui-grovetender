@@ -77,9 +77,18 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
 		var size_gizmo := SizeGizmo.new(self)
 		gizmos.push_back(size_gizmo)
+		
+		# TODO: Keep track of the size at the start of the operation, accumulate deltas, and apply current modifier key effects retroactively.
+		
 		# TODO: Implement constraints, snapping, alignment.
-		size_gizmo.corner_size_changed.connect(_resize_by_corner)
+		size_gizmo.corner_size_changed.connect(_resize_by_corner.bind(false))
+		size_gizmo.corner_size_all_changed.connect(_resize_by_all_corners.bind(false))
+		size_gizmo.corner_size_ratio_changed.connect(_resize_by_corner.bind(true))
+		size_gizmo.corner_size_ratio_all_changed.connect(_resize_by_all_corners.bind(true))
+		
 		size_gizmo.side_size_changed.connect(_resize_by_side)
+		size_gizmo.side_size_all_changed.connect(_resize_by_all_sides)
+		size_gizmo.side_size_opposite_changed.connect(_resize_by_opposite_sides)
 		
 		var position_gizmo := PositionGizmo.new(self)
 		gizmos.push_back(position_gizmo)
@@ -102,7 +111,28 @@ func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[P
 
 # Properties.
 
-func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
+func _ensure_positive_size(value: Vector2) -> Vector2:
+	if value.x < 0:
+		value.x = 0
+	if value.y < 0:
+		value.y = 0
+	
+	return value
+
+
+func _ensure_ratio_size(value: Vector2, ratio: Vector2) -> Vector2:
+	if ratio.x == 0 || ratio.y == 0:
+		return value
+	
+	if ratio.x > ratio.y:
+		value.y = (ratio.y / ratio.x) * value.x
+	else:
+		value.x = (ratio.x / ratio.y) * value.y
+	
+	return _ensure_positive_size(value)
+
+
+func _resize_by_corner(corner: Corner, delta: Vector2, keep_ratio: bool) -> void:
 	var center_rect := rect.get_size_and_position()
 	
 	match corner:
@@ -115,11 +145,9 @@ func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
 		CORNER_BOTTOM_LEFT:
 			center_rect.size += Vector2(-delta.x, delta.y)
 	
-	# Constrain the size to be non-negative.
-	if center_rect.size.x < 0:
-		center_rect.size.x = 0
-	if center_rect.size.y < 0:
-		center_rect.size.y = 0
+	center_rect.size = _ensure_positive_size(center_rect.size)
+	if keep_ratio:
+		center_rect.size = _ensure_ratio_size(center_rect.size, rect.get_size())
 	
 	# Update position delta based on the actual size change.
 	var effective_delta := Vector2(
@@ -135,6 +163,26 @@ func _resize_by_corner(corner: Corner, delta: Vector2) -> void:
 	rect.set_size_and_position(center_rect)
 
 
+func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool) -> void:
+	var center_size := rect.get_size()
+	
+	match corner:
+		CORNER_TOP_LEFT:
+			center_size -= delta * 2.0 # Inverted on both axes.
+		CORNER_TOP_RIGHT:
+			center_size += Vector2(delta.x, -delta.y) * 2.0
+		CORNER_BOTTOM_RIGHT:
+			center_size += delta * 2.0
+		CORNER_BOTTOM_LEFT:
+			center_size += Vector2(-delta.x, delta.y) * 2.0
+	
+	center_size = _ensure_positive_size(center_size)
+	if keep_ratio:
+		center_size = _ensure_ratio_size(center_size, rect.get_size())
+	
+	rect.set_size(center_size)
+
+
 func _resize_by_side(side: Side, delta: Vector2) -> void:
 	var center_rect := rect.get_size_and_position()
 	
@@ -148,11 +196,7 @@ func _resize_by_side(side: Side, delta: Vector2) -> void:
 		SIDE_BOTTOM:
 			center_rect.size.y += delta.y
 	
-	# Constrain the size to be non-negative.
-	if center_rect.size.x < 0:
-		center_rect.size.x = 0
-	if center_rect.size.y < 0:
-		center_rect.size.y = 0
+	center_rect.size = _ensure_positive_size(center_rect.size)
 	
 	# Update position delta based on the actual size change.
 	var effective_delta := Vector2(
@@ -166,6 +210,46 @@ func _resize_by_side(side: Side, delta: Vector2) -> void:
 	
 	center_rect.position += effective_delta / 2.0
 	rect.set_size_and_position(center_rect)
+
+
+func _resize_by_all_sides(side: Side, delta: Vector2) -> void:
+	var center_size := rect.get_size()
+	
+	match side:
+		SIDE_LEFT:
+			center_size.x -= delta.x * 2.0
+			center_size.y -= delta.x * 2.0
+		SIDE_RIGHT:
+			center_size.x += delta.x * 2.0
+			center_size.y += delta.x * 2.0
+		SIDE_TOP:
+			center_size.y -= delta.y * 2.0
+			center_size.x -= delta.y * 2.0
+		SIDE_BOTTOM:
+			center_size.y += delta.y * 2.0
+			center_size.x += delta.y * 2.0
+	
+	center_size = _ensure_positive_size(center_size)
+	
+	rect.set_size(center_size)
+
+
+func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
+	var center_size := rect.get_size()
+	
+	match side:
+		SIDE_LEFT:
+			center_size.x -= delta.x * 2.0
+		SIDE_RIGHT:
+			center_size.x += delta.x * 2.0
+		SIDE_TOP:
+			center_size.y -= delta.y * 2.0
+		SIDE_BOTTOM:
+			center_size.y += delta.y * 2.0
+	
+	center_size = _ensure_positive_size(center_size)
+	
+	rect.set_size(center_size)
 
 
 func _reposition_by_center(delta: Vector2) -> void:

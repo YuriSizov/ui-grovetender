@@ -8,7 +8,13 @@
 class_name SizeGizmo extends BaseGizmo
 
 signal corner_size_changed(corner: Corner, delta: Vector2)
+signal corner_size_all_changed(corner: Corner, delta: Vector2)
+signal corner_size_ratio_changed(corner: Corner, delta: Vector2)
+signal corner_size_ratio_all_changed(corner: Corner, delta: Vector2)
+
 signal side_size_changed(side: Side, delta: Vector2)
+signal side_size_all_changed(side: Side, delta: Vector2)
+signal side_size_opposite_changed(side: Side, delta: Vector2)
 
 var _corner_handles: Array[Rect2] = []
 var _side_handles: Array[Rect2] = []
@@ -21,6 +27,8 @@ enum ResizeType {
 
 var _resize_type: ResizeType = ResizeType.NONE
 var _resize_index: int = -1
+
+var _label_text_buffer: TextLine = TextLine.new()
 
 
 func _init(element: BaseUIElement) -> void:
@@ -111,6 +119,29 @@ func _draw() -> void:
 		else:
 			draw_style_box(corner_handle_default, horizontal_rect)
 			draw_style_box(corner_handle_default, vertical_rect)
+	
+	# Information label.
+	
+	var label_size := _label_text_buffer.get_size()
+	var label_position := get_element_global_corner(CORNER_TOP_LEFT) - position
+	var label_offset = Vector2(
+		get_theme_constant("label_offset_x"),
+		get_theme_constant("label_offset_y")
+	)
+	
+	var element_size := get_element_global_size()
+	if (label_size.x + label_offset.x * 2) > element_size.x || (label_size.y + label_offset.y * 2) > element_size.y:
+		label_position += Vector2(label_offset.x, -(label_offset.y + label_size.y))
+	else:
+		label_position += label_offset
+	
+	
+	var label_color := get_theme_color("font_color")
+	var label_outline_size := get_theme_constant("font_outline_size")
+	var label_outline_color := get_theme_color("font_outline_color")
+	
+	_label_text_buffer.draw_outline(get_canvas_item(), label_position, label_outline_size, label_outline_color)
+	_label_text_buffer.draw(get_canvas_item(), label_position, label_color)
 
 
 func _process(_delta: float) -> void:
@@ -123,26 +154,10 @@ func _get_tooltip(_at_position: Vector2) -> String:
 		return ""
 	
 	if _resize_type == ResizeType.CORNER:
-		match _resize_index:
-			CORNER_TOP_LEFT:
-				return "Resize by top-left corner"
-			CORNER_TOP_RIGHT:
-				return "Resize by top-right corner"
-			CORNER_BOTTOM_RIGHT:
-				return "Resize by bottom-right corner"
-			CORNER_BOTTOM_LEFT:
-				return "Resize by bottom-left corner"
-			
+		return "Resize by the corner.\nHold Ctrl to resize in all directions.\nHold Shift to resize maintaining proportions."
+	
 	elif _resize_type == ResizeType.SIDE:
-		match _resize_index:
-			SIDE_LEFT:
-				return "Resize by left side"
-			SIDE_TOP:
-				return "Resize by top side"
-			SIDE_RIGHT:
-				return "Resize by right side"
-			SIDE_BOTTOM:
-				return "Resize by bottom side"
+		return "Resize by the side.\nHold Ctrl to resize in all directions.\nHold Alt to resize by opposite sides."
 	
 	return ""
 
@@ -169,6 +184,16 @@ func _update_handles() -> void:
 		else: # Top/Bottom.
 			_side_handles[i].position = get_element_global_side(i) - Vector2(half_element_size.x - base_size.x, base_size.y)
 			_side_handles[i].size = Vector2((half_element_size.x - base_size.x) * 2, base_size.y * 2).max(Vector2.ZERO)
+	
+	# Information label.
+	
+	var label_font := get_theme_font("font", "BaseGizmo")
+	var label_font_size := get_theme_font_size("font_size", "BaseGizmo")
+	
+	var size_label := "%dx%d" % [ half_element_size.x * 2, half_element_size.y * 2 ]
+	
+	_label_text_buffer.clear()
+	_label_text_buffer.add_string(size_label, label_font, label_font_size)
 
 
 func _is_hovering_at(mouse_position: Vector2) -> bool:
@@ -266,6 +291,29 @@ func handle_input(event: InputEvent) -> void:
 		
 		match _resize_type:
 			ResizeType.CORNER:
-				corner_size_changed.emit(_resize_index, relative)
+				# Hold Ctrl and Shift to adjust all corners at the same time, keeping proportions.
+				if Input.is_key_pressed(KEY_CTRL) && Input.is_key_pressed(KEY_SHIFT):
+					corner_size_ratio_all_changed.emit(_resize_index, relative)
+				
+				# Hold Shift to adjust one corner, keeping proportions.
+				elif Input.is_key_pressed(KEY_SHIFT):
+					corner_size_ratio_changed.emit(_resize_index, relative)
+				
+				# Hold Ctrl to adjust all corners at the same time.
+				elif Input.is_key_pressed(KEY_CTRL):
+					corner_size_all_changed.emit(_resize_index, relative)
+				
+				else:
+					corner_size_changed.emit(_resize_index, relative)
+			
 			ResizeType.SIDE:
-				side_size_changed.emit(_resize_index, relative)
+				# Hold Ctrl to adjust all sides at the same time.
+				if Input.is_key_pressed(KEY_CTRL):
+					side_size_all_changed.emit(_resize_index, relative)
+				
+				# Hold Alt to adjust opposite sides at the same time.
+				elif Input.is_key_pressed(KEY_ALT):
+					side_size_opposite_changed.emit(_resize_index, relative)
+				
+				else:
+					side_size_changed.emit(_resize_index, relative)

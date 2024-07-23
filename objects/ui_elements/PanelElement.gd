@@ -70,6 +70,9 @@ func draw() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
 	
+	if element_rect.size.x == 0 || element_rect.size.y == 0:
+		return
+	
 	if draw_shadow:
 		var shadow_rect = element_rect
 		shadow_rect.position += shadow_offset
@@ -92,12 +95,14 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 		gizmos.push_back(_border_gizmo)
 		_border_gizmo.width_changed.connect(_set_border_width)
 		_border_gizmo.width_all_changed.connect(_set_border_all_width)
+		_border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
 		
 		var corner_gizmo := CornerStyleGizmo.new(self)
 		corner_gizmo.set_curved_radius_property("corner_curved_radius")
 		gizmos.push_back(corner_gizmo)
 		corner_gizmo.curved_radius_changed.connect(_set_corner_curve_radius)
 		corner_gizmo.curved_radius_all_changed.connect(_set_corner_curve_all_radius)
+		corner_gizmo.curved_radius_opposite_changed.connect(_set_corner_curve_opposite_radius)
 	
 	return gizmos
 
@@ -144,10 +149,10 @@ func _update_base_style() -> void:
 	_base_style.corner_radius_bottom_right = int(corner_curved_radius[2])
 	_base_style.corner_radius_bottom_left  = int(corner_curved_radius[3])
 	
-	_base_style.expand_margin_left   = 0 if border_width[0] < 0 else int(border_width[0])
-	_base_style.expand_margin_top    = 0 if border_width[1] < 0 else int(border_width[1])
-	_base_style.expand_margin_right  = 0 if border_width[2] < 0 else int(border_width[2])
-	_base_style.expand_margin_bottom = 0 if border_width[3] < 0 else int(border_width[3])
+	_base_style.expand_margin_left   = 0 if not draw_border || border_width[0] < 0 else int(border_width[0])
+	_base_style.expand_margin_top    = 0 if not draw_border || border_width[1] < 0 else int(border_width[1])
+	_base_style.expand_margin_right  = 0 if not draw_border || border_width[2] < 0 else int(border_width[2])
+	_base_style.expand_margin_bottom = 0 if not draw_border || border_width[3] < 0 else int(border_width[3])
 
 
 func _toggle_draw_background(value: bool) -> void:
@@ -196,6 +201,8 @@ func _toggle_draw_border(value: bool) -> void:
 	if is_instance_valid(_border_gizmo):
 		_border_gizmo.visible = draw_border
 	
+	_update_base_style()
+	_update_shadow_style()
 	properties_changed.emit()
 
 
@@ -241,6 +248,24 @@ func _set_border_all_width(side: Side, delta: float) -> void:
 	properties_changed.emit()
 
 
+func _set_border_opposite_width(side: Side, delta: float) -> void:
+	if not draw_border:
+		return
+	
+	if side == SIDE_LEFT || side == SIDE_TOP:
+		delta = -delta
+	var new_value := border_width[side] + delta
+	var pair_index := side % 2
+	
+	border_width[pair_index + 0] = new_value
+	border_width[pair_index + 2] = new_value
+	
+	_update_base_style()
+	_update_border_style()
+	_update_shadow_style()
+	properties_changed.emit()
+
+
 func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
 	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
@@ -262,6 +287,21 @@ func _set_corner_curve_all_radius(corner: Corner, delta: float) -> void:
 	corner_curved_radius[1] = new_value
 	corner_curved_radius[2] = new_value
 	corner_curved_radius[3] = new_value
+	_update_corner_curved_detail()
+	
+	_update_base_style()
+	_update_border_style()
+	_update_shadow_style()
+	properties_changed.emit()
+
+
+func _set_corner_curve_opposite_radius(corner: Corner, delta: float) -> void:
+	# TODO: Sanitize values which result in artifacts and bugs.
+	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
+	var pair_index := corner % 2
+	
+	corner_curved_radius[pair_index + 0] = new_value
+	corner_curved_radius[pair_index + 2] = new_value
 	_update_corner_curved_detail()
 	
 	_update_base_style()
@@ -292,10 +332,10 @@ func _update_shadow_style() -> void:
 	_shadow_style.corner_radius_bottom_right = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[2])
 	_shadow_style.corner_radius_bottom_left  = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[3])
 	
-	_shadow_style.expand_margin_left   = int(shadow_size.x) + _border_style.expand_margin_left
-	_shadow_style.expand_margin_right  = int(shadow_size.x) + _border_style.expand_margin_right
-	_shadow_style.expand_margin_top    = int(shadow_size.y) + _border_style.expand_margin_top
-	_shadow_style.expand_margin_bottom = int(shadow_size.y) + _border_style.expand_margin_bottom
+	_shadow_style.expand_margin_left   = int(shadow_size.x) + _base_style.expand_margin_left
+	_shadow_style.expand_margin_right  = int(shadow_size.x) + _base_style.expand_margin_right
+	_shadow_style.expand_margin_top    = int(shadow_size.y) + _base_style.expand_margin_top
+	_shadow_style.expand_margin_bottom = int(shadow_size.y) + _base_style.expand_margin_bottom
 	
 	_shadow_style.border_width_left   = int(shadow_size.x)
 	_shadow_style.border_width_right  = int(shadow_size.x)

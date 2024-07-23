@@ -9,6 +9,7 @@ class_name CornerStyleGizmo extends BaseGizmo
 
 signal curved_radius_changed(corner: Corner, delta: float)
 signal curved_radius_all_changed(corner: Corner, delta: float)
+signal curved_radius_opposite_changed(corner: Corner, delta: float)
 
 var _corner_handles: Array[Rect2] = []
 var _corner_index: int = -1
@@ -56,20 +57,7 @@ func _get_tooltip(_at_position: Vector2) -> String:
 	if not is_hovering():
 		return ""
 	
-	if not Input.is_key_pressed(KEY_CTRL): # Hold Ctrl to adjust individual corners instead.
-		return "Adjust radius of all corners"
-	
-	match _corner_index:
-		CORNER_TOP_LEFT:
-			return "Adjust radius of the top-left corner"
-		CORNER_TOP_RIGHT:
-			return "Adjust radius of the top-right corner"
-		CORNER_BOTTOM_RIGHT:
-			return "Adjust radius of the bottom-right corner"
-		CORNER_BOTTOM_LEFT:
-			return "Adjust radius of the bottom-left corner"
-	
-	return ""
+	return "Adjust radius of the corner.\nHold Ctrl to adjust all corners.\nHold Alt to adjust opposite corners."
 
 
 # Properties.
@@ -184,7 +172,13 @@ func handle_input(event: InputEvent) -> void:
 		
 		var relative_corner := relative.y
 		
-		if Input.is_key_pressed(KEY_CTRL): # Hold Ctrl to adjust individual corners instead.
-			curved_radius_changed.emit(_corner_index, relative_corner)
-		else:
+		# Hold Ctrl to adjust all corners at the same time.
+		if Input.is_key_pressed(KEY_CTRL):
 			curved_radius_all_changed.emit(_corner_index, relative_corner)
+		
+		# Hold Alt to adjust opposite corners at the same time.
+		elif Input.is_key_pressed(KEY_ALT):
+			curved_radius_opposite_changed.emit(_corner_index, relative_corner)
+		
+		else:
+			curved_radius_changed.emit(_corner_index, relative_corner)
