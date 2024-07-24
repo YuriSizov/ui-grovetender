@@ -190,7 +190,8 @@ func _update_handles() -> void:
 	var label_font := get_theme_font("font", "BaseGizmo")
 	var label_font_size := get_theme_font_size("font_size", "BaseGizmo")
 	
-	var size_label := "%dx%d" % [ half_element_size.x * 2, half_element_size.y * 2 ]
+	var element_size := _reference_element.rect.get_size()
+	var size_label := "%dx%d" % [ element_size.x, element_size.y ]
 	
 	_label_text_buffer.clear()
 	_label_text_buffer.add_string(size_label, label_font, label_font_size)
