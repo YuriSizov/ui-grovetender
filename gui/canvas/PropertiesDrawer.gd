@@ -9,7 +9,7 @@ class_name PropertiesDrawer extends PanelContainer
 var _edited_property: PropertyEditor = null
 
 @onready var _element_title: Label = %Title
-@onready var _element_properties: Control = %Properties
+@onready var _element_properties: Control = %List
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -22,7 +22,7 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	
 	for property_editor: PropertyEditor in _element_properties.get_children():
-		if property_editor.is_hovering():
+		if property_editor.is_visible_in_tree() && property_editor.is_hovering():
 			property_editor.handle_input(event)
 			break
 

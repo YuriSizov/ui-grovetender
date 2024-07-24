@@ -52,10 +52,14 @@ var _base_style: StyleBoxFlat = StyleBoxFlat.new()
 var _border_style: StyleBoxFlat = StyleBoxFlat.new()
 var _shadow_style: StyleBoxFlat = StyleBoxFlat.new()
 
-# Gizmo references for active updates.
+# Gizmo and property references for active updates.
 
 var _border_gizmo: BorderStyleGizmo = null
 var _shadow_gizmo: ShadowStyleGizmo = null
+
+var _background_color_property: ColorPropertyEditor = null
+var _border_color_property: ColorPropertyEditor = null
+var _shadow_color_property: ColorPropertyEditor = null
 
 
 func _init() -> void:
@@ -121,23 +125,36 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 
 
 func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
+	_clear_property_references()
 	var properties := super(editing_mode)
 	
 	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
 		var background_property := TogglePropertyEditor.new(self, "draw_background", _toggle_draw_background)
-		background_property.label = "Background"
+		background_property.label = "Fill"
+		background_property.icon = preload("res://assets/icons/panel-fill.png")
 		properties.push_back(background_property)
-		properties.push_back(ColorPropertyEditor.new(self, "background_color", _set_background_color))
+		
+		_background_color_property = ColorPropertyEditor.new(self, "background_color", _set_background_color)
+		_background_color_property.visible = draw_background
+		properties.push_back(_background_color_property)
 		
 		var border_property := TogglePropertyEditor.new(self, "draw_border", _toggle_draw_border)
 		border_property.label = "Border"
+		border_property.icon = preload("res://assets/icons/panel-border.png")
 		properties.push_back(border_property)
-		properties.push_back(ColorPropertyEditor.new(self, "border_color", _set_border_color))
+		
+		_border_color_property = ColorPropertyEditor.new(self, "border_color", _set_border_color)
+		_border_color_property.visible = draw_border
+		properties.push_back(_border_color_property)
 		
 		var shadow_property := TogglePropertyEditor.new(self, "draw_shadow", _toggle_draw_shadow)
 		shadow_property.label = "Shadow"
+		shadow_property.icon = preload("res://assets/icons/panel-shadow.png")
 		properties.push_back(shadow_property)
-		properties.push_back(ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color))
+		
+		_shadow_color_property = ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color)
+		_shadow_color_property.visible = draw_shadow
+		properties.push_back(_shadow_color_property)
 	
 	return properties
 
@@ -147,8 +164,25 @@ func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[P
 func _clear_gizmo_references() -> void:
 	if is_instance_valid(_border_gizmo):
 		_border_gizmo.queue_free()
-	
 	_border_gizmo = null
+	
+	if is_instance_valid(_shadow_gizmo):
+		_shadow_gizmo.queue_free()
+	_shadow_gizmo = null
+
+
+func _clear_property_references() -> void:
+	if is_instance_valid(_background_color_property):
+		_background_color_property.queue_free()
+	_background_color_property = null
+	
+	if is_instance_valid(_border_color_property):
+		_border_color_property.queue_free()
+	_border_color_property = null
+	
+	if is_instance_valid(_shadow_color_property):
+		_shadow_color_property.queue_free()
+	_shadow_color_property = null
 
 
 # Properties.
@@ -173,6 +207,9 @@ func _toggle_draw_background(value: bool) -> void:
 		return
 		
 	draw_background = value
+	if is_instance_valid(_background_color_property):
+		_background_color_property.visible = draw_background
+	
 	property_changed.emit("draw_background")
 	properties_changed.emit()
 
@@ -215,6 +252,8 @@ func _toggle_draw_border(value: bool) -> void:
 	draw_border = value
 	if is_instance_valid(_border_gizmo):
 		_border_gizmo.visible = draw_border
+	if is_instance_valid(_border_color_property):
+		_border_color_property.visible = draw_border
 	
 	_update_base_style()
 	_update_shadow_style()
@@ -371,6 +410,8 @@ func _toggle_draw_shadow(value: bool) -> void:
 	draw_shadow = value
 	if is_instance_valid(_shadow_gizmo):
 		_shadow_gizmo.visible = draw_shadow
+	if is_instance_valid(_shadow_color_property):
+		_shadow_color_property.visible = draw_shadow
 	
 	property_changed.emit("draw_shadow")
 	properties_changed.emit()

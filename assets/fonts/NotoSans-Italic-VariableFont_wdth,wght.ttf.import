@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://ce35uqvkdkhya"
-path="res://.godot/imported/NotoSans-VariableFont_wdth,wght.ttf-f0878fa9e710810524615659303d9fa3.fontdata"
+uid="uid://b2r0bhxxbjccv"
+path="res://.godot/imported/NotoSans-Italic-VariableFont_wdth,wght.ttf-5c920ee795fb222e7123e9c273703b41.fontdata"
 
 [deps]
 
-source_file="res://gui/theme/fonts/NotoSans-VariableFont_wdth,wght.ttf"
-dest_files=["res://.godot/imported/NotoSans-VariableFont_wdth,wght.ttf-f0878fa9e710810524615659303d9fa3.fontdata"]
+source_file="res://assets/fonts/NotoSans-Italic-VariableFont_wdth,wght.ttf"
+dest_files=["res://.godot/imported/NotoSans-Italic-VariableFont_wdth,wght.ttf-5c920ee795fb222e7123e9c273703b41.fontdata"]
 
 [params]
 
@@ -32,7 +32,12 @@ preload=[{
 "chars": [],
 "glyphs": [],
 "name": "New Configuration",
-"size": Vector2i(16, 0)
+"size": Vector2i(16, 0),
+"variation_embolden": 0.0,
+"variation_opentype": {
+2003072104: 100,
+2003265652: 400
+}
 }]
 language_support={}
 script_support={}

@@ -76,7 +76,7 @@ func draw() -> void:
 func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
-	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
+	if editing_mode == EndlessCanvas.EditingMode.LAYOUT_TOOLS:
 		var size_gizmo := SizeGizmo.new(self)
 		gizmos.push_back(size_gizmo)
 		
@@ -103,7 +103,7 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
-	if editing_mode == EndlessCanvas.EditingMode.DIMENSIONAL_TOOLS:
+	if editing_mode == EndlessCanvas.EditingMode.LAYOUT_TOOLS:
 		# TODO: Add a property editor for size.
 		# TODO: Add a property editor for position, when it's an offset inside a composite element.
 		pass

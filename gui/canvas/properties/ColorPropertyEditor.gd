@@ -46,17 +46,15 @@ func _ready() -> void:
 
 func _draw() -> void:
 	super()
+	var available_rect := get_content_rect()
 	
-	var available_rect := Rect2(Vector2.ZERO, size)
-	var background_panel := get_current_panel()
-	
-	var preview_position := available_rect.position + Vector2(
-		background_panel.content_margin_left,
-		background_panel.content_margin_top
-	)
 	var preview_size := Vector2(
 		get_theme_constant("color_preview_x"),
 		get_theme_constant("color_preview_y")
+	)
+	var preview_position := Vector2(
+		available_rect.position.x + available_rect.size.x - preview_size.x,
+		available_rect.position.y + (available_rect.size.y - preview_size.y) / 2.0
 	)
 	
 	var preview_color: Color = object.get(prop_name)
@@ -64,6 +62,10 @@ func _draw() -> void:
 
 
 func _get_minimum_size() -> Vector2:
+	var minimum_size := Vector2(
+		get_theme_constant("minimum_size_x"),
+		get_theme_constant("minimum_size_y")
+	)
 	var combined_size := Vector2(
 		get_theme_constant("color_preview_x"),
 		get_theme_constant("color_preview_y")
@@ -73,7 +75,7 @@ func _get_minimum_size() -> Vector2:
 	combined_size.x += background_panel.content_margin_left + background_panel.content_margin_right
 	combined_size.y += background_panel.content_margin_top + background_panel.content_margin_bottom
 	
-	return combined_size
+	return minimum_size.max(combined_size)
 
 
 # Helpers.

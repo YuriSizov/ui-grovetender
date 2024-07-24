@@ -50,7 +50,12 @@ func _notification(what: int) -> void:
 
 
 func _get_minimum_size() -> Vector2:
-	return Vector2.ZERO
+	var minimum_size := Vector2(
+		get_theme_constant("minimum_size_x"),
+		get_theme_constant("minimum_size_y")
+	)
+	
+	return minimum_size
 
 
 # Metadata.
@@ -73,11 +78,14 @@ func set_label(value: String) -> void:
 
 func _shape_text() -> void:
 	var editor_label := _get_editor_label()
-	var font := get_theme_font("")
+	var font := get_theme_font("font")
 	var font_size := get_theme_font_size("font_size")
 	
 	_label_text_buffer.clear()
 	_label_text_buffer.add_string(editor_label, font, font_size)
+	
+	update_minimum_size()
+	queue_redraw()
 
 
 # Helpers.

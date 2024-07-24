@@ -1,11 +1,11 @@
-[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://dn6h7jdi3wgnr"]
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://68jb1argqylt"]
 
-[ext_resource type="FontFile" uid="uid://ce35uqvkdkhya" path="res://gui/theme/fonts/NotoSans-VariableFont_wdth,wght.ttf" id="1_pupni"]
+[ext_resource type="FontFile" uid="uid://ce35uqvkdkhya" path="res://assets/fonts/NotoSans-VariableFont_wdth,wght.ttf" id="1_f4cls"]
 
 [resource]
-base_font = ExtResource("1_pupni")
+base_font = ExtResource("1_f4cls")
 variation_opentype = {
 2003072104: 100,
-2003265652: 900
+2003265652: 700
 }
 spacing_glyph = 1

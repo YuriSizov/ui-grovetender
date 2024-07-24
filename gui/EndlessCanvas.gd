@@ -13,12 +13,12 @@ signal canvas_transformed()
 static var _instance: EndlessCanvas = null
 
 enum EditingMode {
-	DIMENSIONAL_TOOLS,
+	LAYOUT_TOOLS,
 	STYLING_TOOLS,
 	BEHAVIOR_TOOLS,
 	ANIMATION_TOOLS,
 }
-var _editing_mode: EditingMode = EditingMode.DIMENSIONAL_TOOLS
+var _editing_mode: EditingMode = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
 var _drawn_elements: Array[CanvasElementControl] = []

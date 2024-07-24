@@ -38,6 +38,18 @@ func get_current_panel() -> StyleBox:
 	return background_panel
 
 
+func get_content_rect() -> Rect2:
+	var available_rect := Rect2(Vector2.ZERO, size)
+	
+	var background_panel := get_current_panel()
+	available_rect = available_rect.grow_individual(
+		-background_panel.content_margin_left, -background_panel.content_margin_top,
+		-background_panel.content_margin_right, -background_panel.content_margin_bottom
+	)
+	
+	return available_rect
+
+
 # Implementation.
 
 func handle_input(event: InputEvent) -> void:
