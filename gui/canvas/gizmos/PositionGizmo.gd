@@ -53,7 +53,7 @@ func _process(_delta: float) -> void:
 
 func _get_tooltip(_at_position: Vector2) -> String:
 	if is_hovering():
-		return "Move"
+		return "Move the element."
 	return ""
 
 

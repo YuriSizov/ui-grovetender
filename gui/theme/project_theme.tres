@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=23 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=26 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_bold.tres" id="1_nbw0c"]
@@ -113,6 +113,27 @@ corner_detail = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r4kx8"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6t2ax"]
+bg_color = Color(0.864558, 0.801257, 0.537737, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ij30v"]
+bg_color = Color(0.734841, 0.63477, 0.390658, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gvlbs"]
+bg_color = Color(0.621852, 0.53273, 0.366, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shuin"]
 content_margin_left = 8.0
 content_margin_top = 8.0
@@ -199,7 +220,7 @@ ColorPropertyEditor/constants/color_preview_y = 24
 ColorPropertyEditor/constants/picker_offset_x = 8
 ColorPropertyEditor/constants/picker_offset_y = 8
 CornerStyleGizmo/base_type = &"BaseGizmo"
-CornerStyleGizmo/constants/corner_handle_size = 16
+CornerStyleGizmo/constants/corner_handle_size = 12
 CornerStyleGizmo/constants/handle_trigger_size = 24
 CornerStyleGizmo/styles/corner_handle = SubResource("StyleBoxFlat_tp2fv")
 CornerStyleGizmo/styles/corner_handle_hover = SubResource("StyleBoxFlat_wsoho")
@@ -231,6 +252,17 @@ PropertyEditor/constants/font_outline_size = 0
 PropertyEditor/constants/font_shadow_offset_x = 0
 PropertyEditor/constants/font_shadow_offset_y = 0
 PropertyEditor/font_sizes/font_size = 18
+ShadowStyleGizmo/base_type = &"BaseGizmo"
+ShadowStyleGizmo/constants/ray_count = 8
+ShadowStyleGizmo/constants/ray_handle_separation = 16
+ShadowStyleGizmo/constants/ray_handle_size = 12
+ShadowStyleGizmo/constants/ray_handle_thickness = 4
+ShadowStyleGizmo/constants/ray_handle_trigger_size = 24
+ShadowStyleGizmo/constants/sun_handle_size = 16
+ShadowStyleGizmo/constants/sun_handle_trigger_size = 36
+ShadowStyleGizmo/styles/sun_handle = SubResource("StyleBoxFlat_6t2ax")
+ShadowStyleGizmo/styles/sun_handle_hover = SubResource("StyleBoxFlat_ij30v")
+ShadowStyleGizmo/styles/sun_handle_pressed = SubResource("StyleBoxFlat_gvlbs")
 SimpleColorPicker/base_type = &"PanelContainer"
 SimpleColorPicker/styles/panel = SubResource("StyleBoxFlat_shuin")
 SizeGizmo/base_type = &"BaseGizmo"

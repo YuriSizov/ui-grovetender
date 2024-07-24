@@ -157,7 +157,7 @@ func set_grabbing(value: bool) -> void:
 
 ## Called when one of the reference object properties changes. Extending classes implement this
 ## method.
-func _handle_property_changes(property_name: String) -> void:
+func _handle_property_changes(_property_name: String) -> void:
 	pass
 
 

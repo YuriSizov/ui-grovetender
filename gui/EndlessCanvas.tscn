@@ -48,6 +48,7 @@ size_flags_vertical = 0
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
+mouse_filter = 0
 theme_type_variation = &"EditingModeButtons"
 
 [node name="DimensionalTools" type="Button" parent="CanvasOverlay/EditingModeButtons"]

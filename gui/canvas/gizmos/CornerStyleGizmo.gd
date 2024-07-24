@@ -74,7 +74,6 @@ func set_curved_radius_property(value: String) -> void:
 
 
 func get_element_curved_radius_values() -> Vector4:
-	# TODO: Use these values to adjust the handle position according to the angle curvature.
 	var element_radius_values := Vector4(0.0, 0.0, 0.0, 0.0)
 	
 	if _reference_element && not _curved_radius_property.is_empty():

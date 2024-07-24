@@ -15,7 +15,8 @@ enum CornerStyle {
 }
 
 const CORNER_CURVED_BASE_DETAIL := 4
-const SHADOW_BASE_CURVED_RADIUS := 8
+const SHADOW_BASE_CURVED_RADIUS := 2
+const SHADOW_BASE_CURVED_FACTOR := 4.0
 
 ## The flag that enables background drawing.
 @export var draw_background: bool = true
@@ -54,6 +55,7 @@ var _shadow_style: StyleBoxFlat = StyleBoxFlat.new()
 # Gizmo references for active updates.
 
 var _border_gizmo: BorderStyleGizmo = null
+var _shadow_gizmo: ShadowStyleGizmo = null
 
 
 func _init() -> void:
@@ -90,6 +92,7 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	var gizmos := super(editing_mode)
 	
 	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
+		# TODO: Implement constraints, snapping, alignment.
 		_border_gizmo = BorderStyleGizmo.new(self)
 		_border_gizmo.visible = draw_border
 		gizmos.push_back(_border_gizmo)
@@ -97,12 +100,22 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 		_border_gizmo.width_all_changed.connect(_set_border_all_width)
 		_border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
 		
+		# TODO: Implement corner style toggles.
+		# TODO: Implement constraints.
 		var corner_gizmo := CornerStyleGizmo.new(self)
 		corner_gizmo.set_curved_radius_property("corner_curved_radius")
 		gizmos.push_back(corner_gizmo)
 		corner_gizmo.curved_radius_changed.connect(_set_corner_curve_radius)
 		corner_gizmo.curved_radius_all_changed.connect(_set_corner_curve_all_radius)
 		corner_gizmo.curved_radius_opposite_changed.connect(_set_corner_curve_opposite_radius)
+		
+		# TODO: Implement constraints, snapping, alignment.
+		_shadow_gizmo = ShadowStyleGizmo.new(self)
+		_shadow_gizmo.set_shadow_size_property("shadow_size")
+		_shadow_gizmo.visible = draw_shadow
+		gizmos.push_back(_shadow_gizmo)
+		_shadow_gizmo.offset_changed.connect(_set_shadow_offset)
+		_shadow_gizmo.size_changed.connect(_set_shadow_size)
 	
 	return gizmos
 
@@ -274,8 +287,6 @@ func _set_border_opposite_width(side: Side, delta: float) -> void:
 
 
 func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
-	# TODO: Implement corner style toggles.
-	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
 	corner_curved_radius[corner] = new_value
@@ -289,8 +300,6 @@ func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
 
 
 func _set_corner_curve_all_radius(corner: Corner, delta: float) -> void:
-	# TODO: Implement corner style toggles.
-	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
 	corner_curved_radius[0] = new_value
@@ -307,8 +316,6 @@ func _set_corner_curve_all_radius(corner: Corner, delta: float) -> void:
 
 
 func _set_corner_curve_opposite_radius(corner: Corner, delta: float) -> void:
-	# TODO: Implement corner style toggles.
-	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	var pair_index := corner % 2
 	
@@ -339,11 +346,12 @@ func _update_shadow_style() -> void:
 	_shadow_style.border_blend = true
 	
 	_shadow_style.corner_detail = corner_curved_detail
-	# TODO: This value should be affected by the shadow size.
-	_shadow_style.corner_radius_top_left     = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[0])
-	_shadow_style.corner_radius_top_right    = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[1])
-	_shadow_style.corner_radius_bottom_right = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[2])
-	_shadow_style.corner_radius_bottom_left  = SHADOW_BASE_CURVED_RADIUS + int(corner_curved_radius[3])
+	
+	var shadow_base_corner_radius := SHADOW_BASE_CURVED_RADIUS + int(SHADOW_BASE_CURVED_RADIUS * (maxf(shadow_size[0], shadow_size[1]) / SHADOW_BASE_CURVED_FACTOR))
+	_shadow_style.corner_radius_top_left     = shadow_base_corner_radius + int(corner_curved_radius[0])
+	_shadow_style.corner_radius_top_right    = shadow_base_corner_radius + int(corner_curved_radius[1])
+	_shadow_style.corner_radius_bottom_right = shadow_base_corner_radius + int(corner_curved_radius[2])
+	_shadow_style.corner_radius_bottom_left  = shadow_base_corner_radius + int(corner_curved_radius[3])
 	
 	_shadow_style.expand_margin_left   = int(shadow_size.x) + _base_style.expand_margin_left
 	_shadow_style.expand_margin_right  = int(shadow_size.x) + _base_style.expand_margin_right
@@ -361,6 +369,9 @@ func _toggle_draw_shadow(value: bool) -> void:
 		return
 		
 	draw_shadow = value
+	if is_instance_valid(_shadow_gizmo):
+		_shadow_gizmo.visible = draw_shadow
+	
 	property_changed.emit("draw_shadow")
 	properties_changed.emit()
 
@@ -372,4 +383,28 @@ func _set_shadow_color(value: Color) -> void:
 	
 	_update_shadow_style()
 	property_changed.emit("shadow_color")
+	properties_changed.emit()
+
+
+func _set_shadow_offset(delta: Vector2) -> void:
+	if not draw_shadow:
+		return
+	
+	shadow_offset += delta
+	
+	_update_shadow_style()
+	property_changed.emit("shadow_offset")
+	properties_changed.emit()
+
+
+func _set_shadow_size(delta: float) -> void:
+	if not draw_shadow:
+		return
+	
+	shadow_size.x += delta
+	shadow_size.y += delta
+	shadow_size = shadow_size.max(Vector2.ZERO)
+	
+	_update_shadow_style()
+	property_changed.emit("shadow_size")
 	properties_changed.emit()
