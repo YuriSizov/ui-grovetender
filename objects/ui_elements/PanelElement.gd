@@ -32,7 +32,7 @@ const SHADOW_BASE_CURVED_RADIUS := 8
 ## The style of each corner of this panel.
 @export var corner_styles: PackedInt32Array = [ CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE ]
 ## The radius for the curved corner style.
-@export var corner_curved_radius: Vector4 = Vector4(4.0, 4.0, 4.0, 4.0)
+@export var corner_curved_radius: Vector4 = Vector4(0.0, 0.0, 0.0, 0.0)
 ## The level of detail for the curved corner style.
 @export var corner_curved_detail: int = 4
 
@@ -160,6 +160,7 @@ func _toggle_draw_background(value: bool) -> void:
 		return
 		
 	draw_background = value
+	property_changed.emit("draw_background")
 	properties_changed.emit()
 
 
@@ -169,6 +170,7 @@ func _set_background_color(value: Color) -> void:
 	background_color = value
 	
 	_update_base_style()
+	property_changed.emit("background_color")
 	properties_changed.emit()
 
 
@@ -203,6 +205,7 @@ func _toggle_draw_border(value: bool) -> void:
 	
 	_update_base_style()
 	_update_shadow_style()
+	property_changed.emit("draw_border")
 	properties_changed.emit()
 
 
@@ -212,6 +215,7 @@ func _set_border_color(value: Color) -> void:
 	border_color = value
 	
 	_update_border_style()
+	property_changed.emit("border_color")
 	properties_changed.emit()
 
 
@@ -226,6 +230,7 @@ func _set_border_width(side: Side, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("border_width")
 	properties_changed.emit()
 
 
@@ -245,6 +250,7 @@ func _set_border_all_width(side: Side, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("border_width")
 	properties_changed.emit()
 
 
@@ -263,10 +269,12 @@ func _set_border_opposite_width(side: Side, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("border_width")
 	properties_changed.emit()
 
 
 func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
+	# TODO: Implement corner style toggles.
 	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
@@ -276,10 +284,12 @@ func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("corner_curved_radius")
 	properties_changed.emit()
 
 
 func _set_corner_curve_all_radius(corner: Corner, delta: float) -> void:
+	# TODO: Implement corner style toggles.
 	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
@@ -292,10 +302,12 @@ func _set_corner_curve_all_radius(corner: Corner, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("corner_curved_radius")
 	properties_changed.emit()
 
 
 func _set_corner_curve_opposite_radius(corner: Corner, delta: float) -> void:
+	# TODO: Implement corner style toggles.
 	# TODO: Sanitize values which result in artifacts and bugs.
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	var pair_index := corner % 2
@@ -307,6 +319,7 @@ func _set_corner_curve_opposite_radius(corner: Corner, delta: float) -> void:
 	_update_base_style()
 	_update_border_style()
 	_update_shadow_style()
+	property_changed.emit("corner_curved_radius")
 	properties_changed.emit()
 
 
@@ -348,6 +361,7 @@ func _toggle_draw_shadow(value: bool) -> void:
 		return
 		
 	draw_shadow = value
+	property_changed.emit("draw_shadow")
 	properties_changed.emit()
 
 
@@ -357,4 +371,5 @@ func _set_shadow_color(value: Color) -> void:
 	shadow_color = value
 	
 	_update_shadow_style()
+	property_changed.emit("shadow_color")
 	properties_changed.emit()

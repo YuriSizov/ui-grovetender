@@ -9,6 +9,8 @@ class_name BaseUIElement extends Resource
 
 signal rect_changed()
 @warning_ignore("unused_signal") # Used in extending classes.
+signal property_changed(property_name: String)
+@warning_ignore("unused_signal") # Used in extending classes.
 signal properties_changed()
 
 ## The unique name of this UI element.

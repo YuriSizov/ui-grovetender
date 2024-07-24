@@ -59,11 +59,13 @@ func _update_rect_by_element() -> void:
 func _connect_to_element(element: BaseUIElement) -> void:
 	if _reference_element:
 		_reference_element.rect_changed.disconnect(_update_rect_by_element)
+		_reference_element.property_changed.disconnect(_handle_property_changes)
 	
 	_reference_element = element
 	
 	if _reference_element:
 		_reference_element.rect_changed.connect(_update_rect_by_element)
+		_reference_element.property_changed.connect(_handle_property_changes)
 
 
 ## Connects this gizmo to the given UI element's changes.
@@ -152,6 +154,12 @@ func set_grabbing(value: bool) -> void:
 
 
 # Implementation.
+
+## Called when one of the reference object properties changes. Extending classes implement this
+## method.
+func _handle_property_changes(property_name: String) -> void:
+	pass
+
 
 ## Called when it's an opportune time to update gizmo's handles/interactive areas. Extending classes
 ## implement this method.

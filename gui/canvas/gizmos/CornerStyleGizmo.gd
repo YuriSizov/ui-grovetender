@@ -31,6 +31,7 @@ func _draw() -> void:
 	var corner_handle_pressed := get_theme_stylebox("corner_handle_pressed")
 	
 	var corner_handle_size := get_theme_constant("corner_handle_size")
+	var corner_radius_values := get_element_curved_radius_values()
 	
 	for i in 4:
 		var handle_base := get_element_global_corner(i) - position
@@ -38,6 +39,9 @@ func _draw() -> void:
 		var visual_rect := Rect2()
 		visual_rect.size = Vector2(corner_handle_size, corner_handle_size)
 		visual_rect.position = handle_base - visual_rect.size / 2.0
+		
+		visual_rect.position.x -= corner_radius_values[i] * cos((i + 0.5) * (TAU / 4.0) + PI)
+		visual_rect.position.y -= corner_radius_values[i] * sin((i + 0.5) * (TAU / 4.0) + PI)
 		
 		if is_hovering() && _corner_index == i:
 			if is_grabbing():
@@ -80,13 +84,23 @@ func get_element_curved_radius_values() -> Vector4:
 
 # Implementation.
 
+func _handle_property_changes(property_name: String) -> void:
+	if property_name == _curved_radius_property:
+		_update_handles()
+		queue_redraw()
+
+
 func _update_handles() -> void:
 	var handle_trigger_size := get_theme_constant("handle_trigger_size") / 2.0
 	var base_size := Vector2(handle_trigger_size, handle_trigger_size)
+	var corner_radius_values := get_element_curved_radius_values()
 	
 	for i in 4:
-		_corner_handles[i].position = get_element_global_corner(i) - base_size
 		_corner_handles[i].size = base_size * 2
+		_corner_handles[i].position = get_element_global_corner(i) - base_size
+		
+		_corner_handles[i].position.x -= corner_radius_values[i] * cos((i + 0.5) * (TAU / 4.0) + PI)
+		_corner_handles[i].position.y -= corner_radius_values[i] * sin((i + 0.5) * (TAU / 4.0) + PI)
 
 
 func _is_hovering_at(mouse_position: Vector2) -> bool:
