@@ -222,6 +222,7 @@ ColorPropertyEditor/constants/color_preview_y = 24
 ColorPropertyEditor/constants/picker_offset_x = 8
 ColorPropertyEditor/constants/picker_offset_y = 8
 CornerStyleGizmo/base_type = &"BaseGizmo"
+CornerStyleGizmo/constants/corner_connection_size = 2
 CornerStyleGizmo/constants/corner_handle_size = 12
 CornerStyleGizmo/constants/handle_trigger_size = 24
 CornerStyleGizmo/styles/corner_handle = SubResource("StyleBoxFlat_tp2fv")

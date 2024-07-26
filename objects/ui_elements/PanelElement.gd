@@ -96,14 +96,6 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	var gizmos := super(editing_mode)
 	
 	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
-		# TODO: Implement constraints, snapping, alignment.
-		_border_gizmo = BorderStyleGizmo.new(self)
-		_border_gizmo.visible = draw_border
-		gizmos.push_back(_border_gizmo)
-		_border_gizmo.width_changed.connect(_set_border_width)
-		_border_gizmo.width_all_changed.connect(_set_border_all_width)
-		_border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
-		
 		# TODO: Implement corner style toggles.
 		# TODO: Implement constraints.
 		var corner_gizmo := CornerStyleGizmo.new(self)
@@ -112,6 +104,14 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 		corner_gizmo.curved_radius_changed.connect(_set_corner_curve_radius)
 		corner_gizmo.curved_radius_all_changed.connect(_set_corner_curve_all_radius)
 		corner_gizmo.curved_radius_opposite_changed.connect(_set_corner_curve_opposite_radius)
+		
+		# TODO: Implement constraints, snapping, alignment.
+		_border_gizmo = BorderStyleGizmo.new(self)
+		_border_gizmo.visible = draw_border
+		gizmos.push_back(_border_gizmo)
+		_border_gizmo.width_changed.connect(_set_border_width)
+		_border_gizmo.width_all_changed.connect(_set_border_all_width)
+		_border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
 		
 		# TODO: Implement constraints, snapping, alignment.
 		_shadow_gizmo = ShadowStyleGizmo.new(self)

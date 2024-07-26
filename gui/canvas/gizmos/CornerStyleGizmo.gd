@@ -31,25 +31,37 @@ func _draw() -> void:
 	var corner_handle_pressed := get_theme_stylebox("corner_handle_pressed")
 	
 	var corner_handle_size := get_theme_constant("corner_handle_size")
+	var corner_connection_size := get_theme_constant("corner_connection_size")
 	var corner_radius_values := get_element_curved_radius_values()
 	
 	for i in 4:
 		var handle_base := get_element_global_corner(i) - position
+		var handle_angle := (i + 0.5) * (TAU / 4.0) + PI
+		var handle_offset := Vector2(
+			corner_radius_values[i] * cos(handle_angle),
+			corner_radius_values[i] * sin(handle_angle)
+		) * EndlessCanvas.get_instance().get_elements_scale()
 		
-		var visual_rect := Rect2()
-		visual_rect.size = Vector2(corner_handle_size, corner_handle_size)
-		visual_rect.position = handle_base - visual_rect.size / 2.0
+		var handle_rect := Rect2()
+		handle_rect.size = Vector2(corner_handle_size, corner_handle_size)
+		handle_rect.position = handle_base - handle_rect.size / 2.0 - handle_offset
 		
-		visual_rect.position.x -= corner_radius_values[i] * cos((i + 0.5) * (TAU / 4.0) + PI)
-		visual_rect.position.y -= corner_radius_values[i] * sin((i + 0.5) * (TAU / 4.0) + PI)
+		var connection_rect := Rect2()
+		connection_rect.size = Vector2(-handle_offset.length(), corner_connection_size)
+		connection_rect.position = Vector2.ZERO - Vector2(0.0, connection_rect.size.y / 2.0)
 		
+		var handle_style := corner_handle_default
 		if is_hovering() && _corner_index == i:
 			if is_grabbing():
-				draw_style_box(corner_handle_pressed, visual_rect)
+				handle_style = corner_handle_pressed
 			else:
-				draw_style_box(corner_handle_hover, visual_rect)
-		else:
-			draw_style_box(corner_handle_default, visual_rect)
+				handle_style = corner_handle_hover
+		
+		draw_set_transform(handle_base, handle_angle)
+		draw_style_box(corner_handle_default, connection_rect)
+		draw_set_transform(Vector2.ZERO, 0.0)
+		
+		draw_style_box(handle_style, handle_rect)
 
 
 func _process(_delta: float) -> void:
@@ -95,24 +107,21 @@ func _update_handles() -> void:
 	var corner_radius_values := get_element_curved_radius_values()
 	
 	for i in 4:
-		_corner_handles[i].size = base_size * 2
-		_corner_handles[i].position = get_element_global_corner(i) - base_size
+		var handle_angle := (i + 0.5) * (TAU / 4.0) + PI
+		var handle_offset := Vector2(
+			corner_radius_values[i] * cos(handle_angle),
+			corner_radius_values[i] * sin(handle_angle)
+		) * EndlessCanvas.get_instance().get_elements_scale()
 		
-		_corner_handles[i].position.x -= corner_radius_values[i] * cos((i + 0.5) * (TAU / 4.0) + PI)
-		_corner_handles[i].position.y -= corner_radius_values[i] * sin((i + 0.5) * (TAU / 4.0) + PI)
+		_corner_handles[i].size = base_size * 2
+		_corner_handles[i].position = get_element_global_corner(i) - base_size - handle_offset
 
 
 func _is_hovering_at(mouse_position: Vector2) -> bool:
 	# We use this opportunity to pre-determine which handle we're going to interact with.
 	_corner_index = -1
 	
-	# First, test the rough area of this gizmo to exclude all obviously wrong events.
-	var handle_trigger_size := get_theme_constant("handle_trigger_size") / 2.0
-	var rough_rect := get_element_global_rect().grow(handle_trigger_size)
-	if not rough_rect.has_point(mouse_position):
-		return false
-	
-	# Then, test corner handles.
+	# Test corner handle areas directly, because they may be outside of element bounds.
 	for i in 4:
 		var handle := _corner_handles[i]
 		if handle.has_point(mouse_position):
