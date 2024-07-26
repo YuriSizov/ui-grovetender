@@ -12,13 +12,8 @@ signal canvas_transformed()
 # Our singleton instance.
 static var _instance: EndlessCanvas = null
 
-enum EditingMode {
-	LAYOUT_TOOLS,
-	STYLING_TOOLS,
-	BEHAVIOR_TOOLS,
-	ANIMATION_TOOLS,
-}
-var _editing_mode: EditingMode = EditingMode.LAYOUT_TOOLS
+
+var _editing_mode: int = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
 var _drawn_elements: Array[CanvasElementControl] = []
@@ -36,6 +31,7 @@ var _canvas_drag_position: Vector2 = Vector2.ZERO
 @onready var _element_container: Control = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
+@onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
 
 var _editing_mode_buttons := preload("res://gui/canvas/editing_mode_button_group.tres")
 
@@ -55,6 +51,9 @@ func _ready() -> void:
 	_edit_current_canvas()
 	
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
+	_gizmos_container.gizmos_input_consumed.connect(func() -> void:
+		_context_menu.clear_options()
+	)
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -63,6 +62,7 @@ func _ready() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
+		_context_menu.clear_options()
 		
 		if mb.pressed: # Events triggered on press.
 			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
@@ -79,7 +79,7 @@ func _gui_input(event: InputEvent) -> void:
 				_try_select_element(to_canvas_coordinates(mb.global_position))
 			
 			elif mb.button_index == MOUSE_BUTTON_RIGHT:
-				_create_element(to_canvas_coordinates(mb.global_position))
+				_show_create_context_menu(mb.global_position)
 			
 			elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 				_stop_canvas_dragging()
@@ -100,7 +100,7 @@ func _edit_current_canvas() -> void:
 		_current_canvas.element_created.connect(_add_canvas_element)
 
 
-func _change_editing_mode(new_mode: EditingMode) -> void:
+func _change_editing_mode(new_mode: int) -> void:
 	if _editing_mode == new_mode:
 		return
 	
@@ -165,11 +165,24 @@ func from_canvas_coordinates(canvas_position: Vector2) -> Vector2:
 
 # Element management.
 
-func _create_element(canvas_position: Vector2) -> void:
+func _show_create_context_menu(mouse_position: Vector2) -> void:
+	_context_menu.clear_options()
+	
 	if not Controller.current_project || not _current_canvas:
 		return
 	
-	_current_canvas.create_element(ElementType.ELEMENT_PANEL, canvas_position)
+	var context_options: Array[CanvasContextMenu.Option] = []
+	
+	for i in ElementType.MAX:
+		var create_option := CanvasContextMenu.Option.new()
+		create_option.label = ElementType.get_element_name(i)
+		create_option.icon = ElementType.get_element_icon(i)
+		create_option.action = func() -> void:
+			_current_canvas.create_element(i, to_canvas_coordinates(mouse_position))
+		
+		context_options.push_back(create_option)
+	
+	_context_menu.show_options(context_options, mouse_position)
 
 
 func _add_canvas_element(element: BaseUIElement) -> void:
@@ -191,7 +204,10 @@ func _try_select_element(canvas_position: Vector2) -> void:
 	# TODO: Add support for multi-element selections.
 	_selected_elements.clear()
 	
-	for element in _drawn_elements:
+	for i in _drawn_elements.size():
+		var element_index := _drawn_elements.size() - 1 - i
+		var element := _drawn_elements[element_index]
+		
 		if not element.is_visible_on_screen() || not element.data:
 			break
 		

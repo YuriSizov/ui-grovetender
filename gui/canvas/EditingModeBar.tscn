@@ -1,0 +1,98 @@
+[gd_scene load_steps=11 format=3 uid="uid://dv5jqsctwngn"]
+
+[ext_resource type="Script" path="res://gui/canvas/EditingModeBar.gd" id="1_6ps3l"]
+[ext_resource type="ButtonGroup" uid="uid://qrhc1kujnngh" path="res://gui/canvas/editing_mode_button_group.tres" id="1_kcgi6"]
+
+[sub_resource type="InputEventAction" id="InputEventAction_j11ko"]
+action = &"grove_tool_layout"
+
+[sub_resource type="Shortcut" id="Shortcut_s6cuc"]
+events = [SubResource("InputEventAction_j11ko")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_fl4e5"]
+action = &"grove_tool_styling"
+
+[sub_resource type="Shortcut" id="Shortcut_iu1fv"]
+events = [SubResource("InputEventAction_fl4e5")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_h3yaq"]
+action = &"grove_tool_behavior"
+
+[sub_resource type="Shortcut" id="Shortcut_rndw4"]
+events = [SubResource("InputEventAction_h3yaq")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_l4rmj"]
+action = &"grove_tool_animation"
+
+[sub_resource type="Shortcut" id="Shortcut_mnwd1"]
+events = [SubResource("InputEventAction_l4rmj")]
+
+[node name="EditingModeBar" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+script = ExtResource("1_6ps3l")
+
+[node name="CurrentModeLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"EditingModeBarTitle"
+text = "Current Mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="ButtonsPanel" type="PanelContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_type_variation = &"EditingModeBarPanel"
+
+[node name="Buttons" type="HBoxContainer" parent="ButtonsPanel"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 0
+theme_type_variation = &"EditingModeButtons"
+alignment = 1
+
+[node name="DimensionalTools" type="Button" parent="ButtonsPanel/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("1_kcgi6")
+shortcut = SubResource("Shortcut_s6cuc")
+text = "LT"
+
+[node name="StylingTools" type="Button" parent="ButtonsPanel/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("1_kcgi6")
+shortcut = SubResource("Shortcut_iu1fv")
+text = "ST"
+
+[node name="BehaviorTool" type="Button" parent="ButtonsPanel/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("1_kcgi6")
+shortcut = SubResource("Shortcut_rndw4")
+text = "BT"
+
+[node name="AnimationTool" type="Button" parent="ButtonsPanel/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+toggle_mode = true
+button_group = ExtResource("1_kcgi6")
+shortcut = SubResource("Shortcut_mnwd1")
+text = "AT"

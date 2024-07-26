@@ -16,6 +16,16 @@ func _init(_object: Object, _name: String, _setter: Callable) -> void:
 	super(_object, _name, _setter)
 	
 	theme_type_variation = &"ButtonPropertyEditor"
+	
+	mouse_entered.connect(func() -> void:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_pressed = true
+			queue_redraw()
+	)
+	mouse_exited.connect(func() -> void:
+		_pressed = false
+		queue_redraw()
+	)
 
 
 func _draw() -> void:

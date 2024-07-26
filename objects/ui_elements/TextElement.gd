@@ -23,3 +23,8 @@ class_name TextElement extends BaseUIElement
 @export var shadow_offset: Vector2 = Vector2(2.0, 2.0)
 ## The color of the text shadow.
 @export var shadow_color: Color = Color.BLACK
+
+
+func _init() -> void:
+	super()
+	element_name = "TextElement"

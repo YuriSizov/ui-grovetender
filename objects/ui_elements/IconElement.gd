@@ -8,3 +8,8 @@ class_name IconElement extends BaseUIElement
 
 ## The texture/image of the icon.
 @export var icon: Texture2D = null
+
+
+func _init() -> void:
+	super()
+	element_name = "IconElement"

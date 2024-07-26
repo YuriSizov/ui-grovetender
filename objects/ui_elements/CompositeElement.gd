@@ -5,3 +5,8 @@
 ###################################################
 
 class_name CompositeElement extends BaseUIElement
+
+
+func _init() -> void:
+	super()
+	element_name = "CompositeElement"

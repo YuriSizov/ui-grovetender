@@ -6,6 +6,8 @@
 
 class_name CanvasGizmos extends Control
 
+signal gizmos_input_consumed()
+
 var _grabbed_gizmo: BaseGizmo = null
 
 @onready var _gizmo_container: Control = %Gizmos
@@ -19,6 +21,7 @@ func _gui_input(event: InputEvent) -> void:
 			_update_cursor_shape(cursor_shape)
 			_grabbed_gizmo.handle_input(event)
 			accept_event()
+			gizmos_input_consumed.emit()
 			return
 		
 		# This back-propagates the event to children, which allows us to handle or pass events between
@@ -29,6 +32,7 @@ func _gui_input(event: InputEvent) -> void:
 				_update_cursor_shape(cursor_shape)
 				gizmo.handle_input(event)
 				accept_event()
+				gizmos_input_consumed.emit()
 				return
 		
 		# If we aren't grabbing or clicking anything, then just check for hover and new cursor shape.

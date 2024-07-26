@@ -64,6 +64,7 @@ var _shadow_color_property: ColorPropertyEditor = null
 
 func _init() -> void:
 	super()
+	element_name = "PanelElement"
 	
 	_update_base_style()
 	_update_border_style()
@@ -91,11 +92,11 @@ func draw() -> void:
 		canvas_control.draw_style_box(_border_style, element_rect)
 
 
-func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
+func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	_clear_gizmo_references()
 	var gizmos := super(editing_mode)
 	
-	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
+	if editing_mode == EditingMode.STYLING_TOOLS:
 		# TODO: Implement corner style toggles.
 		# TODO: Implement constraints.
 		var corner_gizmo := CornerStyleGizmo.new(self)
@@ -124,11 +125,11 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	return gizmos
 
 
-func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
+func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	_clear_property_references()
 	var properties := super(editing_mode)
 	
-	if editing_mode == EndlessCanvas.EditingMode.STYLING_TOOLS:
+	if editing_mode == EditingMode.STYLING_TOOLS:
 		var background_property := TogglePropertyEditor.new(self, "draw_background", _toggle_draw_background)
 		background_property.label = "Fill"
 		background_property.icon = preload("res://assets/icons/panel-fill.png")
@@ -196,10 +197,12 @@ func _update_base_style() -> void:
 	_base_style.corner_radius_bottom_right = int(corner_curved_radius[2])
 	_base_style.corner_radius_bottom_left  = int(corner_curved_radius[3])
 	
-	_base_style.expand_margin_left   = 0 if not draw_border || border_width[0] < 0 else int(border_width[0])
-	_base_style.expand_margin_top    = 0 if not draw_border || border_width[1] < 0 else int(border_width[1])
-	_base_style.expand_margin_right  = 0 if not draw_border || border_width[2] < 0 else int(border_width[2])
-	_base_style.expand_margin_bottom = 0 if not draw_border || border_width[3] < 0 else int(border_width[3])
+	# FIXME: Due to Godot's implementation of AA'd styleboxes there is a background leak here.
+	# For now, giving it a slight adjustment is good enough, but it doesn't fix the problem, just makes it less noticeable.
+	_base_style.expand_margin_left   = 0.0 if not draw_border || border_width[0] < 0 else (int(border_width[0]) - 0.5)
+	_base_style.expand_margin_top    = 0.0 if not draw_border || border_width[1] < 0 else (int(border_width[1]) - 0.5)
+	_base_style.expand_margin_right  = 0.0 if not draw_border || border_width[2] < 0 else (int(border_width[2]) - 0.5)
+	_base_style.expand_margin_bottom = 0.0 if not draw_border || border_width[3] < 0 else (int(border_width[3]) - 0.5)
 
 
 func _toggle_draw_background(value: bool) -> void:

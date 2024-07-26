@@ -14,7 +14,7 @@ signal property_changed(property_name: String)
 signal properties_changed()
 
 ## The unique name of this UI element.
-@export var element_name: String = "BaseElement0"
+@export var element_name: String = "EmptyElement"
 ## The rectangle defining the size and position of this UI element.
 @export var rect: UIRect = UIRect.new()
 
@@ -73,10 +73,10 @@ func draw() -> void:
 
 ## Initializes and returns a set of gizmos for editing this UI element. Gizmos with lower indices
 ## are handled first. Extending classes override this method, but must call super() most of the time.
-func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
+func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
-	if editing_mode == EndlessCanvas.EditingMode.LAYOUT_TOOLS:
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var size_gizmo := SizeGizmo.new(self)
 		gizmos.push_back(size_gizmo)
 		
@@ -100,10 +100,10 @@ func get_gizmos(editing_mode: EndlessCanvas.EditingMode) -> Array[BaseGizmo]:
 	return gizmos
 
 
-func get_editable_properties(editing_mode: EndlessCanvas.EditingMode) -> Array[PropertyEditor]:
+func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
-	if editing_mode == EndlessCanvas.EditingMode.LAYOUT_TOOLS:
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		# TODO: Add a property editor for size.
 		# TODO: Add a property editor for position, when it's an offset inside a composite element.
 		pass
