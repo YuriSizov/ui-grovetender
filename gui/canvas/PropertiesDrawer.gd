@@ -25,6 +25,14 @@ func _gui_input(event: InputEvent) -> void:
 		if property_editor.is_visible_in_tree() && property_editor.is_hovering():
 			property_editor.handle_input(event)
 			break
+	
+	# Additionally, check if we click in between editors. These clicks should be captured,
+	# to avoid accidentally closing the panel by slight misclicks.
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if mb.button_index == MOUSE_BUTTON_LEFT && _element_properties.get_global_rect().has_point(mb.global_position):
+			accept_event()
 
 
 # Element data.

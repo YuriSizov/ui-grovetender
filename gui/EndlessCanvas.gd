@@ -33,6 +33,8 @@ var _canvas_drag_position: Vector2 = Vector2.ZERO
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
 @onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
 
+@onready var _zoom_label: Label = %ZoomLabel
+
 var _editing_mode_buttons := preload("res://gui/canvas/editing_mode_button_group.tres")
 
 
@@ -49,6 +51,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	_edit_current_canvas()
+	_update_zoom_label()
 	
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
 	_gizmos_container.gizmos_input_consumed.connect(func() -> void:
@@ -122,12 +125,21 @@ func _change_editing_mode_by_button(button: Button) -> void:
 	_change_editing_mode(button_index)
 
 
+func _update_zoom_label() -> void:
+	if not is_inside_tree():
+		return
+	
+	_zoom_label.text = "%d%%" % [ _elements_scale * 100 ]
+
+
 # Canvas transform.
 
 func _update_canvas_transform() -> void:
 	_element_container.scale = Vector2(_elements_scale, _elements_scale)
 	_element_container.position = -_elements_offset
 	canvas_transformed.emit()
+	
+	_update_zoom_label()
 
 
 func _zoom_canvas(factor: float, center_at: Vector2) -> void:

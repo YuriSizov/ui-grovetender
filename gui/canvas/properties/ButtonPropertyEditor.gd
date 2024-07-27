@@ -71,12 +71,14 @@ func handle_input(event: InputEvent) -> void:
 		
 		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			_pressed = true
+			accept_event()
 			queue_redraw()
 			
 			button_pressed.emit()
 		
 		elif not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			_pressed = false
+			accept_event()
 			queue_redraw()
 			
 			button_released.emit()

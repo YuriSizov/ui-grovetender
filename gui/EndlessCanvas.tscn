@@ -39,6 +39,14 @@ grow_vertical = 2
 mouse_filter = 2
 theme_type_variation = &"CanvasOverlay"
 
+[node name="ZoomLabel" type="Label" parent="CanvasOverlay"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_type_variation = &"ZoomLabel"
+text = "100%"
+
 [node name="PropertiesDrawer" parent="CanvasOverlay" instance=ExtResource("4_amokm")]
 unique_name_in_owner = true
 layout_mode = 2
