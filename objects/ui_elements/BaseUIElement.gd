@@ -7,6 +7,9 @@
 ## A base class for all types of UI elements. Encapsulates shared logic and universal data members.
 class_name BaseUIElement extends Resource
 
+signal editor_selected()
+signal editor_deselected()
+
 signal rect_changed()
 @warning_ignore("unused_signal") # Used in extending classes.
 signal property_changed(property_name: String)
@@ -20,7 +23,8 @@ signal properties_changed()
 
 ## The instance ID of the control. Runtime only.
 var _control_id: int = 0
-
+## Selected status in the editor.
+var _selected: bool = false
 
 
 func _init() -> void:
@@ -50,6 +54,21 @@ func clear_control_id() -> void:
 	_control_id = 0
 
 
+func is_selected() -> bool:
+	return _selected
+
+
+func set_selected(value: bool) -> void:
+	if _selected == value:
+		return
+	
+	_selected = value
+	if _selected:
+		editor_selected.emit()
+	else:
+		editor_deselected.emit()
+
+
 # Position and sizing.
 
 ## Returns the area for this UI element, relative to the control node.
@@ -75,6 +94,10 @@ func draw() -> void:
 ## are handled first. Extending classes override this method, but must call super() most of the time.
 func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
+	
+	# Always add this one, so no matter what there is a reference to the shape of the element.
+	var boundary_gizmo := BoundaryGizmo.new(self)
+	gizmos.push_back(boundary_gizmo)
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var size_gizmo := SizeGizmo.new(self)

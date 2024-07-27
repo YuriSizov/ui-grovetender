@@ -30,6 +30,7 @@ var _canvas_drag_position: Vector2 = Vector2.ZERO
 
 @onready var _element_container: Control = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
+@onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
 @onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
 
@@ -54,9 +55,12 @@ func _ready() -> void:
 	_update_zoom_label()
 	
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
+	
 	_gizmos_container.gizmos_input_consumed.connect(func() -> void:
 		_context_menu.clear_options()
 	)
+	
+	_canvas_drawer.element_selected.connect(_select_element.bind(true))
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -104,11 +108,17 @@ func _shortcut_input(event: InputEvent) -> void:
 
 func _edit_current_canvas() -> void:
 	if _current_canvas:
+		_canvas_drawer.clear_title()
+		_canvas_drawer.clear_elements()
+		
 		_current_canvas.element_created.disconnect(_add_canvas_element)
 	
 	_current_canvas = Controller.get_current_canvas()
 	
 	if _current_canvas:
+		_canvas_drawer.set_title(_current_canvas.canvas_name)
+		_canvas_drawer.set_elements(_current_canvas.elements)
+		
 		_current_canvas.element_created.connect(_add_canvas_element)
 
 
@@ -213,8 +223,27 @@ func _add_canvas_element(element: BaseUIElement) -> void:
 	_element_container.add_child(canvas_element)
 	_drawn_elements.push_back(canvas_element)
 	
-	# Auto-select the added element.
+	# Update the canvas drawer.
+	_canvas_drawer.add_element(element)
+	
+	# Auto-select the added element (exclusive).
+	_select_element(element, true)
+	
+	_update_element_tools()
+
+
+func _unselect_all_elements() -> void:
+	for element in _selected_elements:
+		element.set_selected(false)
+	
 	_selected_elements.clear()
+
+
+func _select_element(element: BaseUIElement, exclusive: bool = false) -> void:
+	if exclusive:
+		_unselect_all_elements()
+	
+	element.set_selected(true)
 	_selected_elements.push_back(element)
 	
 	_update_element_tools()
@@ -223,17 +252,17 @@ func _add_canvas_element(element: BaseUIElement) -> void:
 func _try_select_element(canvas_position: Vector2) -> void:
 	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
 	# TODO: Add support for multi-element selections.
-	_selected_elements.clear()
+	_unselect_all_elements()
 	
 	for i in _drawn_elements.size():
-		var element_index := _drawn_elements.size() - 1 - i
-		var element := _drawn_elements[element_index]
+		var element_index := _drawn_elements.size() - 1 - i # Iterate backwards, from the topmost.
+		var canvas_element := _drawn_elements[element_index]
 		
-		if not element.is_visible_on_screen() || not element.data:
+		if not canvas_element.is_visible_on_screen() || not canvas_element.data:
 			break
 		
-		if element.is_selectable(canvas_position):
-			_selected_elements.push_back(element.data)
+		if canvas_element.is_selectable(canvas_position):
+			_select_element(canvas_element.data)
 			break # For now, select the first match only.
 	
 	_update_element_tools()

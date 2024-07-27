@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://c2galfnni2hkt"]
+
+[ext_resource type="Script" path="res://gui/canvas/elements/ElementEntry.gd" id="1_l5dfc"]
+[ext_resource type="Texture2D" uid="uid://ew3h751oobcn" path="res://assets/icons/element-empty.png" id="2_q63d1"]
+
+[node name="ElementEntry" type="PanelContainer"]
+offset_right = 188.0
+offset_bottom = 30.0
+theme_type_variation = &"ElementEntry"
+script = ExtResource("1_l5dfc")
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_type_variation = &"ElementEntryLayout"
+
+[node name="Icon" type="TextureRect" parent="Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_q63d1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"ElementEntryName"
+text = "Element Name"

@@ -32,6 +32,9 @@ func _init() -> void:
 
 
 func _draw() -> void:
+	var target_color := get_theme_color("target_color")
+	var target_size := get_theme_constant("target_size")
+	
 	var option_panel_default := get_theme_stylebox("option_panel")
 	var option_panel_hover := get_theme_stylebox("option_panel_hover")
 	var option_panel_pressed := get_theme_stylebox("option_panel_pressed")
@@ -59,6 +62,11 @@ func _draw() -> void:
 		get_theme_constant("shadow_offset_x", "ShortcutLabel"),
 		get_theme_constant("shadow_offset_y", "ShortcutLabel")
 	)
+	
+	# Draw the target/click point for the reference.
+	draw_circle(Vector2.ZERO, target_size, target_color, true, -1, true)
+	
+	# Draw all options.
 	
 	for i in _current_options.size():
 		var option := _current_options[i]

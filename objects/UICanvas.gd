@@ -8,7 +8,11 @@ class_name UICanvas extends Resource
 
 signal element_created(element: BaseUIElement)
 
+## The display name of the canvas.
+@export var canvas_name: String = "Canvas"
+## The collection of elements in this canvas.
 @export var elements: Array[BaseUIElement] = []
+## The index used to generate unique element names.
 @export var element_increment: int = 0
 
 

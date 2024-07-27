@@ -8,8 +8,8 @@ class_name PropertiesDrawer extends PanelContainer
 
 var _edited_property: PropertyEditor = null
 
-@onready var _element_title: Label = %Title
-@onready var _element_properties: Control = %List
+@onready var _element_title: Label = %ElementTitle
+@onready var _element_properties: Control = %PropertiesList
 
 
 func _gui_input(event: InputEvent) -> void:

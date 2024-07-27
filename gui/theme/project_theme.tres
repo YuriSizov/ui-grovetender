@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=36 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=45 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -6,10 +6,10 @@
 [ext_resource type="StyleBox" uid="uid://nepoyenppmop" path="res://gui/theme/styles/shortcut_label_style.tres" id="3_obau7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3lu1"]
-bg_color = Color(0.848204, 0.67796, 0.86397, 1)
+bg_color = Color(0.885001, 0.68641, 0.702486, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g02sp"]
-bg_color = Color(0.739547, 0.551361, 0.748732, 1)
+bg_color = Color(0.770517, 0.562881, 0.589007, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -17,12 +17,28 @@ corner_radius_bottom_left = 2
 corner_detail = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vx8vk"]
-bg_color = Color(0.644958, 0.299874, 0.631309, 1)
+bg_color = Color(0.649798, 0.363055, 0.34427, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 corner_detail = 4
+
+[sub_resource type="Gradient" id="Gradient_1upls"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.5)
+colors = PackedColorArray(0.682353, 0.717647, 0.772549, 0.784314, 0.984314, 0.988235, 0.992157, 0.784314)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lj8yg"]
+gradient = SubResource("Gradient_1upls")
+width = 8
+height = 8
+fill = 2
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v6g26"]
+texture = SubResource("GradientTexture2D_lj8yg")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plgh6"]
 content_margin_left = 12.0
@@ -104,6 +120,8 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 4
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3jkdq"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tp2fv"]
 bg_color = Color(0.846863, 0.630659, 0.387486, 1)
 corner_radius_top_left = 16
@@ -177,6 +195,71 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6vlub"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 12.0
+content_margin_bottom = 2.0
+bg_color = Color(0.69316, 0.693728, 0.70527, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.313726)
+shadow_size = 1
+shadow_offset = Vector2(2, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d02xj"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 12.0
+content_margin_bottom = 2.0
+bg_color = Color(0.80109, 0.801508, 0.809896, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.313726)
+shadow_size = 1
+shadow_offset = Vector2(2, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6m80i"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 12.0
+content_margin_bottom = 2.0
+bg_color = Color(0.578516, 0.57915, 0.592228, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.313726)
+shadow_size = 1
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_to7qs"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 12.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wkryf"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 12.0
+content_margin_bottom = 2.0
+bg_color = Color(0.813753, 0.749168, 0.55731, 0.784314)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.313726)
+shadow_size = 1
+shadow_offset = Vector2(2, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
 bg_color = Color(0.72549, 0.827451, 0.780392, 0.54902)
@@ -295,6 +378,9 @@ BorderStyleGizmo/constants/side_handle_thickness = 4
 BorderStyleGizmo/styles/side_handle = SubResource("StyleBoxFlat_i3lu1")
 BorderStyleGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_g02sp")
 BorderStyleGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_vx8vk")
+BoundaryGizmo/base_type = &"BaseGizmo"
+BoundaryGizmo/constants/boundary_size = 2
+BoundaryGizmo/styles/boundary = SubResource("StyleBoxTexture_v6g26")
 ButtonPropertyEditor/base_type = &"PropertyEditor"
 ButtonPropertyEditor/font_sizes/font_size = 18
 ButtonPropertyEditor/fonts/font = ExtResource("1_nbw0c")
@@ -304,16 +390,31 @@ ButtonPropertyEditor/styles/panel_pressed = SubResource("StyleBoxFlat_xd33u")
 CanvasContextMenu/base_type = &"Control"
 CanvasContextMenu/colors/option_font_color = Color(0, 0, 0, 1)
 CanvasContextMenu/colors/option_font_shadow_color = Color(1, 1, 1, 0.862745)
+CanvasContextMenu/colors/target_color = Color(0.627451, 0.741176, 0.760784, 0.352941)
 CanvasContextMenu/constants/option_font_shadow_offset_x = 2
 CanvasContextMenu/constants/option_font_shadow_offset_y = 2
 CanvasContextMenu/constants/option_icon_separation = 8
 CanvasContextMenu/constants/option_icon_size = 24
 CanvasContextMenu/constants/option_pushback = 32
 CanvasContextMenu/constants/option_separation = 16
+CanvasContextMenu/constants/target_size = 4
 CanvasContextMenu/font_sizes/option_font_size = 18
 CanvasContextMenu/styles/option_panel = SubResource("StyleBoxFlat_hnsk6")
 CanvasContextMenu/styles/option_panel_hover = SubResource("StyleBoxFlat_a0v0n")
 CanvasContextMenu/styles/option_panel_pressed = SubResource("StyleBoxFlat_qjo7p")
+CanvasDrawer/base_type = &"PanelContainer"
+CanvasDrawer/styles/panel = SubResource("StyleBoxEmpty_3jkdq")
+CanvasDrawerElementList/base_type = &"VBoxContainer"
+CanvasDrawerElementList/constants/separation = 8
+CanvasDrawerTitle/base_type = &"Label"
+CanvasDrawerTitle/colors/font_color = Color(1, 1, 1, 1)
+CanvasDrawerTitle/colors/font_outline_color = Color(0.47451, 0.52549, 0.572549, 1)
+CanvasDrawerTitle/colors/font_shadow_color = Color(0.054902, 0.054902, 0.054902, 0.509804)
+CanvasDrawerTitle/constants/outline_size = 6
+CanvasDrawerTitle/constants/shadow_offset_x = 3
+CanvasDrawerTitle/constants/shadow_offset_y = 3
+CanvasDrawerTitle/font_sizes/font_size = 32
+CanvasDrawerTitle/fonts/font = ExtResource("1_8ropx")
 CanvasOverlay/base_type = &"MarginContainer"
 CanvasOverlay/constants/margin_bottom = 24
 CanvasOverlay/constants/margin_left = 24
@@ -349,6 +450,23 @@ EditingModeButton/styles/normal = SubResource("StyleBoxFlat_tbyt2")
 EditingModeButton/styles/pressed = SubResource("StyleBoxFlat_txf5v")
 EditingModeButtons/base_type = &"HBoxContainer"
 EditingModeButtons/constants/separation = 16
+ElementEntry/base_type = &"PanelContainer"
+ElementEntry/styles/background = SubResource("StyleBoxFlat_6vlub")
+ElementEntry/styles/background_hover = SubResource("StyleBoxFlat_d02xj")
+ElementEntry/styles/background_pressed = SubResource("StyleBoxFlat_6m80i")
+ElementEntry/styles/panel = SubResource("StyleBoxEmpty_to7qs")
+ElementEntry/styles/panel_selected = SubResource("StyleBoxFlat_wkryf")
+ElementEntryLayout/base_type = &"HBoxContainer"
+ElementEntryLayout/constants/separation = 12
+ElementEntryName/base_type = &"Label"
+ElementEntryName/colors/font_color = Color(1, 1, 1, 1)
+ElementEntryName/colors/font_outline_color = Color(0.567368, 0.567368, 0.567368, 1)
+ElementEntryName/colors/font_shadow_color = Color(0, 0, 0, 0.470588)
+ElementEntryName/constants/outline_size = 2
+ElementEntryName/constants/shadow_offset_x = 2
+ElementEntryName/constants/shadow_offset_y = 1
+ElementEntryName/font_sizes/font_size = 18
+ElementEntryName/fonts/font = ExtResource("1_nbw0c")
 PositionGizmo/base_type = &"BaseGizmo"
 PositionGizmo/constants/center_handle_size = 24
 PositionGizmo/constants/center_handle_thickness = 4
@@ -367,7 +485,7 @@ PropertiesDrawerTitle/colors/font_shadow_color = Color(0.054902, 0.054902, 0.054
 PropertiesDrawerTitle/constants/outline_size = 6
 PropertiesDrawerTitle/constants/shadow_offset_x = 3
 PropertiesDrawerTitle/constants/shadow_offset_y = 3
-PropertiesDrawerTitle/font_sizes/font_size = 32
+PropertiesDrawerTitle/font_sizes/font_size = 28
 PropertiesDrawerTitle/fonts/font = ExtResource("1_8ropx")
 PropertyEditor/base_type = &"Object"
 PropertyEditor/colors/font_color = Color(0.961229, 0.961229, 0.961229, 1)
