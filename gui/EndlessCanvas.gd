@@ -88,6 +88,15 @@ func _gui_input(event: InputEvent) -> void:
 		_process_canvas_dragging(event)
 
 
+
+func _shortcut_input(event: InputEvent) -> void:
+	if event.is_action_pressed("grove_create_element", false, true):
+		var mouse_position := get_global_mouse_position()
+		_show_create_context_menu(mouse_position)
+		
+		get_viewport().set_input_as_handled()
+
+
 # Canvas management.
 
 func _edit_current_canvas() -> void:

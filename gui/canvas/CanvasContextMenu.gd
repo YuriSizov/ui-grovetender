@@ -9,6 +9,7 @@ class_name CanvasContextMenu extends Control
 var _current_options: Array[Option] = []
 var _option_text_buffers: Array[TextLine] = []
 var _option_rects: Array[Rect2] = []
+var _option_shortcut_buffers: Array[TextLine] = []
 
 var _hovering: bool = false
 var _hovered_option: int = -1
@@ -45,11 +46,26 @@ func _draw() -> void:
 		get_theme_constant("option_font_shadow_offset_y")
 	)
 	
+	var shortcut_label_style := get_theme_stylebox("normal", "ShortcutLabel")
+	
+	var shortcut_label_size := Vector2(
+		get_theme_constant("label_size", "ShortcutLabel"),
+		get_theme_constant("label_size", "ShortcutLabel")
+	)
+	var shortcut_label_color := get_theme_color("font_color", "ShortcutLabel")
+	
+	var shortcut_label_shadow_color := get_theme_color("font_shadow_color", "ShortcutLabel")
+	var shortcut_label_shadow_offset := Vector2(
+		get_theme_constant("shadow_offset_x", "ShortcutLabel"),
+		get_theme_constant("shadow_offset_y", "ShortcutLabel")
+	)
+	
 	for i in _current_options.size():
 		var option := _current_options[i]
 		var option_label := _option_text_buffers[i]
 		var option_rect := _option_rects[i]
 		
+		# Draw the background.
 		var option_style := option_panel_default
 		if _hovering && _hovered_option == i:
 			if _pressed:
@@ -59,7 +75,11 @@ func _draw() -> void:
 		
 		draw_style_box(option_style, option_rect)
 		
+		# Draw the content.
+		
 		var content_offset := option_style.get_offset()
+		
+		# Draw the icon, if present.
 		
 		if option.icon:
 			var icon_position := option_rect.position + content_offset
@@ -69,13 +89,27 @@ func _draw() -> void:
 			
 			content_offset.x += icon_size.x + option_icon_separation
 		
+		# Draw the label.
+		
 		var label_position := option_rect.position + content_offset
 		
-		if option_font_shadow_offset.x > 0 || option_font_shadow_offset.y > 0:
-			var label_shadow_position := label_position + option_font_shadow_offset
-			option_label.draw(get_canvas_item(), label_shadow_position, option_font_shadow_color)
+		DrawingUtil.draw_text_buffer(
+			get_canvas_item(), option_label, label_position, option_font_color,
+			option_font_shadow_offset, option_font_shadow_color
+		)
 		
-		option_label.draw(get_canvas_item(), label_position, option_font_color)
+		# Draw the shortcut label on top.
+		
+		var shortcut_position := option_rect.end - shortcut_label_size / 2.0
+		draw_style_box(shortcut_label_style, Rect2(shortcut_position, shortcut_label_size))
+		
+		var shortcut_label := _option_shortcut_buffers[i]
+		var shortcut_label_position := shortcut_position + (shortcut_label_size - shortcut_label.get_size()) / 2.0
+		
+		DrawingUtil.draw_text_buffer(
+			get_canvas_item(), shortcut_label, shortcut_label_position, shortcut_label_color,
+			shortcut_label_shadow_offset, shortcut_label_shadow_color
+		)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -90,7 +124,6 @@ func _gui_input(event: InputEvent) -> void:
 		
 		elif not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			_handle_option_pressed()
-			_pressed = false
 			accept_event()
 			queue_redraw()
 	
@@ -108,6 +141,18 @@ func _gui_input(event: InputEvent) -> void:
 				break
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var ik := event as InputEventKey
+		
+		if not ik.pressed && ik.keycode >= KEY_1 && ik.keycode <= KEY_9:
+			var option_index := ik.keycode - KEY_1
+			
+			if _handle_option_activated(option_index):
+				accept_event()
+				queue_redraw()
+
+
 func _has_point(point: Vector2) -> bool:
 	for option_rect in _option_rects:
 		if option_rect.has_point(point):
@@ -121,7 +166,12 @@ func _has_point(point: Vector2) -> bool:
 func clear_options() -> void:
 	_option_text_buffers.clear()
 	_option_rects.clear()
+	_option_shortcut_buffers.clear()
 	_current_options.clear()
+	
+	_hovering = false
+	_hovered_option = -1
+	_pressed = false
 	
 	hide()
 
@@ -133,6 +183,7 @@ func show_options(options: Array[Option], at_position: Vector2) -> void:
 	
 	_option_text_buffers.clear()
 	_option_rects.clear()
+	_option_shortcut_buffers.clear()
 	_current_options = options
 	
 	_update_option_sizes()
@@ -151,6 +202,9 @@ func _update_option_sizes() -> void:
 	
 	var label_font := get_theme_font("option_font")
 	var label_font_size := get_theme_font_size("option_font_size")
+	
+	var shortcut_label_font := get_theme_font("font", "ShortcutLabel")
+	var shortcut_label_font_size := get_theme_font_size("font_size", "ShortcutLabel")
 	
 	var minimum_size := Vector2(
 		option_panel.content_margin_left + option_panel.content_margin_right,
@@ -181,6 +235,11 @@ func _update_option_sizes() -> void:
 		_option_rects.push_back(rect)
 		
 		height_accumulation += rect.size.y
+		
+		# Create text buffers for the shortcut._add_constant_central_force
+		var shortcut_buffer := TextLine.new()
+		shortcut_buffer.add_string("%d" % [ i + 1 ], shortcut_label_font, shortcut_label_font_size)
+		_option_shortcut_buffers.push_back(shortcut_buffer)
 	
 	# Update positions to center items around the target point in a slight arc.
 	# TODO: Do a proper arc instead of this linear offset.
@@ -209,7 +268,19 @@ func _handle_option_pressed() -> void:
 	var option := _current_options[_hovered_option]
 	if option.action.is_valid():
 		option.action.call()
-		clear_options()
+	clear_options()
+
+
+func _handle_option_activated(option_index: int) -> bool:
+	if option_index < 0 || option_index >= _current_options.size():
+		return false
+	
+	var option := _current_options[option_index]
+	if option.action.is_valid():
+		option.action.call()
+	clear_options()
+	
+	return true
 
 
 class Option:

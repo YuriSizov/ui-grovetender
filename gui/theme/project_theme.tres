@@ -1,8 +1,9 @@
-[gd_resource type="Theme" load_steps=31 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=36 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
 [ext_resource type="FontVariation" uid="uid://68jb1argqylt" path="res://gui/theme/fonts/main_font_bold.tres" id="1_nbw0c"]
+[ext_resource type="StyleBox" uid="uid://nepoyenppmop" path="res://gui/theme/styles/shortcut_label_style.tres" id="3_obau7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3lu1"]
 bg_color = Color(0.848204, 0.67796, 0.86397, 1)
@@ -125,16 +126,57 @@ corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2pxd5"]
-content_margin_left = 12.0
-content_margin_top = 16.0
-content_margin_right = 12.0
-content_margin_bottom = 0.0
-bg_color = Color(1, 1, 1, 0)
-draw_center = false
-border_width_top = 8
-border_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
+content_margin_left = 2.0
+content_margin_top = 3.0
+content_margin_right = 2.0
+content_margin_bottom = 3.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 16.0
+expand_margin_right = 16.0
+shadow_color = Color(0.235371, 0.235371, 0.235371, 0.862745)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+anti_aliasing_size = 0.35
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d7c5a"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bctg3"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.844859, 0.783946, 0.770467, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tbyt2"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.738901, 0.695986, 0.704077, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_txf5v"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.647713, 0.518266, 0.515803, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
 bg_color = Color(0.72549, 0.827451, 0.780392, 0.54902)
@@ -298,10 +340,15 @@ EditingModeBarTitle/colors/font_shadow_color = Color(0.054902, 0.054902, 0.05490
 EditingModeBarTitle/constants/outline_size = 4
 EditingModeBarTitle/constants/shadow_offset_x = 2
 EditingModeBarTitle/constants/shadow_offset_y = 2
-EditingModeBarTitle/font_sizes/font_size = 18
+EditingModeBarTitle/font_sizes/font_size = 20
 EditingModeBarTitle/fonts/font = ExtResource("1_8ropx")
+EditingModeButton/base_type = &"Button"
+EditingModeButton/styles/focus = SubResource("StyleBoxEmpty_d7c5a")
+EditingModeButton/styles/hover = SubResource("StyleBoxFlat_bctg3")
+EditingModeButton/styles/normal = SubResource("StyleBoxFlat_tbyt2")
+EditingModeButton/styles/pressed = SubResource("StyleBoxFlat_txf5v")
 EditingModeButtons/base_type = &"HBoxContainer"
-EditingModeButtons/constants/separation = 12
+EditingModeButtons/constants/separation = 16
 PositionGizmo/base_type = &"BaseGizmo"
 PositionGizmo/constants/center_handle_size = 24
 PositionGizmo/constants/center_handle_thickness = 4
@@ -343,6 +390,14 @@ ShadowStyleGizmo/constants/sun_handle_trigger_size = 36
 ShadowStyleGizmo/styles/sun_handle = SubResource("StyleBoxFlat_6t2ax")
 ShadowStyleGizmo/styles/sun_handle_hover = SubResource("StyleBoxFlat_ij30v")
 ShadowStyleGizmo/styles/sun_handle_pressed = SubResource("StyleBoxFlat_gvlbs")
+ShortcutLabel/base_type = &"Label"
+ShortcutLabel/colors/font_color = Color(0.873385, 0.864891, 0.867007, 1)
+ShortcutLabel/colors/font_shadow_color = Color(0.210647, 0.196641, 0.20206, 0.862745)
+ShortcutLabel/constants/label_size = 18
+ShortcutLabel/constants/shadow_offset_x = 1
+ShortcutLabel/constants/shadow_offset_y = 1
+ShortcutLabel/font_sizes/font_size = 12
+ShortcutLabel/styles/normal = ExtResource("3_obau7")
 SimpleColorPicker/base_type = &"PanelContainer"
 SimpleColorPicker/styles/panel = SubResource("StyleBoxFlat_shuin")
 SizeGizmo/base_type = &"BaseGizmo"
