@@ -21,7 +21,8 @@ func _draw() -> void:
 	if not data || not is_visible_on_screen():
 		return
 	
-	data.draw()
+	if data.visible:
+		data.draw()
 
 
 ## Sets the UI element data.
@@ -29,6 +30,7 @@ func set_data(value: BaseUIElement) -> void:
 	if data:
 		data.clear_control_id()
 		data.rect_changed.disconnect(_on_data_rect_changed)
+		data.visibility_changed.disconnect(queue_redraw)
 		data.properties_changed.disconnect(queue_redraw)
 	
 	data = value
@@ -36,6 +38,7 @@ func set_data(value: BaseUIElement) -> void:
 	if data:
 		data.set_control_id(get_instance_id())
 		data.rect_changed.connect(_on_data_rect_changed)
+		data.visibility_changed.connect(queue_redraw)
 		data.properties_changed.connect(queue_redraw)
 		_on_data_rect_changed()
 

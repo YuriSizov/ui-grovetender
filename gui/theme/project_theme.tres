@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=45 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=49 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -197,10 +197,6 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6vlub"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 12.0
-content_margin_bottom = 2.0
 bg_color = Color(0.69316, 0.693728, 0.70527, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -211,11 +207,22 @@ shadow_color = Color(0, 0, 0, 0.313726)
 shadow_size = 1
 shadow_offset = Vector2(2, 2)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nlxsf"]
+bg_color = Color(0.694118, 0.694118, 0.705882, 1)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.694118, 0.694118, 0.705882, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.313726)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d02xj"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 12.0
-content_margin_bottom = 2.0
 bg_color = Color(0.80109, 0.801508, 0.809896, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -227,10 +234,6 @@ shadow_size = 1
 shadow_offset = Vector2(2, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6m80i"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 12.0
-content_margin_bottom = 2.0
 bg_color = Color(0.578516, 0.57915, 0.592228, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -240,18 +243,38 @@ corner_detail = 4
 shadow_color = Color(0, 0, 0, 0.313726)
 shadow_size = 1
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a6rgn"]
+bg_color = Color(0.803922, 0.803922, 0.803922, 0.627451)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndcan"]
+bg_color = Color(0.596078, 0.596078, 0.596078, 0.627451)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_to7qs"]
 content_margin_left = 8.0
 content_margin_top = 2.0
-content_margin_right = 12.0
+content_margin_right = 8.0
 content_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wkryf"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 12.0
-content_margin_bottom = 2.0
-bg_color = Color(0.813753, 0.749168, 0.55731, 0.784314)
+bg_color = Color(0.839404, 0.776005, 0.59335, 0.705882)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -260,6 +283,13 @@ corner_detail = 4
 shadow_color = Color(0, 0, 0, 0.313726)
 shadow_size = 1
 shadow_offset = Vector2(2, 2)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_nemvj"]
+color = Color(0.588235, 0.588235, 0.588235, 1)
+grow_begin = 0.0
+grow_end = 0.0
+thickness = 2
+vertical = true
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
 bg_color = Color(0.72549, 0.827451, 0.780392, 0.54902)
@@ -452,10 +482,15 @@ EditingModeButtons/base_type = &"HBoxContainer"
 EditingModeButtons/constants/separation = 16
 ElementEntry/base_type = &"PanelContainer"
 ElementEntry/styles/background = SubResource("StyleBoxFlat_6vlub")
+ElementEntry/styles/background_dragging = SubResource("StyleBoxFlat_nlxsf")
 ElementEntry/styles/background_hover = SubResource("StyleBoxFlat_d02xj")
 ElementEntry/styles/background_pressed = SubResource("StyleBoxFlat_6m80i")
+ElementEntry/styles/handle_hover = SubResource("StyleBoxFlat_a6rgn")
+ElementEntry/styles/handle_pressed = SubResource("StyleBoxFlat_ndcan")
 ElementEntry/styles/panel = SubResource("StyleBoxEmpty_to7qs")
 ElementEntry/styles/panel_selected = SubResource("StyleBoxFlat_wkryf")
+ElementEntryHandleSeparator/base_type = &"VSeparator"
+ElementEntryHandleSeparator/styles/separator = SubResource("StyleBoxLine_nemvj")
 ElementEntryLayout/base_type = &"HBoxContainer"
 ElementEntryLayout/constants/separation = 12
 ElementEntryName/base_type = &"Label"

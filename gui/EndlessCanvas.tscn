@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://heg310gps336"]
+[gd_scene load_steps=8 format=3 uid="uid://heg310gps336"]
 
 [ext_resource type="Script" path="res://gui/EndlessCanvas.gd" id="1_y0kqo"]
 [ext_resource type="PackedScene" uid="uid://b4ife7qpjx4gw" path="res://gui/canvas/CanvasGizmos.tscn" id="2_506oc"]
+[ext_resource type="Script" path="res://gui/canvas/CanvasElements.gd" id="2_ir4kv"]
 [ext_resource type="PackedScene" uid="uid://bvu50jml3i41q" path="res://gui/canvas/CanvasDrawer.tscn" id="3_diox8"]
 [ext_resource type="PackedScene" uid="uid://cc6qxmnlw1a6s" path="res://gui/canvas/PropertiesDrawer.tscn" id="4_amokm"]
 [ext_resource type="PackedScene" uid="uid://dv5jqsctwngn" path="res://gui/canvas/EditingModeBar.tscn" id="4_m05n1"]
@@ -25,6 +26,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("2_ir4kv")
 
 [node name="CanvasGizmos" parent="." instance=ExtResource("2_506oc")]
 unique_name_in_owner = true

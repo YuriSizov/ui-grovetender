@@ -11,6 +11,7 @@ signal editor_selected()
 signal editor_deselected()
 
 signal rect_changed()
+signal visibility_changed()
 @warning_ignore("unused_signal") # Used in extending classes.
 signal property_changed(property_name: String)
 @warning_ignore("unused_signal") # Used in extending classes.
@@ -20,6 +21,9 @@ signal properties_changed()
 @export var element_name: String = "EmptyElement"
 ## The rectangle defining the size and position of this UI element.
 @export var rect: UIRect = UIRect.new()
+## The visibility flag, enabling or disabling rendering of this UI element.
+@export var visible: bool = true:
+	set = set_visible
 
 ## The instance ID of the control. Runtime only.
 var _control_id: int = 0
@@ -279,3 +283,11 @@ func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
 
 func _reposition_by_center(delta: Vector2) -> void:
 	rect.position += delta
+
+
+func set_visible(value: bool) -> void:
+	if visible == value:
+		return
+	
+	visible = value
+	visibility_changed.emit()

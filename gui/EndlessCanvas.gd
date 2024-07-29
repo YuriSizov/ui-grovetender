@@ -16,7 +16,6 @@ static var _instance: EndlessCanvas = null
 var _editing_mode: int = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
-var _drawn_elements: Array[CanvasElementControl] = []
 var _selected_elements: Array[BaseUIElement] = []
 
 const ZOOM_STEP := 1.2
@@ -55,12 +54,8 @@ func _ready() -> void:
 	_update_zoom_label()
 	
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
-	
-	_gizmos_container.gizmos_input_consumed.connect(func() -> void:
-		_context_menu.clear_options()
-	)
-	
 	_canvas_drawer.element_selected.connect(_select_element.bind(true))
+	_gizmos_container.gizmos_input_consumed.connect(_context_menu.clear_options)
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -108,18 +103,12 @@ func _shortcut_input(event: InputEvent) -> void:
 
 func _edit_current_canvas() -> void:
 	if _current_canvas:
-		_canvas_drawer.clear_title()
-		_canvas_drawer.clear_elements()
-		
-		_current_canvas.element_created.disconnect(_add_canvas_element)
+		_current_canvas.element_created.disconnect(_select_element.bind(true))
 	
 	_current_canvas = Controller.get_current_canvas()
 	
 	if _current_canvas:
-		_canvas_drawer.set_title(_current_canvas.canvas_name)
-		_canvas_drawer.set_elements(_current_canvas.elements)
-		
-		_current_canvas.element_created.connect(_add_canvas_element)
+		_current_canvas.element_created.connect(_select_element.bind(true))
 
 
 func _change_editing_mode(new_mode: int) -> void:
@@ -194,7 +183,7 @@ func from_canvas_coordinates(canvas_position: Vector2) -> Vector2:
 	return canvas_position * _elements_scale - _elements_offset
 
 
-# Element management.
+# Selection management.
 
 func _show_create_context_menu(mouse_position: Vector2) -> void:
 	_context_menu.clear_options()
@@ -214,22 +203,6 @@ func _show_create_context_menu(mouse_position: Vector2) -> void:
 		context_options.push_back(create_option)
 	
 	_context_menu.show_options(context_options, mouse_position)
-
-
-func _add_canvas_element(element: BaseUIElement) -> void:
-	var canvas_element := CanvasElementControl.new()
-	canvas_element.data = element
-	
-	_element_container.add_child(canvas_element)
-	_drawn_elements.push_back(canvas_element)
-	
-	# Update the canvas drawer.
-	_canvas_drawer.add_element(element)
-	
-	# Auto-select the added element (exclusive).
-	_select_element(element, true)
-	
-	_update_element_tools()
 
 
 func _unselect_all_elements() -> void:
@@ -254,9 +227,10 @@ func _try_select_element(canvas_position: Vector2) -> void:
 	# TODO: Add support for multi-element selections.
 	_unselect_all_elements()
 	
-	for i in _drawn_elements.size():
-		var element_index := _drawn_elements.size() - 1 - i # Iterate backwards, from the topmost.
-		var canvas_element := _drawn_elements[element_index]
+	var drawn_elements_count := _element_container.get_child_count()
+	for i in drawn_elements_count:
+		var element_index := drawn_elements_count - 1 - i # Iterate backwards, from the topmost.
+		var canvas_element := _element_container.get_child(element_index)
 		
 		if not canvas_element.is_visible_on_screen() || not canvas_element.data:
 			break

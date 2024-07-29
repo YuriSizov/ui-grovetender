@@ -7,6 +7,7 @@
 class_name UICanvas extends Resource
 
 signal element_created(element: BaseUIElement)
+signal elements_sorted()
 
 ## The display name of the canvas.
 @export var canvas_name: String = "Canvas"
@@ -42,3 +43,13 @@ func create_element(element_type: int, at_position: Vector2) -> BaseUIElement:
 		element_increment += 1
 	
 	return element
+
+
+func sort_element(element: BaseUIElement, to_index: int) -> void:
+	if not elements.has(element):
+		printerr("UICanvas: Cannot sort element that doesn't belong to this canvas, %s." % [ element ])
+		return
+	
+	elements.erase(element)
+	elements.insert(to_index, element)
+	elements_sorted.emit()
