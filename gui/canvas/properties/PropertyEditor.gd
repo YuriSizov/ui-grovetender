@@ -10,8 +10,8 @@ class_name PropertyEditor extends Control
 signal editing_started()
 signal editing_stopped()
 
-## The object that owns the property.
-var object: Object = null
+## The element object that owns the property.
+var element: BaseUIElement = null
 ## The name of the property in the object.
 var prop_name: String = "":
 	set = set_prop_name
@@ -23,11 +23,13 @@ var label: String = "":
 	set = set_label
 var _label_text_buffer: TextLine = TextLine.new()
 
+var _visibility_condition: Callable = Callable()
+
 var _hovering: bool = false
 
 
-func _init(_object: Object, _name: String, _setter: Callable) -> void:
-	object = _object
+func _init(_element: BaseUIElement, _name: String, _setter: Callable) -> void:
+	element = _element
 	prop_name = _name
 	prop_setter = _setter
 	
@@ -42,6 +44,12 @@ func _init(_object: Object, _name: String, _setter: Callable) -> void:
 		_hovering = false
 		queue_redraw()
 	)
+	
+	element.properties_changed.connect(_check_visibility_condition)
+
+
+func _enter_tree() -> void:
+	_check_visibility_condition()
 
 
 func _notification(what: int) -> void:
@@ -86,6 +94,21 @@ func _shape_text() -> void:
 	
 	update_minimum_size()
 	queue_redraw()
+
+
+func set_visibility_condition(callable: Callable) -> void:
+	if callable.is_valid():
+		_visibility_condition = callable
+	else:
+		_visibility_condition = Callable()
+
+
+func _check_visibility_condition() -> void:
+	if not _visibility_condition.is_valid():
+		visible = true
+		return
+	
+	visible = _visibility_condition.call()
 
 
 # Helpers.

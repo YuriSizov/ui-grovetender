@@ -10,8 +10,8 @@ const COLOR_PICKER_SCENE := preload("res://gui/widgets/SimpleColorPicker.tscn")
 var _color_picker: SimpleColorPicker = null
 
 
-func _init(_object: Object, _name: String, _setter: Callable) -> void:
-	super(_object, _name, _setter)
+func _init(_element: Object, _name: String, _setter: Callable) -> void:
+	super(_element, _name, _setter)
 	
 	theme_type_variation = &"ColorPropertyEditor"
 	
@@ -27,7 +27,7 @@ func _ready() -> void:
 		
 		if _color_picker.visible:
 			_update_picker_position()
-			_color_picker.get_picker().color = object.get(prop_name)
+			_color_picker.get_picker().color = element.get(prop_name)
 			
 			editing_started.emit()
 		else:
@@ -57,7 +57,7 @@ func _draw() -> void:
 		available_rect.position.y + (available_rect.size.y - preview_size.y) / 2.0
 	)
 	
-	var preview_color: Color = object.get(prop_name)
+	var preview_color: Color = element.get(prop_name)
 	draw_rect(Rect2(preview_position, preview_size), preview_color)
 
 

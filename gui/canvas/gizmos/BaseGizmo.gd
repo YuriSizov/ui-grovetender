@@ -17,6 +17,8 @@ var _element_global_position: Vector2 = Vector2.ZERO
 var _element_global_size: Vector2 = Vector2.ZERO
 var _element_global_rect: Rect2 = Rect2()
 
+var _visibility_condition: Callable = Callable()
+
 var _hovering: bool = false
 var _grabbing: bool = false
 
@@ -30,11 +32,12 @@ func _init(element: BaseUIElement) -> void:
 
 
 func _ready() -> void:
+	_check_visibility_condition()
 	_update_rect_by_element()
 	_update_handles()
 
 
-# Position and sizing.
+# Element connection and properties.
 
 func _update_rect_by_element() -> void:
 	if not _reference_element:
@@ -60,12 +63,14 @@ func _connect_to_element(element: BaseUIElement) -> void:
 	if _reference_element:
 		_reference_element.rect_changed.disconnect(_update_rect_by_element)
 		_reference_element.property_changed.disconnect(_handle_property_changes)
+		_reference_element.properties_changed.disconnect(_check_visibility_condition)
 	
 	_reference_element = element
 	
 	if _reference_element:
 		_reference_element.rect_changed.connect(_update_rect_by_element)
 		_reference_element.property_changed.connect(_handle_property_changes)
+		_reference_element.properties_changed.connect(_check_visibility_condition)
 
 
 ## Connects this gizmo to the given UI element's changes.
@@ -114,6 +119,21 @@ func get_element_global_side(side: Side) -> Vector2:
 			return _element_global_rect.end - Vector2(_element_global_rect.size.x / 2.0, 0)
 	
 	return _element_global_position
+
+
+func set_visibility_condition(callable: Callable) -> void:
+	if callable.is_valid():
+		_visibility_condition = callable
+	else:
+		_visibility_condition = Callable()
+
+
+func _check_visibility_condition() -> void:
+	if not _visibility_condition.is_valid():
+		visible = true
+		return
+	
+	visible = _visibility_condition.call()
 
 
 # Interactions.

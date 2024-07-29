@@ -15,8 +15,8 @@ var icon: Texture2D = null:
 	set = set_icon
 
 
-func _init(_object: Object, _name: String, _setter: Callable) -> void:
-	super(_object, _name, _setter)
+func _init(_element: Object, _name: String, _setter: Callable) -> void:
+	super(_element, _name, _setter)
 	
 	theme_type_variation = &"TogglePropertyEditor"
 
@@ -24,7 +24,7 @@ func _init(_object: Object, _name: String, _setter: Callable) -> void:
 func _ready() -> void:
 	button_released.connect(func() -> void:
 		if prop_setter.is_valid():
-			var current_value: bool = object.get(prop_name)
+			var current_value: bool = element.get(prop_name)
 			prop_setter.call(not current_value)
 	)
 
@@ -57,7 +57,7 @@ func _draw() -> void:
 			available_rect.position.x + available_rect.size.x - checkbox_size.x,
 			available_rect.position.y + (available_rect.size.y - checkbox_size.y) / 2.0
 		)
-		var checkbox_icon: Texture2D = CHECKBOX_ICONS[0] if object.get(prop_name) else CHECKBOX_ICONS[1]
+		var checkbox_icon: Texture2D = CHECKBOX_ICONS[0] if element.get(prop_name) else CHECKBOX_ICONS[1]
 		
 		draw_texture_rect(checkbox_icon, Rect2(checkbox_position, checkbox_size), false)
 		available_rect = available_rect.grow_side(SIDE_RIGHT, -(checkbox_size.x + get_theme_constant("checkbox_separation")))

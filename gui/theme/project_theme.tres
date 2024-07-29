@@ -42,9 +42,9 @@ axis_stretch_vertical = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plgh6"]
 content_margin_left = 12.0
-content_margin_top = 6.0
+content_margin_top = 4.0
 content_margin_right = 12.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.517155, 0.588756, 0.671438, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -57,9 +57,9 @@ shadow_offset = Vector2(2, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dnsyu"]
 content_margin_left = 12.0
-content_margin_top = 6.0
+content_margin_top = 4.0
 content_margin_right = 12.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.590482, 0.656558, 0.733807, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -72,9 +72,9 @@ shadow_offset = Vector2(2, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xd33u"]
 content_margin_left = 12.0
-content_margin_top = 6.0
+content_margin_top = 4.0
 content_margin_right = 12.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.444586, 0.51501, 0.59703, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -451,8 +451,8 @@ CanvasOverlay/constants/margin_left = 24
 CanvasOverlay/constants/margin_right = 24
 CanvasOverlay/constants/margin_top = 24
 ColorPropertyEditor/base_type = &"ButtonPropertyEditor"
-ColorPropertyEditor/constants/color_preview_x = 32
-ColorPropertyEditor/constants/color_preview_y = 24
+ColorPropertyEditor/constants/color_preview_x = 48
+ColorPropertyEditor/constants/color_preview_y = 28
 ColorPropertyEditor/constants/picker_offset_x = 8
 ColorPropertyEditor/constants/picker_offset_y = 8
 CornerStyleGizmo/base_type = &"BaseGizmo"

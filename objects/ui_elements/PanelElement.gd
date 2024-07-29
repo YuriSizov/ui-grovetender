@@ -52,15 +52,6 @@ var _base_style: StyleBoxFlat = StyleBoxFlat.new()
 var _border_style: StyleBoxFlat = StyleBoxFlat.new()
 var _shadow_style: StyleBoxFlat = StyleBoxFlat.new()
 
-# Gizmo and property references for active updates.
-
-var _border_gizmo: BorderStyleGizmo = null
-var _shadow_gizmo: ShadowStyleGizmo = null
-
-var _background_color_property: ColorPropertyEditor = null
-var _border_color_property: ColorPropertyEditor = null
-var _shadow_color_property: ColorPropertyEditor = null
-
 
 func _init() -> void:
 	super()
@@ -93,7 +84,6 @@ func draw() -> void:
 
 
 func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
-	_clear_gizmo_references()
 	var gizmos := super(editing_mode)
 	
 	if editing_mode == EditingMode.STYLING_TOOLS:
@@ -107,26 +97,29 @@ func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 		corner_gizmo.curved_radius_opposite_changed.connect(_set_corner_curve_opposite_radius)
 		
 		# TODO: Implement constraints, snapping, alignment.
-		_border_gizmo = BorderStyleGizmo.new(self)
-		_border_gizmo.visible = draw_border
-		gizmos.push_back(_border_gizmo)
-		_border_gizmo.width_changed.connect(_set_border_width)
-		_border_gizmo.width_all_changed.connect(_set_border_all_width)
-		_border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
+		var border_gizmo := BorderStyleGizmo.new(self)
+		border_gizmo.set_visibility_condition(func() -> bool:
+			return draw_border
+		)
+		gizmos.push_back(border_gizmo)
+		border_gizmo.width_changed.connect(_set_border_width)
+		border_gizmo.width_all_changed.connect(_set_border_all_width)
+		border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
 		
 		# TODO: Implement constraints, snapping, alignment.
-		_shadow_gizmo = ShadowStyleGizmo.new(self)
-		_shadow_gizmo.set_shadow_size_property("shadow_size")
-		_shadow_gizmo.visible = draw_shadow
-		gizmos.push_back(_shadow_gizmo)
-		_shadow_gizmo.offset_changed.connect(_set_shadow_offset)
-		_shadow_gizmo.size_changed.connect(_set_shadow_size)
+		var shadow_gizmo := ShadowStyleGizmo.new(self)
+		shadow_gizmo.set_shadow_size_property("shadow_size")
+		shadow_gizmo.set_visibility_condition(func() -> bool:
+			return draw_shadow
+		)
+		gizmos.push_back(shadow_gizmo)
+		shadow_gizmo.offset_changed.connect(_set_shadow_offset)
+		shadow_gizmo.size_changed.connect(_set_shadow_size)
 	
 	return gizmos
 
 
 func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
-	_clear_property_references()
 	var properties := super(editing_mode)
 	
 	if editing_mode == EditingMode.STYLING_TOOLS:
@@ -135,58 +128,38 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		background_property.icon = preload("res://assets/icons/panel-fill.png")
 		properties.push_back(background_property)
 		
-		_background_color_property = ColorPropertyEditor.new(self, "background_color", _set_background_color)
-		_background_color_property.visible = draw_background
-		properties.push_back(_background_color_property)
+		var background_color_property := ColorPropertyEditor.new(self, "background_color", _set_background_color)
+		background_color_property.set_visibility_condition(func() -> bool:
+			return draw_background
+		)
+		properties.push_back(background_color_property)
 		
 		var border_property := TogglePropertyEditor.new(self, "draw_border", _toggle_draw_border)
 		border_property.label = "Border"
 		border_property.icon = preload("res://assets/icons/panel-border.png")
 		properties.push_back(border_property)
 		
-		_border_color_property = ColorPropertyEditor.new(self, "border_color", _set_border_color)
-		_border_color_property.visible = draw_border
-		properties.push_back(_border_color_property)
+		var border_color_property := ColorPropertyEditor.new(self, "border_color", _set_border_color)
+		border_color_property.set_visibility_condition(func() -> bool:
+			return draw_border
+		)
+		properties.push_back(border_color_property)
 		
 		var shadow_property := TogglePropertyEditor.new(self, "draw_shadow", _toggle_draw_shadow)
 		shadow_property.label = "Shadow"
 		shadow_property.icon = preload("res://assets/icons/panel-shadow.png")
 		properties.push_back(shadow_property)
 		
-		_shadow_color_property = ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color)
-		_shadow_color_property.visible = draw_shadow
-		properties.push_back(_shadow_color_property)
+		var shadow_color_property := ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color)
+		shadow_color_property.set_visibility_condition(func() -> bool:
+			return draw_shadow
+		)
+		properties.push_back(shadow_color_property)
 	
 	return properties
 
 
-# Helpers.
-
-func _clear_gizmo_references() -> void:
-	if is_instance_valid(_border_gizmo):
-		_border_gizmo.queue_free()
-	_border_gizmo = null
-	
-	if is_instance_valid(_shadow_gizmo):
-		_shadow_gizmo.queue_free()
-	_shadow_gizmo = null
-
-
-func _clear_property_references() -> void:
-	if is_instance_valid(_background_color_property):
-		_background_color_property.queue_free()
-	_background_color_property = null
-	
-	if is_instance_valid(_border_color_property):
-		_border_color_property.queue_free()
-	_border_color_property = null
-	
-	if is_instance_valid(_shadow_color_property):
-		_shadow_color_property.queue_free()
-	_shadow_color_property = null
-
-
-# Properties.
+# Properties - Basic.
 
 func _update_base_style() -> void:
 	_base_style.bg_color = background_color
@@ -208,10 +181,7 @@ func _update_base_style() -> void:
 func _toggle_draw_background(value: bool) -> void:
 	if draw_background == value:
 		return
-		
 	draw_background = value
-	if is_instance_valid(_background_color_property):
-		_background_color_property.visible = draw_background
 	
 	property_changed.emit("draw_background")
 	properties_changed.emit()
@@ -226,6 +196,8 @@ func _set_background_color(value: Color) -> void:
 	property_changed.emit("background_color")
 	properties_changed.emit()
 
+
+# Properties - Border.
 
 func _update_border_style() -> void:
 	_border_style.bg_color = Color(0, 0, 0, 0)
@@ -251,12 +223,7 @@ func _update_border_style() -> void:
 func _toggle_draw_border(value: bool) -> void:
 	if draw_border == value:
 		return
-		
 	draw_border = value
-	if is_instance_valid(_border_gizmo):
-		_border_gizmo.visible = draw_border
-	if is_instance_valid(_border_color_property):
-		_border_color_property.visible = draw_border
 	
 	_update_base_style()
 	_update_shadow_style()
@@ -328,6 +295,8 @@ func _set_border_opposite_width(side: Side, delta: float) -> void:
 	properties_changed.emit()
 
 
+# Properties - Corners.
+
 func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
@@ -382,6 +351,8 @@ func _update_corner_curved_detail() -> void:
 	corner_curved_detail = max(CORNER_CURVED_BASE_DETAIL, int(biggest_radius / 2.0))
 
 
+# Properties - Shadow.
+
 func _update_shadow_style() -> void:
 	_shadow_style.bg_color = shadow_color
 	_shadow_style.border_color = Color(shadow_color.r, shadow_color.g, shadow_color.b, 0.0)
@@ -409,12 +380,7 @@ func _update_shadow_style() -> void:
 func _toggle_draw_shadow(value: bool) -> void:
 	if draw_shadow == value:
 		return
-		
 	draw_shadow = value
-	if is_instance_valid(_shadow_gizmo):
-		_shadow_gizmo.visible = draw_shadow
-	if is_instance_valid(_shadow_color_property):
-		_shadow_color_property.visible = draw_shadow
 	
 	property_changed.emit("draw_shadow")
 	properties_changed.emit()

@@ -89,7 +89,7 @@ func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
 		_gizmo_container.add_child(gizmo)
 		
 		# Update the cursor immediately, if the new gizmo is hovered.
-		if gizmo.test_hovering(mouse_position):
+		if gizmo.is_visible_in_tree() && gizmo.test_hovering(mouse_position):
 			var cursor_shape := gizmo.get_hovering_cursor_shape(mouse_position)
 			_update_cursor_shape(cursor_shape)
 		
