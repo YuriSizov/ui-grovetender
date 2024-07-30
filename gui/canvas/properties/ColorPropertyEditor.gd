@@ -57,8 +57,12 @@ func _draw() -> void:
 		available_rect.position.y + (available_rect.size.y - preview_size.y) / 2.0
 	)
 	
+	var preview_rect := Rect2(preview_position, preview_size)
+	var preview_bg := get_theme_icon("sample_bg", "ColorPicker") # Godot already provides a nice icon for this.
 	var preview_color: Color = element.get(prop_name)
-	draw_rect(Rect2(preview_position, preview_size), preview_color)
+	
+	draw_texture_rect(preview_bg, preview_rect, true)
+	draw_rect(preview_rect, preview_color)
 
 
 func _get_minimum_size() -> Vector2:

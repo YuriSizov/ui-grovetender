@@ -8,15 +8,16 @@
 class_name EndlessCanvas extends Control
 
 signal canvas_transformed()
+signal editing_mode_changed()
+signal selection_changed()
 
 # Our singleton instance.
 static var _instance: EndlessCanvas = null
 
-
 var _editing_mode: int = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
-var _selected_elements: Array[BaseUIElement] = []
+var _selected_element: BaseUIElement = null
 
 const ZOOM_STEP := 1.2
 const ZOOM_MIN := 1 / pow(ZOOM_STEP, 8)
@@ -30,7 +31,6 @@ var _canvas_drag_position: Vector2 = Vector2.ZERO
 @onready var _element_container: Control = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
-@onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
 @onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
 
 @onready var _zoom_label: Label = %ZoomLabel
@@ -116,12 +116,16 @@ func _change_editing_mode(new_mode: int) -> void:
 		return
 	
 	_editing_mode = new_mode
-	_update_element_tools()
+	editing_mode_changed.emit()
 
 
 func _change_editing_mode_by_button(button: Button) -> void:
 	var button_index := button.get_index()
 	_change_editing_mode(button_index)
+
+
+func get_editing_mode() -> int:
+	return _editing_mode
 
 
 func _update_zoom_label() -> void:
@@ -133,12 +137,16 @@ func _update_zoom_label() -> void:
 
 # Canvas transform.
 
-func _update_canvas_transform() -> void:
-	_element_container.scale = Vector2(_elements_scale, _elements_scale)
-	_element_container.position = -_elements_offset
-	canvas_transformed.emit()
-	
-	_update_zoom_label()
+func get_elements_scale() -> float:
+	return _elements_scale
+
+
+func get_elements_scale_vector() -> Vector2:
+	return Vector2(_elements_scale, _elements_scale)
+
+
+func get_elements_offset() -> Vector2:
+	return _elements_offset
 
 
 func _zoom_canvas(factor: float, center_at: Vector2) -> void:
@@ -146,7 +154,9 @@ func _zoom_canvas(factor: float, center_at: Vector2) -> void:
 	
 	_elements_scale = clampf(_elements_scale * factor, ZOOM_MIN, ZOOM_MAX)
 	_elements_offset = old_offset * _elements_scale - center_at
-	_update_canvas_transform()
+	
+	canvas_transformed.emit()
+	_update_zoom_label()
 
 
 func _start_canvas_dragging(event: InputEventMouseButton) -> void:
@@ -168,11 +178,9 @@ func _process_canvas_dragging(event: InputEventMouseMotion) -> void:
 	_canvas_drag_position = event.global_position
 	
 	_elements_offset -= relative
-	_update_canvas_transform()
-
-
-func get_elements_scale() -> float:
-	return _elements_scale
+	
+	canvas_transformed.emit()
+	_update_zoom_label()
 
 
 func to_canvas_coordinates(ui_position: Vector2) -> Vector2:
@@ -206,20 +214,20 @@ func _show_create_context_menu(mouse_position: Vector2) -> void:
 
 
 func _unselect_all_elements() -> void:
-	for element in _selected_elements:
-		element.set_selected(false)
-	
-	_selected_elements.clear()
+	if _selected_element:
+		_selected_element.set_selected(false)
+	_selected_element = null
 
 
 func _select_element(element: BaseUIElement, exclusive: bool = false) -> void:
 	if exclusive:
 		_unselect_all_elements()
 	
-	element.set_selected(true)
-	_selected_elements.push_back(element)
+	# TODO: Support selecting multiple elements at once.
+	_selected_element = element
+	_selected_element.set_selected(true)
 	
-	_update_element_tools()
+	selection_changed.emit()
 
 
 func _try_select_element(canvas_position: Vector2) -> void:
@@ -239,29 +247,8 @@ func _try_select_element(canvas_position: Vector2) -> void:
 			_select_element(canvas_element.data)
 			break # For now, select the first match only.
 	
-	_update_element_tools()
+	selection_changed.emit()
 
 
-# Editing tools.
-
-func _update_element_tools() -> void:
-	_gizmos_container.clear_gizmos()
-	_properties_drawer.clear_title()
-	_properties_drawer.clear_properties()
-	
-	if _selected_elements.size() == 0:
-		return
-	
-	# TODO: Support gizmos for multiple selected elements.
-	if _selected_elements.size() > 1:
-		return
-	
-	var selected_element := _selected_elements[0]
-	
-	var active_gizmos := selected_element.get_gizmos(_editing_mode)
-	_gizmos_container.set_gizmos(active_gizmos)
-	
-	_properties_drawer.set_title(selected_element.element_name)
-	
-	var active_properties := selected_element.get_editable_properties(_editing_mode)
-	_properties_drawer.set_properties(active_properties)
+func get_selected_element() -> BaseUIElement:
+	return _selected_element

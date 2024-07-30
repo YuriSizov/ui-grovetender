@@ -13,6 +13,13 @@ var _grabbed_gizmo: BaseGizmo = null
 @onready var _gizmo_container: Control = %Gizmos
 
 
+func _ready() -> void:
+	_update_active_gizmos()
+	
+	EndlessCanvas.get_instance().editing_mode_changed.connect(_update_active_gizmos)
+	EndlessCanvas.get_instance().selection_changed.connect(_update_active_gizmos)
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouse:
 		# When there is a grabbed gizmo, we pass events to it directly.
@@ -71,21 +78,22 @@ func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 	mouse_default_cursor_shape = cursor_shape
 
 
-func clear_gizmos() -> void:
-	_grabbed_gizmo = null
+func _update_active_gizmos() -> void:
+	_clear_active_gizmos()
 	
-	for gizmo: BaseGizmo in _gizmo_container.get_children():
-		gizmo.grabbed.disconnect(_update_grabbed_gizmo.bind(gizmo))
-		gizmo.released.disconnect(_update_grabbed_gizmo.bind(null))
-		
-		_gizmo_container.remove_child(gizmo)
-		gizmo.queue_free()
-
-
-func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
+	if not EndlessCanvas.get_instance():
+		return
+	
+	var selected_element := EndlessCanvas.get_instance().get_selected_element()
+	if not selected_element:
+		return
+	
+	var editing_mode := EndlessCanvas.get_instance().get_editing_mode()
+	var active_gizmos := selected_element.get_gizmos(editing_mode)
+	
 	var mouse_position := get_global_mouse_position()
 	
-	for gizmo in new_gizmos:
+	for gizmo in active_gizmos:
 		_gizmo_container.add_child(gizmo)
 		
 		# Update the cursor immediately, if the new gizmo is hovered.
@@ -95,3 +103,14 @@ func set_gizmos(new_gizmos: Array[BaseGizmo]) -> void:
 		
 		gizmo.grabbed.connect(_update_grabbed_gizmo.bind(gizmo))
 		gizmo.released.connect(_update_grabbed_gizmo.bind(null))
+
+
+func _clear_active_gizmos() -> void:
+	_grabbed_gizmo = null
+	
+	for gizmo: BaseGizmo in _gizmo_container.get_children():
+		gizmo.grabbed.disconnect(_update_grabbed_gizmo.bind(gizmo))
+		gizmo.released.disconnect(_update_grabbed_gizmo.bind(null))
+		
+		_gizmo_container.remove_child(gizmo)
+		gizmo.queue_free()

@@ -12,6 +12,9 @@ var _elements_data_map: Dictionary = {}
 
 func _ready() -> void:
 	_edit_current_canvas()
+	_update_canvas_transform()
+	
+	EndlessCanvas.get_instance().canvas_transformed.connect(_update_canvas_transform)
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -33,6 +36,14 @@ func _edit_current_canvas() -> void:
 		
 		_current_canvas.element_created.connect(_create_canvas_element)
 		_current_canvas.elements_sorted.connect(_sort_canvas_elements)
+
+
+func _update_canvas_transform() -> void:
+	if not EndlessCanvas.get_instance():
+		return
+	
+	scale = EndlessCanvas.get_instance().get_elements_scale_vector()
+	position = Vector2.ZERO - EndlessCanvas.get_instance().get_elements_offset()
 
 
 # Element management.
