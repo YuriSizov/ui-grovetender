@@ -123,37 +123,43 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties := super(editing_mode)
 	
 	if editing_mode == EditingMode.STYLING_TOOLS:
-		var background_property := TogglePropertyEditor.new(self, "draw_background", _toggle_draw_background)
-		background_property.label = "Fill"
-		background_property.icon = preload("res://assets/icons/panel-fill.png")
-		properties.push_back(background_property)
+		# Background properties.
 		
-		var background_color_property := ColorPropertyEditor.new(self, "background_color", _set_background_color)
-		background_color_property.set_visibility_condition(func() -> bool:
-			return draw_background
+		var background_section := PropertyEditorHelper.create_togglable_section(
+			self, "draw_background", _toggle_draw_background,
+			"Fill", preload("res://assets/icons/panel-fill.png")
 		)
+		properties.push_back(background_section)
+		
+		var background_color_property := PropertyEditorHelper.create_color_property(self, "background_color", _set_background_color)
+		background_color_property.label = "Color"
+		background_section.connect_property_to_section(background_color_property)
 		properties.push_back(background_color_property)
 		
-		var border_property := TogglePropertyEditor.new(self, "draw_border", _toggle_draw_border)
-		border_property.label = "Border"
-		border_property.icon = preload("res://assets/icons/panel-border.png")
-		properties.push_back(border_property)
+		# Border properties.
 		
-		var border_color_property := ColorPropertyEditor.new(self, "border_color", _set_border_color)
-		border_color_property.set_visibility_condition(func() -> bool:
-			return draw_border
+		var border_section := PropertyEditorHelper.create_togglable_section(
+			self, "draw_border", _toggle_draw_border,
+			"Border", preload("res://assets/icons/panel-border.png")
 		)
+		properties.push_back(border_section)
+		
+		var border_color_property := PropertyEditorHelper.create_color_property(self, "border_color", _set_border_color)
+		border_color_property.label = "Color"
+		border_section.connect_property_to_section(border_color_property)
 		properties.push_back(border_color_property)
 		
-		var shadow_property := TogglePropertyEditor.new(self, "draw_shadow", _toggle_draw_shadow)
-		shadow_property.label = "Shadow"
-		shadow_property.icon = preload("res://assets/icons/panel-shadow.png")
-		properties.push_back(shadow_property)
+		# Shadow properties.
 		
-		var shadow_color_property := ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color)
-		shadow_color_property.set_visibility_condition(func() -> bool:
-			return draw_shadow
+		var shadow_section := PropertyEditorHelper.create_togglable_section(
+			self, "draw_shadow", _toggle_draw_shadow,
+			"Shadow", preload("res://assets/icons/panel-shadow.png")
 		)
+		properties.push_back(shadow_section)
+		
+		var shadow_color_property := PropertyEditorHelper.create_color_property(self, "shadow_color", _set_shadow_color)
+		shadow_color_property.label = "Color"
+		shadow_section.connect_property_to_section(shadow_color_property)
 		properties.push_back(shadow_color_property)
 	
 	return properties

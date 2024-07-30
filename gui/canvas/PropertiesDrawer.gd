@@ -6,6 +6,7 @@
 
 class_name PropertiesDrawer extends PanelContainer
 
+var _property_section_ranges: Array[Vector2i] = []
 var _edited_property: PropertyEditor = null
 
 @onready var _element_title: Label = %ElementTitle
@@ -21,27 +22,51 @@ func _ready() -> void:
 	EndlessCanvas.get_instance().selection_changed.connect(_update_element_title)
 
 
-func _gui_input(event: InputEvent) -> void:
-	# Property editors don't handle input directly (although they catch hover events
-	# for convenience). Instead, the drawer propagates events back. This allows us to
-	# check for currently active editors and give them priority, always.
+func _input(event: InputEvent) -> void:
+	# Before the GUI input handler is called, check for the actively edited property and
+	# let it capture the event.
 	
 	if _edited_property:
 		_edited_property.handle_input(event)
-		return
-	
-	for property_editor: PropertyEditor in _element_properties.get_children():
-		if property_editor.is_visible_in_tree() && property_editor.is_hovering():
-			property_editor.handle_input(event)
-			break
-	
-	# Additionally, check if we click in between editors. These clicks should be captured,
+
+
+func _gui_input(event: InputEvent) -> void:
+	# Check if we click in between editors. These clicks should be captured,
 	# to avoid accidentally closing the panel by slight misclicks.
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
 		if mb.button_index == MOUSE_BUTTON_LEFT && _element_properties.get_global_rect().has_point(mb.global_position):
 			accept_event()
+
+
+func _draw() -> void:
+	var section_panel := get_theme_stylebox("section_panel")
+	
+	# Draw extra backgrounds behind opened sections.
+	for property_range in _property_section_ranges:
+		var from_index := property_range.x
+		var to_index := property_range.y
+		
+		var section_editor: SectionPropertyEditor = _element_properties.get_child(from_index)
+		if not section_editor.is_toggled():
+			continue
+		
+		while to_index > from_index:
+			var last_visible: Control = _element_properties.get_child(to_index)
+			if last_visible.visible:
+				break
+			
+			to_index -= 1
+		
+		var last_property: Control = _element_properties.get_child(to_index)
+		
+		var range_rect := Rect2()
+		range_rect.position = section_editor.global_position
+		range_rect = range_rect.expand(last_property.global_position + last_property.size)
+		
+		range_rect.position -= global_position
+		draw_style_box(section_panel, range_rect)
 
 
 # Element data.
@@ -76,22 +101,43 @@ func _update_property_list() -> void:
 	var editing_mode := EndlessCanvas.get_instance().get_editing_mode()
 	var active_properties := selected_element.get_editable_properties(editing_mode)
 	
-	for property_editor in active_properties:
+	var current_range := Vector2i.ZERO
+	for i in active_properties.size():
+		var property_editor := active_properties[i]
+		
+		if property_editor is SectionPropertyEditor:
+			if current_range.x != current_range.y:
+				_property_section_ranges.push_back(current_range)
+			
+			current_range = Vector2i(i, i)
+		else:
+			current_range.y = i
+		
 		_element_properties.add_child(property_editor)
 		
 		property_editor.editing_started.connect(_update_edited_property.bind(property_editor))
 		property_editor.editing_stopped.connect(_update_edited_property.bind(null))
+		property_editor.visibility_changed.connect(queue_redraw)
+	
+	if current_range.x != current_range.y:
+		_property_section_ranges.push_back(current_range)
+	
+	queue_redraw()
 
 
 func _clear_property_list() -> void:
+	_property_section_ranges.clear()
 	_edited_property = null
 	
 	for property_editor: PropertyEditor in _element_properties.get_children():
 		property_editor.editing_started.disconnect(_update_edited_property.bind(property_editor))
 		property_editor.editing_stopped.disconnect(_update_edited_property.bind(null))
+		property_editor.visibility_changed.disconnect(queue_redraw)
 		
 		_element_properties.remove_child(property_editor)
 		property_editor.queue_free()
+	
+	queue_redraw()
 
 
 func _update_edited_property(property: PropertyEditor) -> void:

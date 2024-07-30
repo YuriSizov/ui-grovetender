@@ -19,6 +19,7 @@ const VISIBILITY_ICON_UNCHECKED := preload("res://assets/ui/visibility-handle-un
 @onready var _element_icon: TextureRect = %Icon
 @onready var _element_name: Label = %Name
 @onready var _layout_container: Control = $Layout
+@onready var _handle_separator: VSeparator = %HandleSeparator
 @onready var _sorting_handle: TextureRect = %SortingHandle
 @onready var _visibility_handle: TextureRect = %VisibilityHandle
 
@@ -36,11 +37,63 @@ var _interacted_area: InteractedArea = InteractedArea.NONE
 
 
 func _ready() -> void:
+	_update_theme()
 	_update_entry()
 	_update_visibility_icon()
 	
 	mouse_entered.connect(_handle_hovered)
 	mouse_exited.connect(_handle_unhovered)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED:
+		_update_theme()
+	
+	# This is so hacky, but it allows us to use one theme definition for all elements of a complex
+	# scene, with in-editor preview, without polluting saved scenes.
+	if what == NOTIFICATION_EDITOR_PRE_SAVE:
+		_clear_theme()
+	elif what == NOTIFICATION_EDITOR_POST_SAVE:
+		_update_theme()
+
+
+func _update_theme() -> void:
+	if not is_node_ready():
+		return
+	
+	_layout_container.add_theme_constant_override("separation", get_theme_constant("base_separation"))
+	_handle_separator.add_theme_stylebox_override("separator", get_theme_stylebox("handle_separator"))
+	
+	_element_name.begin_bulk_theme_override()
+	_element_name.add_theme_font_override("font", get_theme_font("font"))
+	_element_name.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
+	_element_name.add_theme_color_override("font_color", get_theme_color("font_color"))
+	_element_name.add_theme_color_override("font_outline_color", get_theme_color("font_outline_color"))
+	_element_name.add_theme_color_override("font_shadow_color", get_theme_color("font_shadow_color"))
+	_element_name.add_theme_constant_override("outline_size", get_theme_constant("font_outline_size"))
+	_element_name.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
+	_element_name.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
+	_element_name.end_bulk_theme_override()
+
+
+
+func _clear_theme() -> void:
+	if not is_node_ready():
+		return
+	
+	_layout_container.remove_theme_constant_override("separation")
+	_handle_separator.remove_theme_stylebox_override("separator")
+	
+	_element_name.begin_bulk_theme_override()
+	_element_name.remove_theme_font_override("font")
+	_element_name.remove_theme_font_size_override("font_size")
+	_element_name.remove_theme_color_override("font_color")
+	_element_name.remove_theme_color_override("font_outline_color")
+	_element_name.remove_theme_color_override("font_shadow_color")
+	_element_name.remove_theme_constant_override("outline_size")
+	_element_name.remove_theme_constant_override("shadow_offset_x")
+	_element_name.remove_theme_constant_override("shadow_offset_y")
+	_element_name.end_bulk_theme_override()
 
 
 func _draw() -> void:
@@ -243,7 +296,7 @@ func _update_entry() -> void:
 
 
 func _update_visibility_icon() -> void:
-	if not is_inside_tree():
+	if not is_inside_tree() || Engine.is_editor_hint():
 		return
 	
 	if not data:

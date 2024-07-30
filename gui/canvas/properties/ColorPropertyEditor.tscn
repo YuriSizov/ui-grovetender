@@ -1,0 +1,49 @@
+[gd_scene load_steps=3 format=3 uid="uid://dh8unfa1iotqe"]
+
+[ext_resource type="Script" path="res://gui/canvas/properties/ColorPropertyEditor.gd" id="1_hwrsf"]
+[ext_resource type="PackedScene" uid="uid://dfmhjkpb5n6h" path="res://gui/widgets/SimpleColorPicker.tscn" id="3_su2lg"]
+
+[node name="ColorPropertyEditor" type="MarginContainer"]
+offset_right = 190.0
+offset_bottom = 24.0
+theme_type_variation = &"ColorPropertyEditor"
+script = ExtResource("1_hwrsf")
+
+[node name="Layout" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PropertyName" type="Label" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Property Name"
+
+[node name="Spacer" type="Control" parent="Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PropertyColor" type="Control" parent="Layout"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="ColorPickerAnchor" type="Control" parent="."]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="ColorPicker" parent="ColorPickerAnchor" instance=ExtResource("3_su2lg")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_right = 0.0
+offset_bottom = 436.0
+grow_horizontal = 0

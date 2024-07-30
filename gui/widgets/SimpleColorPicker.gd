@@ -4,6 +4,7 @@
 # Provided under MIT                              #
 ###################################################
 
+@tool
 class_name SimpleColorPicker extends PanelContainer
 
 @onready var _color_picker: ColorPicker = $ColorPicker

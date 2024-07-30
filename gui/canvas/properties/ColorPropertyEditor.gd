@@ -4,34 +4,29 @@
 # Provided under MIT                              #
 ###################################################
 
-class_name ColorPropertyEditor extends ButtonPropertyEditor
+@tool
+class_name ColorPropertyEditor extends ValuePropertyEditor
 
-const COLOR_PICKER_SCENE := preload("res://gui/widgets/SimpleColorPicker.tscn")
-var _color_picker: SimpleColorPicker = null
+@onready var _color_preview: Control = %PropertyColor
+@onready var _color_picker: SimpleColorPicker = %ColorPicker
 
 
-func _init(_element: Object, _name: String, _setter: Callable) -> void:
-	super(_element, _name, _setter)
-	
+func _init() -> void:
+	super()
 	theme_type_variation = &"ColorPropertyEditor"
 	
-	_color_picker = COLOR_PICKER_SCENE.instantiate()
-	_color_picker.visible = false
-	add_child(_color_picker)
-	_color_picker.set_anchors_and_offsets_preset(PRESET_TOP_LEFT)
+	sort_children.connect(func() -> void:
+		queue_redraw()
+	)
 
 
 func _ready() -> void:
-	button_released.connect(func() -> void:
-		_color_picker.visible = not _color_picker.visible
-		
-		if _color_picker.visible:
-			_update_picker_position()
-			_color_picker.get_picker().color = element.get(prop_name)
-			
-			editing_started.emit()
-		else:
-			editing_stopped.emit()
+	super()
+	
+	_update_property_name()
+	
+	edited_property_changed.connect(func() -> void:
+		_update_property_name()
 	)
 	
 	_color_picker.get_picker().color_changed.connect(func(color: Color) -> void:
@@ -41,50 +36,27 @@ func _ready() -> void:
 		queue_redraw()
 	)
 	
-	get_window().size_changed.connect(_update_picker_position)
+	get_window().size_changed.connect(_update_color_picker_position)
 
 
 func _draw() -> void:
 	super()
-	var available_rect := get_content_rect()
 	
-	var preview_size := Vector2(
-		get_theme_constant("color_preview_x"),
-		get_theme_constant("color_preview_y")
-	)
-	var preview_position := Vector2(
-		available_rect.position.x + available_rect.size.x - preview_size.x,
-		available_rect.position.y + (available_rect.size.y - preview_size.y) / 2.0
-	)
+	var preview_rect := _color_preview.get_global_rect()
+	preview_rect.position -= global_position
 	
-	var preview_rect := Rect2(preview_position, preview_size)
 	var preview_bg := get_theme_icon("sample_bg", "ColorPicker") # Godot already provides a nice icon for this.
-	var preview_color: Color = element.get(prop_name)
+	var preview_color: Color = Color.WHITE
+	if not Engine.is_editor_hint():
+		preview_color = element.get(prop_name)
 	
 	draw_texture_rect(preview_bg, preview_rect, true)
 	draw_rect(preview_rect, preview_color)
 
 
-func _get_minimum_size() -> Vector2:
-	var minimum_size := Vector2(
-		get_theme_constant("minimum_size_x"),
-		get_theme_constant("minimum_size_y")
-	)
-	var combined_size := Vector2(
-		get_theme_constant("color_preview_x"),
-		get_theme_constant("color_preview_y")
-	)
-	
-	var background_panel := get_theme_stylebox("panel")
-	combined_size.x += background_panel.content_margin_left + background_panel.content_margin_right
-	combined_size.y += background_panel.content_margin_top + background_panel.content_margin_bottom
-	
-	return minimum_size.max(combined_size)
+# Properties.
 
-
-# Helpers.
-
-func _update_picker_position() -> void:
+func _update_color_picker_position() -> void:
 	if not _color_picker.visible:
 		return
 	
@@ -92,22 +64,46 @@ func _update_picker_position() -> void:
 		get_theme_constant("picker_offset_x"),
 		get_theme_constant("picker_offset_y")
 	)
-	var picker_position := Vector2(
+	var picker_position := global_position + Vector2(
 		0 - picker_offset.x - _color_picker.size.x,
 		0
 	)
 	
 	var window_size := get_window().size
-	var picker_end_position := global_position.y + picker_position.y + _color_picker.size.y + picker_offset.y
+	var picker_end_position := picker_position.y + _color_picker.size.y + picker_offset.y
 	if picker_end_position > window_size.y:
 		picker_position.y -= picker_end_position - window_size.y
 	
-	_color_picker.position = picker_position
+	_color_picker.global_position = picker_position
 
 
 # Implementation.
 
+func _handle_property_clicked() -> void:
+	_color_picker.visible = not _color_picker.visible
+	
+	if _color_picker.visible:
+		_update_color_picker_position()
+		if not Engine.is_editor_hint():
+			_color_picker.get_picker().color = element.get(prop_name)
+		
+		editing_started.emit()
+	else:
+		editing_stopped.emit()
+
+
+func _handle_outside_clicked(at_global_position: Vector2) -> void:
+	if _color_picker.get_global_rect().has_point(at_global_position):
+		return
+	
+	_cancel_editing()
+
+
+func _handle_property_changes(property_name: String) -> void:
+	if property_name == prop_name:
+		queue_redraw()
+
+
 func _cancel_editing() -> void:
 	_color_picker.visible = false
-	
 	super()

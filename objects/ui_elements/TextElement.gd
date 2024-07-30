@@ -81,29 +81,40 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties := super(editing_mode)
 	
 	if editing_mode == EditingMode.STYLING_TOOLS:
-		var font_color_property := ColorPropertyEditor.new(self, "font_color", _set_font_color)
+		# Font properties.
+		
+		var font_section := PropertyEditorHelper.create_section(self, "Font", null) #preload("res://assets/icons/text-fill.png")
+		properties.push_back(font_section)
+		
+		var font_color_property := PropertyEditorHelper.create_color_property(self, "font_color", _set_font_color)
+		font_color_property.label = "Color"
+		font_section.connect_property_to_section(font_color_property)
 		properties.push_back(font_color_property)
 		
-		var shadow_property := TogglePropertyEditor.new(self, "draw_shadow", _toggle_draw_shadow)
-		shadow_property.label = "Shadow"
-		#shadow_property.icon = preload("res://assets/icons/text-shadow.png")
-		properties.push_back(shadow_property)
+		# Shadow properties.
 		
-		var shadow_color_property := ColorPropertyEditor.new(self, "shadow_color", _set_shadow_color)
-		shadow_color_property.set_visibility_condition(func() -> bool:
-			return draw_shadow
+		var shadow_section := PropertyEditorHelper.create_togglable_section(
+			self, "draw_shadow", _toggle_draw_shadow,
+			"Shadow", null #preload("res://assets/icons/text-shadow.png")
 		)
+		properties.push_back(shadow_section)
+		
+		var shadow_color_property := PropertyEditorHelper.create_color_property(self, "shadow_color", _set_shadow_color)
+		shadow_color_property.label = "Color"
+		shadow_section.connect_property_to_section(shadow_color_property)
 		properties.push_back(shadow_color_property)
 		
-		var outline_property := TogglePropertyEditor.new(self, "draw_outline", _toggle_draw_outline)
-		outline_property.label = "Outline"
-		#outline_property.icon = preload("res://assets/icons/text-outline.png")
-		properties.push_back(outline_property)
+		# Outline properties.
 		
-		var outline_color_property := ColorPropertyEditor.new(self, "outline_color", _set_outline_color)
-		outline_color_property.set_visibility_condition(func() -> bool:
-			return draw_outline
+		var outline_section := PropertyEditorHelper.create_togglable_section(
+			self, "draw_outline", _toggle_draw_outline,
+			"Outline", null #preload("res://assets/icons/text-outline.png")
 		)
+		properties.push_back(outline_section)
+		
+		var outline_color_property := PropertyEditorHelper.create_color_property(self, "outline_color", _set_outline_color)
+		outline_color_property.label = "Color"
+		outline_section.connect_property_to_section(outline_color_property)
 		properties.push_back(outline_color_property)
 		
 	return properties
