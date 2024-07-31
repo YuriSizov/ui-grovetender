@@ -80,7 +80,29 @@ func draw() -> void:
 func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties := super(editing_mode)
 	
-	if editing_mode == EditingMode.STYLING_TOOLS:
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
+		# Text properties.
+		
+		var text_section := PropertyEditorHelper.create_section(self, "Text", null)
+		properties.push_back(text_section)
+		
+		var font_h_alignment := PropertyEditorHelper.create_variant_property(self, "text_horizontal_alignment", Callable())
+		font_h_alignment.label = "Hor. align"
+		font_h_alignment.add_variant_item(TextAlignment.BEGIN, "Align to the left.", null)
+		font_h_alignment.add_variant_item(TextAlignment.CENTER, "Align to the center.", null)
+		font_h_alignment.add_variant_item(TextAlignment.END, "Align to the right.", null)
+		text_section.connect_property_to_section(font_h_alignment)
+		properties.push_back(font_h_alignment)
+	
+		var font_v_alignment := PropertyEditorHelper.create_variant_property(self, "text_vertical_alignment", Callable())
+		font_v_alignment.label = "Ver. align"
+		font_v_alignment.add_variant_item(TextAlignment.BEGIN, "Align to the top.", null)
+		font_v_alignment.add_variant_item(TextAlignment.CENTER, "Align to the middle.", null)
+		font_v_alignment.add_variant_item(TextAlignment.END, "Align to the bottom.", null)
+		text_section.connect_property_to_section(font_v_alignment)
+		properties.push_back(font_v_alignment)
+	
+	elif editing_mode == EditingMode.STYLING_TOOLS:
 		# Font properties.
 		
 		var font_section := PropertyEditorHelper.create_section(self, "Font", null) #preload("res://assets/icons/text-fill.png")

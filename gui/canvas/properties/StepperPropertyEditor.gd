@@ -27,13 +27,14 @@ func _init() -> void:
 	theme_type_variation = &"StepperPropertyEditor"
 	
 	resized.connect(queue_redraw)
+	sort_children.connect(queue_redraw)
 
 
 func _ready() -> void:
 	super()
 	
 	_update_property_steppers()
-	edited_property_changed.connect(_update_property_steppers)
+	property_connected.connect(_update_property_steppers)
 	
 	for stepper: SpinBox in _stepper_grid.get_children():
 		stepper.value_changed.connect(_change_property_value.bind(stepper.get_index()))
@@ -55,6 +56,12 @@ func _update_theme() -> void:
 	_property_stepper2.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
 	_property_stepper3.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
 	_property_stepper4.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
+	
+	# Allows to set a more flexible minimum width via control properties.
+	_property_stepper1.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
+	_property_stepper2.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
+	_property_stepper3.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
+	_property_stepper4.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
 
 
 func _clear_theme() -> void:
@@ -67,6 +74,12 @@ func _clear_theme() -> void:
 	_property_stepper2.get_line_edit().remove_theme_stylebox_override("normal")
 	_property_stepper3.get_line_edit().remove_theme_stylebox_override("normal")
 	_property_stepper4.get_line_edit().remove_theme_stylebox_override("normal")
+	
+	_property_stepper1.get_line_edit().remove_theme_constant_override("minimum_character_width")
+	_property_stepper2.get_line_edit().remove_theme_constant_override("minimum_character_width")
+	_property_stepper3.get_line_edit().remove_theme_constant_override("minimum_character_width")
+	_property_stepper4.get_line_edit().remove_theme_constant_override("minimum_character_width")
+
 
 
 func _draw() -> void:
@@ -216,13 +229,13 @@ func _handle_stepper_input(event: InputEvent, stepper: SpinBox) -> void:
 
 func _handle_stepper_focused(stepper: SpinBox) -> void:
 	_focused_stepper = stepper
-	editing_started.emit()
+	_start_editing()
 
 
 func _handle_stepper_unfocused(stepper: SpinBox) -> void:
 	if _focused_stepper == stepper: # In case we've already gained focus elsewhere.
 		_focused_stepper = null
-		editing_stopped.emit()
+		_stop_editing()
 
 
 func _change_property_value(value: float, value_index: int) -> void:

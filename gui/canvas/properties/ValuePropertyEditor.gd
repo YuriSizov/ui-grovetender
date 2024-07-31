@@ -32,7 +32,7 @@ func _ready() -> void:
 	super()
 	
 	_update_property_name()
-	edited_property_changed.connect(_update_property_name)
+	property_connected.connect(_update_property_name)
 	
 	_property_name.gui_input.connect(_handle_property_name_input)
 
@@ -73,9 +73,21 @@ func _clear_theme() -> void:
 	_property_name.end_bulk_theme_override()
 
 
-func _gui_input(event: InputEvent) -> void:
-	super(event)
+func _input(event: InputEvent) -> void:
+	# Capture input events before GUI input in case we are going to click outside of this
+	# editor and need to gracefully exit the active state.
 	
+	if not _editing_active:
+		return
+	
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if not get_global_rect().has_point(mb.global_position):
+			_handle_outside_clicked(mb.global_position)
+
+
+func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		
@@ -97,7 +109,7 @@ func _update_property_name() -> void:
 	if not is_inside_tree() || Engine.is_editor_hint():
 		return
 	
-	_property_name.text = get_editor_label()
+	_property_name.text = _get_editor_label()
 
 
 func _handle_property_name_input(event: InputEvent) -> void:
@@ -118,14 +130,6 @@ func _handle_property_name_input(event: InputEvent) -> void:
 
 
 # Implementation.
-
-func handle_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if not get_global_rect().has_point(mb.global_position):
-			_handle_outside_clicked(mb.global_position)
-			return # Event may come from outside of this control, e.g. via _input.
-
 
 ## Called when the property name was clicked. Extending classes should treat this as editing toggle.
 func _handle_property_name_clicked() -> void:

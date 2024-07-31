@@ -7,18 +7,13 @@
 @tool
 class_name ColorPropertyEditor extends ValuePropertyEditor
 
-@onready var _color_preview: Control = %PropertyColor
+@onready var _color_preview: Button = %PropertyColor
 @onready var _color_picker: SimpleColorPicker = %ColorPicker
-
-var _color_pressed: bool = false
 
 
 func _init() -> void:
 	super()
 	theme_type_variation = &"ColorPropertyEditor"
-	
-	resized.connect(queue_redraw)
-	sort_children.connect(queue_redraw)
 
 
 func _ready() -> void:
@@ -27,23 +22,20 @@ func _ready() -> void:
 	get_window().size_changed.connect(_update_color_picker_position)
 	
 	_color_picker.get_picker().color_changed.connect(_change_color_value)
-	_color_preview.gui_input.connect(_handle_color_preview_input)
-	_color_preview.mouse_exited.connect(func() -> void:
-		_color_pressed = false
-	)
+	_color_preview.pressed.connect(_toggle_color_picker)
+	_color_preview.draw.connect(_draw_color_preview)
 
 
-func _draw() -> void:
-	var preview_rect := _color_preview.get_global_rect()
-	preview_rect.position -= global_position
+func _draw_color_preview() -> void:
+	var preview_rect := Rect2(Vector2.ZERO, _color_preview.size)
 	
 	var preview_bg := get_theme_icon("sample_bg", "ColorPicker") # Godot already provides a nice icon for this.
 	var preview_color: Color = Color.WHITE
 	if not Engine.is_editor_hint():
 		preview_color = get_property_value()
 	
-	draw_texture_rect(preview_bg, preview_rect, true)
-	draw_rect(preview_rect, preview_color)
+	_color_preview.draw_texture_rect(preview_bg, preview_rect, true)
+	_color_preview.draw_rect(preview_rect, preview_color)
 
 
 # Properties.
@@ -69,23 +61,6 @@ func _update_color_picker_position() -> void:
 	_color_picker.global_position = picker_position
 
 
-func _handle_color_preview_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		
-		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_color_pressed = true
-			accept_event()
-			queue_redraw()
-		
-		elif _color_pressed && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_color_pressed = false
-			accept_event()
-			queue_redraw()
-			
-			_toggle_color_picker()
-
-
 func _toggle_color_picker() -> void:
 	_color_picker.visible = not _color_picker.visible
 	
@@ -94,9 +69,9 @@ func _toggle_color_picker() -> void:
 		if not Engine.is_editor_hint():
 			_color_picker.get_picker().color = get_property_value()
 		
-		editing_started.emit()
+		_start_editing()
 	else:
-		editing_stopped.emit()
+		_stop_editing()
 
 
 func _change_color_value(color: Color) -> void:
@@ -104,6 +79,7 @@ func _change_color_value(color: Color) -> void:
 		prop_setter.call(color)
 	
 	queue_redraw()
+	_color_preview.queue_redraw()
 
 
 # Implementation.
@@ -122,6 +98,7 @@ func _handle_outside_clicked(at_global_position: Vector2) -> void:
 func _handle_property_changes(property_name: String) -> void:
 	if property_name == prop_name:
 		queue_redraw()
+		_color_preview.queue_redraw()
 
 
 func _cancel_editing() -> void:

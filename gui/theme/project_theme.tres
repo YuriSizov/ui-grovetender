@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=54 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=58 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -287,7 +287,7 @@ corner_detail = 4
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r4kx8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j60as"]
-bg_color = Color(0.686866, 0.741687, 0.805968, 1)
+bg_color = Color(0.370749, 0.436418, 0.512803, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -418,6 +418,32 @@ corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ivebc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8v7q"]
+bg_color = Color(0.51625, 0.663092, 0.775114, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4dq1"]
+bg_color = Color(0.447683, 0.597677, 0.713726, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gfq45"]
+bg_color = Color(0.488228, 0.762116, 0.932688, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
 
 [resource]
 default_font = ExtResource("1_32up8")
@@ -610,12 +636,19 @@ StepperPropertyEditor/styles/stepper_panel = SubResource("StyleBoxFlat_gv0jq")
 TogglePropertyEditor/base_type = &"ValuePropertyEditor"
 TogglePropertyEditor/font_sizes/font_size = 16
 TogglePropertyEditor/fonts/font = ExtResource("1_nbw0c")
+TogglePropertyEditor/styles/toggle_panel = SubResource("StyleBoxEmpty_ivebc")
 ValuePropertyEditor/base_type = &"PropertyEditor"
 ValuePropertyEditor/constants/base_separation = 8
 ValuePropertyEditor/constants/margin_bottom = 2
 ValuePropertyEditor/constants/margin_left = 8
 ValuePropertyEditor/constants/margin_right = 8
 ValuePropertyEditor/constants/margin_top = 2
+VariantPropertyEditor/base_type = &"ValuePropertyEditor"
+VariantPropertyEditor/font_sizes/font_size = 16
+VariantPropertyEditor/fonts/font = ExtResource("1_nbw0c")
+VariantPropertyEditor/styles/button_hover = SubResource("StyleBoxFlat_x8v7q")
+VariantPropertyEditor/styles/button_normal = SubResource("StyleBoxFlat_p4dq1")
+VariantPropertyEditor/styles/button_pressed = SubResource("StyleBoxFlat_gfq45")
 ZoomLabel/base_type = &"Label"
 ZoomLabel/colors/font_color = Color(0.309804, 0.309804, 0.309804, 0.705882)
 ZoomLabel/colors/font_shadow_color = Color(1, 1, 1, 0.862745)

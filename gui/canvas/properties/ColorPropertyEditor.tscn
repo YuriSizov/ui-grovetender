@@ -25,11 +25,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="PropertyColor" type="Control" parent="Layout"]
+[node name="PropertyColor" type="Button" parent="Layout"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(64, 24)
 layout_mode = 2
-size_flags_vertical = 4
+flat = true
 
 [node name="ColorPickerAnchor" type="Control" parent="."]
 layout_mode = 2

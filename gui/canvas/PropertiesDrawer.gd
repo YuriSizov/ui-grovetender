@@ -7,7 +7,6 @@
 class_name PropertiesDrawer extends PanelContainer
 
 var _property_section_ranges: Array[Vector2i] = []
-var _edited_property: PropertyEditor = null
 
 @onready var _element_title: Label = %ElementTitle
 @onready var _element_properties: Control = %PropertiesList
@@ -20,14 +19,6 @@ func _ready() -> void:
 	EndlessCanvas.get_instance().editing_mode_changed.connect(_update_property_list)
 	EndlessCanvas.get_instance().selection_changed.connect(_update_property_list)
 	EndlessCanvas.get_instance().selection_changed.connect(_update_element_title)
-
-
-func _input(event: InputEvent) -> void:
-	# Before the GUI input handler is called, check for the actively edited property and
-	# let it capture the event.
-	
-	if _edited_property:
-		_edited_property.handle_input(event)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -114,9 +105,6 @@ func _update_property_list() -> void:
 			current_range.y = i
 		
 		_element_properties.add_child(property_editor)
-		
-		property_editor.editing_started.connect(_update_edited_property.bind(property_editor))
-		property_editor.editing_stopped.connect(_update_edited_property.bind(null))
 		property_editor.visibility_changed.connect(queue_redraw)
 	
 	if current_range.x != current_range.y:
@@ -127,18 +115,11 @@ func _update_property_list() -> void:
 
 func _clear_property_list() -> void:
 	_property_section_ranges.clear()
-	_edited_property = null
 	
 	for property_editor: PropertyEditor in _element_properties.get_children():
-		property_editor.editing_started.disconnect(_update_edited_property.bind(property_editor))
-		property_editor.editing_stopped.disconnect(_update_edited_property.bind(null))
 		property_editor.visibility_changed.disconnect(queue_redraw)
 		
 		_element_properties.remove_child(property_editor)
 		property_editor.queue_free()
 	
 	queue_redraw()
-
-
-func _update_edited_property(property: PropertyEditor) -> void:
-	_edited_property = property

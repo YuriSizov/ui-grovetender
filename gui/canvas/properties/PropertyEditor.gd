@@ -7,10 +7,7 @@
 @tool
 class_name PropertyEditor extends MarginContainer
 
-@warning_ignore("unused_signal") # Used in extending classes.
-signal editing_started()
-signal editing_stopped()
-signal edited_property_changed()
+signal property_connected()
 
 ## The element object that owns the property.
 var element: BaseUIElement = null
@@ -25,6 +22,8 @@ var label: String = ""
 ## The callable that is called to check if the editor should be visible. If it's empty/invalid,
 ## the editor is always visible.
 var _visibility_condition: Callable = Callable()
+
+var _editing_active: bool = false
 
 
 func _init() -> void:
@@ -62,10 +61,6 @@ func _clear_theme() -> void:
 	pass
 
 
-func _gui_input(event: InputEvent) -> void:
-	handle_input(event)
-
-
 # Metadata.
 
 func connect_to_property(_element: BaseUIElement, _name: String, _setter: Callable) -> void:
@@ -84,7 +79,7 @@ func connect_to_property(_element: BaseUIElement, _name: String, _setter: Callab
 		element.property_changed.connect(_handle_property_changes)
 		element.properties_changed.connect(_check_visibility_condition)
 	
-	edited_property_changed.emit()
+	property_connected.emit()
 
 
 func has_property() -> bool:
@@ -118,18 +113,27 @@ func _check_visibility_condition() -> void:
 
 # Helpers.
 
-func get_editor_label() -> String:
+func _get_editor_label() -> String:
 	if not label.is_empty():
 		return label
 	return prop_name.capitalize()
 
 
+func _start_editing() -> void:
+	if _editing_active:
+		return
+	
+	_editing_active = true
+
+
+func _stop_editing() -> void:
+	if not _editing_active:
+		return
+	
+	_editing_active = false
+
+
 # Implementation.
-
-## Handles incoming input events. Extending classes implement this method.
-func handle_input(_event: InputEvent) -> void:
-	pass
-
 
 ## Called when one of the reference element properties changes. Extending classes implement this
 ## method.
@@ -140,4 +144,4 @@ func _handle_property_changes(_property_name: String) -> void:
 ## Called when the editing state must be exited due to external circumstances, e.g. a click outside.
 ## Extending classes can implement and/or call this method.
 func _cancel_editing() -> void:
-	editing_stopped.emit()
+	_stop_editing()

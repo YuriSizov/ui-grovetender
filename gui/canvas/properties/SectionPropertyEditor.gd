@@ -46,7 +46,7 @@ func _ready() -> void:
 	_update_section_name()
 	_update_section_toggle()
 	
-	edited_property_changed.connect(func() -> void:
+	property_connected.connect(func() -> void:
 		_update_section_icon()
 		_update_section_name()
 		_update_section_toggle()
@@ -100,6 +100,23 @@ func _draw() -> void:
 	draw_style_box(background_style, Rect2(Vector2.ZERO, size))
 
 
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_pressed = true
+			accept_event()
+			queue_redraw()
+		
+		elif _pressed && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_pressed = false
+			accept_event()
+			queue_redraw()
+			
+			_toggle_section()
+
+
 # Properties.
 
 func set_icon(value: Texture2D) -> void:
@@ -121,7 +138,7 @@ func _update_section_name() -> void:
 	if not is_inside_tree() || Engine.is_editor_hint():
 		return
 	
-	_section_name.text = get_editor_label()
+	_section_name.text = _get_editor_label()
 
 
 func _update_section_toggle() -> void:
@@ -134,6 +151,14 @@ func _update_section_toggle() -> void:
 	
 	_section_toggle.visible = true
 	_section_toggle.texture = CHECKBOX_ICONS[0] if get_property_value() else CHECKBOX_ICONS[1]
+
+
+func _toggle_section() -> void:
+	if not has_property() || not prop_setter.is_valid():
+		return
+	
+	var current_value: bool = get_property_value()
+	prop_setter.call(not current_value)
 
 
 func is_toggled() -> bool:
@@ -153,27 +178,6 @@ func connect_property_to_section(property_editor: PropertyEditor) -> void:
 
 
 # Implementation.
-
-func handle_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		if not get_global_rect().has_point(mb.global_position):
-			return # Event may come from outside of this control, e.g. via _input.
-		
-		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_pressed = true
-			accept_event()
-			queue_redraw()
-		
-		elif _pressed && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
-			_pressed = false
-			accept_event()
-			queue_redraw()
-			
-			if has_property() && prop_setter.is_valid():
-				var current_value: bool = get_property_value()
-				prop_setter.call(not current_value)
-
 
 func _handle_property_changes(property_name: String) -> void:
 	if property_name == prop_name:

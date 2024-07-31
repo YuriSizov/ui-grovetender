@@ -30,24 +30,24 @@ columns = 2
 
 [node name="PropertyValue1" type="SpinBox" parent="Layout/StepperGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-suffix = "px"
 select_all_on_focus = true
 
 [node name="PropertyValue2" type="SpinBox" parent="Layout/StepperGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-suffix = "px"
 select_all_on_focus = true
 
 [node name="PropertyValue3" type="SpinBox" parent="Layout/StepperGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-suffix = "px"
 select_all_on_focus = true
 
 [node name="PropertyValue4" type="SpinBox" parent="Layout/StepperGrid"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-suffix = "px"
 select_all_on_focus = true

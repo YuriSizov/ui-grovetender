@@ -10,6 +10,7 @@ const SECTION_PROPERTY_EDITOR := preload("res://gui/canvas/properties/SectionPro
 const TOGGLE_PROPERTY_EDITOR := preload("res://gui/canvas/properties/TogglePropertyEditor.tscn")
 const COLOR_PROPERTY_EDITOR := preload("res://gui/canvas/properties/ColorPropertyEditor.tscn")
 const STEPPER_PROPERTY_EDITOR := preload("res://gui/canvas/properties/StepperPropertyEditor.tscn")
+const VARIANT_PROPERTY_EDITOR := preload("res://gui/canvas/properties/VariantPropertyEditor.tscn")
 
 
 static func create_section(element: BaseUIElement, label: String, icon: Texture2D = null) -> SectionPropertyEditor:
@@ -46,6 +47,13 @@ static func create_color_property(element: BaseUIElement, prop_name: String, pro
 
 static func create_stepper_property(element: BaseUIElement, prop_name: String, prop_setter: Callable) -> StepperPropertyEditor:
 	var stepper_editor := STEPPER_PROPERTY_EDITOR.instantiate()
+	stepper_editor.connect_to_property(element, prop_name, prop_setter)
+	
+	return stepper_editor
+
+
+static func create_variant_property(element: BaseUIElement, prop_name: String, prop_setter: Callable) -> VariantPropertyEditor:
+	var stepper_editor := VARIANT_PROPERTY_EDITOR.instantiate()
 	stepper_editor.connect_to_property(element, prop_name, prop_setter)
 	
 	return stepper_editor
