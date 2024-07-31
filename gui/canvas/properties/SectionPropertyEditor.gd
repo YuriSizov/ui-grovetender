@@ -128,27 +128,27 @@ func _update_section_toggle() -> void:
 	if not is_inside_tree() || Engine.is_editor_hint():
 		return
 	
-	if prop_name.is_empty():
+	if not has_property():
 		_section_toggle.visible = false
 		return
 	
 	_section_toggle.visible = true
-	_section_toggle.texture = CHECKBOX_ICONS[0] if element.get(prop_name) else CHECKBOX_ICONS[1]
+	_section_toggle.texture = CHECKBOX_ICONS[0] if get_property_value() else CHECKBOX_ICONS[1]
 
 
 func is_toggled() -> bool:
-	if prop_name.is_empty():
+	if not has_property():
 		return true
 	
-	return element.get(prop_name)
+	return get_property_value()
 
 
 func connect_property_to_section(property_editor: PropertyEditor) -> void:
-	if prop_name.is_empty():
+	if not has_property():
 		return # Nothing to do if this is not a togglable section.
 	
 	property_editor.set_visibility_condition(func() -> bool:
-		return element.get(prop_name)
+		return get_property_value()
 	)
 
 
@@ -170,8 +170,8 @@ func handle_input(event: InputEvent) -> void:
 			accept_event()
 			queue_redraw()
 			
-			if not prop_name.is_empty() && prop_setter.is_valid():
-				var current_value: bool = element.get(prop_name)
+			if has_property() && prop_setter.is_valid():
+				var current_value: bool = get_property_value()
 				prop_setter.call(not current_value)
 
 

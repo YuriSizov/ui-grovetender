@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2nlm3w1rsre4"]
+
+[ext_resource type="Script" path="res://gui/canvas/properties/StepperPropertyEditor.gd" id="1_ctr1w"]
+
+[node name="StepperPropertyEditor" type="MarginContainer"]
+theme_type_variation = &"StepperPropertyEditor"
+script = ExtResource("1_ctr1w")
+
+[node name="Layout" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PropertyName" type="Label" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 1
+text = "Property Name"
+
+[node name="Spacer" type="Control" parent="Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="StepperGrid" type="GridContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+columns = 2
+
+[node name="PropertyValue1" type="SpinBox" parent="Layout/StepperGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+suffix = "px"
+select_all_on_focus = true
+
+[node name="PropertyValue2" type="SpinBox" parent="Layout/StepperGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+suffix = "px"
+select_all_on_focus = true
+
+[node name="PropertyValue3" type="SpinBox" parent="Layout/StepperGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+suffix = "px"
+select_all_on_focus = true
+
+[node name="PropertyValue4" type="SpinBox" parent="Layout/StepperGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+suffix = "px"
+select_all_on_focus = true

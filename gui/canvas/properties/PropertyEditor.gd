@@ -87,6 +87,20 @@ func connect_to_property(_element: BaseUIElement, _name: String, _setter: Callab
 	edited_property_changed.emit()
 
 
+func has_property() -> bool:
+	return element && not prop_name.is_empty()
+
+
+func get_property_value() -> Variant:
+	if not element || prop_name.is_empty():
+		return null
+	
+	if prop_name.contains(":"):
+		return element.get_indexed(prop_name)
+	else:
+		return element.get(prop_name)
+
+
 func set_visibility_condition(callable: Callable) -> void:
 	if callable.is_valid():
 		_visibility_condition = callable

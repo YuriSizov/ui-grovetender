@@ -11,10 +11,12 @@ script = ExtResource("1_8gya8")
 [node name="Layout" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 
 [node name="PropertyName" type="Label" parent="Layout"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 1
 text = "Property Name"
 
 [node name="Spacer" type="Control" parent="Layout"]
@@ -28,6 +30,7 @@ custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 0
 texture = ExtResource("2_51f4o")
 expand_mode = 1
 stretch_mode = 5

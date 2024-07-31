@@ -9,6 +9,7 @@ class_name PropertyEditorHelper extends Object
 const SECTION_PROPERTY_EDITOR := preload("res://gui/canvas/properties/SectionPropertyEditor.tscn")
 const TOGGLE_PROPERTY_EDITOR := preload("res://gui/canvas/properties/TogglePropertyEditor.tscn")
 const COLOR_PROPERTY_EDITOR := preload("res://gui/canvas/properties/ColorPropertyEditor.tscn")
+const STEPPER_PROPERTY_EDITOR := preload("res://gui/canvas/properties/StepperPropertyEditor.tscn")
 
 
 static func create_section(element: BaseUIElement, label: String, icon: Texture2D = null) -> SectionPropertyEditor:
@@ -41,3 +42,10 @@ static func create_color_property(element: BaseUIElement, prop_name: String, pro
 	color_editor.connect_to_property(element, prop_name, prop_setter)
 	
 	return color_editor
+
+
+static func create_stepper_property(element: BaseUIElement, prop_name: String, prop_setter: Callable) -> StepperPropertyEditor:
+	var stepper_editor := STEPPER_PROPERTY_EDITOR.instantiate()
+	stepper_editor.connect_to_property(element, prop_name, prop_setter)
+	
+	return stepper_editor

@@ -31,7 +31,7 @@ const SHADOW_BASE_CURVED_FACTOR := 4.0
 @export var border_width: Vector4 = Vector4(2.0, 2.0, 2.0, 2.0)
 
 ## The style of each corner of this panel.
-@export var corner_styles: PackedInt32Array = [ CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE ]
+@export var corner_styles: PackedByteArray = [ CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE, CornerStyle.RIGHT_ANGLE ]
 ## The radius for the curved corner style.
 @export var corner_curved_radius: Vector4 = Vector4(0.0, 0.0, 0.0, 0.0)
 ## The level of detail for the curved corner style.
@@ -92,7 +92,7 @@ func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 		var corner_gizmo := CornerStyleGizmo.new(self)
 		corner_gizmo.set_curved_radius_property("corner_curved_radius")
 		gizmos.push_back(corner_gizmo)
-		corner_gizmo.curved_radius_changed.connect(_set_corner_curve_radius)
+		corner_gizmo.curved_radius_changed.connect(_set_corner_curve_one_radius)
 		corner_gizmo.curved_radius_all_changed.connect(_set_corner_curve_all_radius)
 		corner_gizmo.curved_radius_opposite_changed.connect(_set_corner_curve_opposite_radius)
 		
@@ -102,7 +102,7 @@ func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 			return draw_border
 		)
 		gizmos.push_back(border_gizmo)
-		border_gizmo.width_changed.connect(_set_border_width)
+		border_gizmo.width_changed.connect(_set_border_side_width)
 		border_gizmo.width_all_changed.connect(_set_border_all_width)
 		border_gizmo.width_opposite_changed.connect(_set_border_opposite_width)
 		
@@ -113,8 +113,8 @@ func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 			return draw_shadow
 		)
 		gizmos.push_back(shadow_gizmo)
-		shadow_gizmo.offset_changed.connect(_set_shadow_offset)
-		shadow_gizmo.size_changed.connect(_set_shadow_size)
+		shadow_gizmo.offset_changed.connect(_adjust_shadow_offset)
+		shadow_gizmo.size_changed.connect(_adjust_shadow_size)
 	
 	return gizmos
 
@@ -149,6 +149,25 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		border_section.connect_property_to_section(border_color_property)
 		properties.push_back(border_color_property)
 		
+		var border_width_property := PropertyEditorHelper.create_stepper_property(self, "border_width", _set_border_width)
+		border_width_property.label = "Thickness"
+		border_width_property.set_value_limits(-40.0, 40.0, true, true) # Max value doesn't matter.
+		border_width_property.set_value_step(1.0)
+		border_section.connect_property_to_section(border_width_property)
+		properties.push_back(border_width_property)
+		
+		# Corner properties.
+		
+		var corner_section := PropertyEditorHelper.create_section(self, "Corners", null)
+		properties.push_back(corner_section)
+		
+		var corner_radius_property := PropertyEditorHelper.create_stepper_property(self, "corner_curved_radius", _set_corner_curve_radius)
+		corner_radius_property.label = "Radius"
+		corner_radius_property.set_value_limits(0.0, 90.0, false, true) # Max value doesn't matter.
+		corner_radius_property.set_value_step(1.0)
+		corner_section.connect_property_to_section(corner_radius_property)
+		properties.push_back(corner_radius_property)
+		
 		# Shadow properties.
 		
 		var shadow_section := PropertyEditorHelper.create_togglable_section(
@@ -161,6 +180,20 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		shadow_color_property.label = "Color"
 		shadow_section.connect_property_to_section(shadow_color_property)
 		properties.push_back(shadow_color_property)
+		
+		var shadow_size_property := PropertyEditorHelper.create_stepper_property(self, "shadow_size:x", _set_shadow_size)
+		shadow_size_property.label = "Size"
+		shadow_size_property.set_value_limits(0.0, 120.0, false, true) # Max value doesn't matter.
+		shadow_size_property.set_value_step(1.0)
+		shadow_section.connect_property_to_section(shadow_size_property)
+		properties.push_back(shadow_size_property)
+		
+		var shadow_offset_property := PropertyEditorHelper.create_stepper_property(self, "shadow_offset", _set_shadow_offset)
+		shadow_offset_property.label = "Offset"
+		shadow_offset_property.set_value_limits(-40.0, 40.0, true, true) # Max value doesn't matter.
+		shadow_offset_property.set_value_step(1.0)
+		shadow_section.connect_property_to_section(shadow_offset_property)
+		properties.push_back(shadow_offset_property)
 	
 	return properties
 
@@ -247,7 +280,20 @@ func _set_border_color(value: Color) -> void:
 	properties_changed.emit()
 
 
-func _set_border_width(side: Side, delta: float) -> void:
+func _set_border_width(value: Vector4) -> void:
+	if not draw_border:
+		return
+	
+	border_width = value
+	
+	_update_base_style()
+	_update_border_style()
+	_update_shadow_style()
+	property_changed.emit("border_width")
+	properties_changed.emit()
+
+
+func _set_border_side_width(side: Side, delta: float) -> void:
 	if not draw_border:
 		return
 	
@@ -303,7 +349,20 @@ func _set_border_opposite_width(side: Side, delta: float) -> void:
 
 # Properties - Corners.
 
-func _set_corner_curve_radius(corner: Corner, delta: float) -> void:
+func _set_corner_curve_radius(value: Vector4) -> void:
+	var new_value := value.maxf(0.0)
+	
+	corner_curved_radius = new_value
+	_update_corner_curved_detail()
+	
+	_update_base_style()
+	_update_border_style()
+	_update_shadow_style()
+	property_changed.emit("corner_curved_radius")
+	properties_changed.emit()
+
+
+func _set_corner_curve_one_radius(corner: Corner, delta: float) -> void:
 	var new_value := maxf(0.0, corner_curved_radius[corner] + delta)
 	
 	corner_curved_radius[corner] = new_value
@@ -402,7 +461,18 @@ func _set_shadow_color(value: Color) -> void:
 	properties_changed.emit()
 
 
-func _set_shadow_offset(delta: Vector2) -> void:
+func _set_shadow_offset(value: Vector2) -> void:
+	if not draw_shadow:
+		return
+	
+	shadow_offset = value
+	
+	_update_shadow_style()
+	property_changed.emit("shadow_offset")
+	properties_changed.emit()
+
+
+func _adjust_shadow_offset(delta: Vector2) -> void:
 	if not draw_shadow:
 		return
 	
@@ -413,7 +483,21 @@ func _set_shadow_offset(delta: Vector2) -> void:
 	properties_changed.emit()
 
 
-func _set_shadow_size(delta: float) -> void:
+func _set_shadow_size(value: float) -> void:
+	if not draw_shadow:
+		return
+	
+	shadow_size.x = value
+	shadow_size.y = value
+	shadow_size = shadow_size.max(Vector2.ZERO)
+	
+	_update_shadow_style()
+	property_changed.emit("shadow_size")
+	property_changed.emit("shadow_size:x") # A tiny hack so we can catch updates from the property editor.
+	properties_changed.emit()
+
+
+func _adjust_shadow_size(delta: float) -> void:
 	if not draw_shadow:
 		return
 	
@@ -423,4 +507,5 @@ func _set_shadow_size(delta: float) -> void:
 	
 	_update_shadow_style()
 	property_changed.emit("shadow_size")
+	property_changed.emit("shadow_size:x") # A tiny hack so we can catch updates from the property editor.
 	properties_changed.emit()

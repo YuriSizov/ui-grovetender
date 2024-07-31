@@ -10,8 +10,8 @@ class_name ValuePropertyEditor extends PropertyEditor
 @onready var _layout_container: HBoxContainer = %Layout
 @onready var _property_name: Label = %PropertyName
 
-var _hovered: bool = false
 var _pressed: bool = false
+var _name_pressed: bool = false
 
 
 func _init() -> void:
@@ -19,14 +19,22 @@ func _init() -> void:
 	theme_type_variation = &"ValuePropertyEditor"
 	
 	mouse_entered.connect(func() -> void:
-		_hovered = true
 		queue_redraw()
 	)
 	mouse_exited.connect(func() -> void:
-		_hovered = false
 		_pressed = false
+		_name_pressed = false
 		queue_redraw()
 	)
+
+
+func _ready() -> void:
+	super()
+	
+	_update_property_name()
+	edited_property_changed.connect(_update_property_name)
+	
+	_property_name.gui_input.connect(_handle_property_name_input)
 
 
 func _update_theme() -> void:
@@ -65,29 +73,11 @@ func _clear_theme() -> void:
 	_property_name.end_bulk_theme_override()
 
 
-func _draw() -> void:
-	if _hovered:
-		var hover_style := get_theme_stylebox("panel_hover")
-		draw_style_box(hover_style, Rect2(Vector2.ZERO, size))
-
-
-# Properties.
-
-func _update_property_name() -> void:
-	if not is_inside_tree() || Engine.is_editor_hint():
-		return
+func _gui_input(event: InputEvent) -> void:
+	super(event)
 	
-	_property_name.text = get_editor_label()
-
-
-# Implementation.
-
-func handle_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if not get_global_rect().has_point(mb.global_position):
-			_handle_outside_clicked(mb.global_position)
-			return # Event may come from outside of this control, e.g. via _input.
 		
 		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
 			_pressed = true
@@ -99,12 +89,56 @@ func handle_input(event: InputEvent) -> void:
 			accept_event()
 			queue_redraw()
 			
-			_handle_property_clicked()
+			_handle_inside_clicked(mb.global_position)
+
+# Properties.
+
+func _update_property_name() -> void:
+	if not is_inside_tree() || Engine.is_editor_hint():
+		return
+	
+	_property_name.text = get_editor_label()
 
 
-func _handle_property_clicked() -> void:
+func _handle_property_name_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_name_pressed = true
+			accept_event()
+			queue_redraw()
+		
+		elif _name_pressed && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_name_pressed = false
+			accept_event()
+			queue_redraw()
+			
+			_handle_property_name_clicked()
+
+
+# Implementation.
+
+func handle_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		if not get_global_rect().has_point(mb.global_position):
+			_handle_outside_clicked(mb.global_position)
+			return # Event may come from outside of this control, e.g. via _input.
+
+
+## Called when the property name was clicked. Extending classes should treat this as editing toggle.
+func _handle_property_name_clicked() -> void:
 	pass
 
 
+## Called when the background was clicked. This has lower priority than property name clicks or GUI
+## input events handled by sub-editors. Extending classes can implement this to cancel editing.
+func _handle_inside_clicked(_at_global_position: Vector2) -> void:
+	_cancel_editing()
+
+
+## Called when there is a click event originating from outside of the editor's bounding box. This
+## only happens to active editors via _input.
 func _handle_outside_clicked(_at_global_position: Vector2) -> void:
 	_cancel_editing()

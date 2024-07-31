@@ -12,9 +12,7 @@ signal editor_deselected()
 
 signal rect_changed()
 signal visibility_changed()
-@warning_ignore("unused_signal") # Used in extending classes.
 signal property_changed(property_name: String)
-@warning_ignore("unused_signal") # Used in extending classes.
 signal properties_changed()
 
 ## The unique name of this UI element.
@@ -131,7 +129,16 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
-		# TODO: Add a property editor for size.
+		var layout_section := PropertyEditorHelper.create_section(self, "Layout", null)
+		properties.push_back(layout_section)
+		
+		var size_property := PropertyEditorHelper.create_stepper_property(self, "rect:size", _set_size)
+		size_property.label = "Size"
+		size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
+		size_property.set_value_step(1.0)
+		layout_section.connect_property_to_section(size_property)
+		properties.push_back(size_property)
+		
 		# TODO: Add a property editor for position, when it's an offset inside a composite element.
 		pass
 	
@@ -139,6 +146,14 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 
 
 # Properties.
+
+func _set_size(value: Vector2) -> void:
+	var center_size := _ensure_positive_size(value)
+	
+	rect.set_size(center_size)
+	property_changed.emit("rect:size")
+	properties_changed.emit()
+
 
 func _ensure_positive_size(value: Vector2) -> Vector2:
 	if value.x < 0:
@@ -190,6 +205,9 @@ func _resize_by_corner(corner: Corner, delta: Vector2, keep_ratio: bool) -> void
 	
 	center_rect.position += effective_delta / 2.0
 	rect.set_size_and_position(center_rect)
+	property_changed.emit("rect:size")
+	property_changed.emit("rect:position")
+	properties_changed.emit()
 
 
 func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool) -> void:
@@ -210,6 +228,8 @@ func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool) ->
 		center_size = _ensure_ratio_size(center_size, rect.get_size())
 	
 	rect.set_size(center_size)
+	property_changed.emit("rect:size")
+	properties_changed.emit()
 
 
 func _resize_by_side(side: Side, delta: Vector2) -> void:
@@ -239,6 +259,9 @@ func _resize_by_side(side: Side, delta: Vector2) -> void:
 	
 	center_rect.position += effective_delta / 2.0
 	rect.set_size_and_position(center_rect)
+	property_changed.emit("rect:size")
+	property_changed.emit("rect:position")
+	properties_changed.emit()
 
 
 func _resize_by_all_sides(side: Side, delta: Vector2) -> void:
@@ -261,6 +284,8 @@ func _resize_by_all_sides(side: Side, delta: Vector2) -> void:
 	center_size = _ensure_positive_size(center_size)
 	
 	rect.set_size(center_size)
+	property_changed.emit("rect:size")
+	properties_changed.emit()
 
 
 func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
@@ -279,10 +304,14 @@ func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
 	center_size = _ensure_positive_size(center_size)
 	
 	rect.set_size(center_size)
+	property_changed.emit("rect:size")
+	properties_changed.emit()
 
 
 func _reposition_by_center(delta: Vector2) -> void:
 	rect.position += delta
+	property_changed.emit("rect:position")
+	properties_changed.emit()
 
 
 func set_visible(value: bool) -> void:
