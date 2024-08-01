@@ -7,9 +7,7 @@
 ## A base class for all canvas gizmos.
 class_name BaseGizmo extends Control
 
-@warning_ignore("unused_signal") # Used by extending classes.
 signal grabbed()
-@warning_ignore("unused_signal") # Used by extending classes.
 signal released()
 
 var _reference_element: BaseUIElement = null

@@ -7,6 +7,8 @@
 ## A text label element. Configurable with editable text, font properties, and text decorations.
 class_name TextElement extends BaseUIElement
 
+signal text_shape_changed()
+
 enum TextAlignment {
 	BEGIN,
 	CENTER,
@@ -23,7 +25,7 @@ enum TextAlignment {
 ## The font used for rendering text.
 @export var font: Font = null
 ## The flag that enables automatic adjustment of the font size to fit the element size.
-@export var font_size_fit: bool = false
+@export var font_size_fit: bool = true
 ## The size of the rendered font.
 @export var font_size: float = 18.0
 ## The color of the rendered font.
@@ -46,7 +48,8 @@ enum TextAlignment {
 # Runtime properties and rendering data.
 
 var _text_buffer_font_size: int = 0
-var _text_buffer: TextLine = TextLine.new()
+var _text_buffer: TextParagraph = TextParagraph.new()
+var _text_buffer_position: Vector2 = Vector2.ZERO
 
 
 func _init() -> void:
@@ -61,6 +64,8 @@ func _init() -> void:
 	rect_changed.connect(func() -> void:
 		if font_size_fit:
 			_update_text_buffer()
+		else:
+			_update_text_buffer_position()
 	)
 
 
@@ -70,24 +75,7 @@ func draw() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
 	
-	var text_size := _text_buffer.get_size()
-	var text_position := element_rect.position
-	
-	match text_horizontal_alignment:
-		TextAlignment.BEGIN:
-			text_position.x += 0.0
-		TextAlignment.CENTER:
-			text_position.x += (element_rect.size.x - text_size.x) / 2.0
-		TextAlignment.END:
-			text_position.x += element_rect.size.x - text_size.x
-	
-	match text_vertical_alignment:
-		TextAlignment.BEGIN:
-			text_position.y += 0.0
-		TextAlignment.CENTER:
-			text_position.y += (element_rect.size.y - text_size.y) / 2.0
-		TextAlignment.END:
-			text_position.y += element_rect.size.y - text_size.y
+	var text_position := element_rect.position + _text_buffer_position
 	
 	if draw_shadow:
 		var shadow_position := text_position + shadow_offset
@@ -102,7 +90,17 @@ func draw() -> void:
 func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos := super(editing_mode)
 	
-	if editing_mode == EditingMode.STYLING_TOOLS:
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
+		var text_edit_gizmo := TextEditGizmo.new(self)
+		text_edit_gizmo.set_text_value_property("text")
+		text_edit_gizmo.set_text_buffer(_text_buffer)
+		text_edit_gizmo.set_text_shape_getter(_get_text_buffer_shape)
+		gizmos.push_back(text_edit_gizmo)
+		text_edit_gizmo.text_changed.connect(_set_text)
+		
+		text_shape_changed.connect(text_edit_gizmo.update_text_shape)
+	
+	elif editing_mode == EditingMode.STYLING_TOOLS:
 		# TODO: Implement constraints, snapping, alignment.
 		var shadow_gizmo := ShadowStyleGizmo.new(self)
 		shadow_gizmo.set_visibility_condition(func() -> bool:
@@ -145,7 +143,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		properties.push_back(font_section)
 		
 		var font_size_fit_property := PropertyEditorHelper.create_toggle_property(self, "font_size_fit", _toggle_fit_font_size)
-		font_size_fit_property.label = "Fit to size"
+		font_size_fit_property.label = "Fit to height"
 		properties.push_back(font_size_fit_property)
 		
 		var font_size_property := PropertyEditorHelper.create_stepper_property(self, "font_size", _set_font_size)
@@ -213,7 +211,8 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 func _update_text_buffer() -> void:
 	if font_size_fit:
 		# TODO: This is a naive approach, can likely be improved.
-		var maximum_height := int(rect.size.y)
+		var number_of_lines := text.split("\n").size()
+		var maximum_height := int(rect.size.y / number_of_lines)
 		
 		# We want to fit the entire shaped rectangle into the element size, but we can only
 		# control the font size. The actual shaped height includes font's own sizing considerations,
@@ -229,6 +228,43 @@ func _update_text_buffer() -> void:
 	_text_buffer.clear()
 	if _text_buffer_font_size > 0:
 		_text_buffer.add_string(text, font, _text_buffer_font_size)
+	
+	_update_text_buffer_position()
+
+
+func _update_text_buffer_position() -> void:
+	var text_size := _text_buffer.get_size()
+	var text_position := Vector2.ZERO
+	
+	match text_horizontal_alignment:
+		TextAlignment.BEGIN:
+			text_position.x += 0.0
+		TextAlignment.CENTER:
+			text_position.x += (rect.size.x - text_size.x) / 2.0
+		TextAlignment.END:
+			text_position.x += rect.size.x - text_size.x
+	
+	match text_vertical_alignment:
+		TextAlignment.BEGIN:
+			text_position.y += 0.0
+		TextAlignment.CENTER:
+			text_position.y += (rect.size.y - text_size.y) / 2.0
+		TextAlignment.END:
+			text_position.y += rect.size.y - text_size.y
+	
+	_text_buffer_position = text_position
+	text_shape_changed.emit()
+
+
+func _get_text_buffer_shape() -> Rect2:
+	var buffer_shape := Rect2()
+	buffer_shape.size = _text_buffer.get_size()
+	buffer_shape.position = _text_buffer_position
+	
+	var bounding_rect := rect.get_bounding_rect()
+	buffer_shape.position += bounding_rect.position
+	
+	return buffer_shape
 
 
 func _set_text(value: String) -> void:
@@ -246,6 +282,7 @@ func _set_text_horizontal_alignment(value: TextAlignment) -> void:
 		return
 	text_horizontal_alignment = value
 	
+	_update_text_buffer_position()
 	property_changed.emit("text_horizontal_alignment")
 	properties_changed.emit()
 
@@ -255,6 +292,7 @@ func _set_text_vertical_alignment(value: TextAlignment) -> void:
 		return
 	text_vertical_alignment = value
 	
+	_update_text_buffer_position()
 	property_changed.emit("text_vertical_alignment")
 	properties_changed.emit()
 
