@@ -139,7 +139,8 @@ func _is_hovering_at(mouse_position: Vector2) -> bool:
 	
 	# We use this opportunity to pre-determine which handle we're going to interact with.
 	if relative_length > pow(_sun_handle_size, 2):
-		_handle_type = HandleType.RAY
+		if not _shadow_size_property.is_empty(): # Can't adjust shadow size, so don't capture ray events.
+			_handle_type = HandleType.RAY
 	else:
 		_handle_type = HandleType.SUN
 	

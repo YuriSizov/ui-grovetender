@@ -42,6 +42,12 @@ func _ready() -> void:
 		
 		stepper.get_line_edit().focus_entered.connect(_handle_stepper_focused.bind(stepper))
 		stepper.get_line_edit().focus_exited.connect(_handle_stepper_unfocused.bind(stepper))
+		# TODO: Maybe keep a simplified version for copy/paste operations?
+		# FIXME: Spinboxes have hidden behavior where right-clicking sets the value to min/max.
+		# Normally it's activated only by arrows, but if the context menu on the line edit is
+		# disabled, right clicks pass to the parent spinbox and it consumes it no mattere where
+		# the click lands. This is pretty annoying, and doubtfully expected.
+		stepper.get_line_edit().context_menu_enabled = false
 	
 	_stepper_grid.sort_children.connect(queue_redraw)
 
