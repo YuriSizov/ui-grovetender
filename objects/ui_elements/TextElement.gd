@@ -87,18 +87,26 @@ func draw() -> void:
 	_text_buffer.draw(canvas_control.get_canvas_item(), text_position, font_color)
 
 
+func can_select(at_position: Vector2) -> bool:
+	if _text_buffer:
+		var element_rect := rect.get_bounding_rect()
+		var text_rect := Rect2(element_rect.position + _text_buffer_position, _text_buffer.get_size())
+		
+		if text_rect.has_point(at_position):
+			return true
+	
+	return super(at_position)
+
+
 func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos := super(editing_mode)
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var text_edit_gizmo := TextEditGizmo.new(self)
 		text_edit_gizmo.set_text_value_property("text")
-		text_edit_gizmo.set_text_buffer(_text_buffer)
-		text_edit_gizmo.set_text_shape_getter(_get_text_buffer_shape)
+		text_edit_gizmo.connect_text_buffer(text_shape_changed, _get_text_buffer_data)
 		gizmos.push_back(text_edit_gizmo)
 		text_edit_gizmo.text_changed.connect(_set_text)
-		
-		text_shape_changed.connect(text_edit_gizmo.update_text_shape)
 	
 	elif editing_mode == EditingMode.STYLING_TOOLS:
 		# TODO: Implement constraints, snapping, alignment.
@@ -256,15 +264,8 @@ func _update_text_buffer_position() -> void:
 	text_shape_changed.emit()
 
 
-func _get_text_buffer_shape() -> Rect2:
-	var buffer_shape := Rect2()
-	buffer_shape.size = _text_buffer.get_size()
-	buffer_shape.position = _text_buffer_position
-	
-	var bounding_rect := rect.get_bounding_rect()
-	buffer_shape.position += bounding_rect.position
-	
-	return buffer_shape
+func _get_text_buffer_data() -> Array:
+	return [ _text_buffer, _text_buffer_position ]
 
 
 func _set_text(value: String) -> void:

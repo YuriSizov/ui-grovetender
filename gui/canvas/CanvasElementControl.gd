@@ -57,8 +57,7 @@ func is_selectable(at_position: Vector2) -> bool:
 	if not data:
 		return false
 	
-	var element_rect := data.rect.get_bounding_rect()
-	return element_rect.has_point(at_position)
+	return data.can_select(at_position)
 
 
 ## Returns whether this proxy control is currently visible on screen.

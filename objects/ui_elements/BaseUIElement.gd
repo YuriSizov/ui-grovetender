@@ -56,10 +56,12 @@ func clear_control_id() -> void:
 	_control_id = 0
 
 
+## Returns whether the element is selected in the editor.
 func is_selected() -> bool:
 	return _selected
 
 
+## Marks the element as selected in the editor.
 func set_selected(value: bool) -> void:
 	if _selected == value:
 		return
@@ -90,6 +92,13 @@ func get_rect_in_control() -> Rect2:
 ## Renders this UI element. Extending classes override this method.
 func draw() -> void:
 	pass
+
+
+## Called to check if a click at the given position should select this element. Extending classes
+## may override this method.
+func can_select(at_position: Vector2) -> bool:
+	var element_rect := rect.get_bounding_rect()
+	return element_rect.has_point(at_position)
 
 
 ## Initializes and returns a set of gizmos for editing this UI element. Gizmos with lower indices
@@ -125,6 +134,8 @@ func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:
 	return gizmos
 
 
+## Initializes and returns a set of property editors for editing this UI element. Extending classes
+## override this method, but must call super() most of the time.
 func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
