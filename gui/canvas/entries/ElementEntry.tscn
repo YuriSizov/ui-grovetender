@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://c2galfnni2hkt"]
 
-[ext_resource type="Script" path="res://gui/canvas/elements/ElementEntry.gd" id="1_l5dfc"]
+[ext_resource type="Script" path="res://gui/canvas/entries/ElementEntry.gd" id="1_l5dfc"]
 [ext_resource type="Texture2D" uid="uid://ew3h751oobcn" path="res://assets/icons/element-empty.png" id="2_q63d1"]
 [ext_resource type="Texture2D" uid="uid://c0ndy6hdd5jm3" path="res://assets/ui/sorting-handle.png" id="3_3g8lo"]
 [ext_resource type="Texture2D" uid="uid://dwv64bqaumnov" path="res://assets/ui/visibility-handle-checked.png" id="4_y0g2s"]

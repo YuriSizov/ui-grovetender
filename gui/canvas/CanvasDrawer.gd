@@ -8,7 +8,7 @@ class_name CanvasDrawer extends PanelContainer
 
 signal element_selected(element: BaseUIElement)
 
-const ELEMENT_ENTRY_SCENE := preload("res://gui/canvas/elements/ElementEntry.tscn")
+const ELEMENT_ENTRY_SCENE := preload("res://gui/canvas/entries/ElementEntry.tscn")
 
 var _current_canvas: UICanvas = null
 var _element_data_map: Dictionary = {}
