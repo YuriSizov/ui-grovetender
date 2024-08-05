@@ -130,51 +130,54 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		# FIXME: This is not very reliable and will break with refactoring, so fix it perhaps?
 		var layout_section := properties[0]
 		
-		var font_h_alignment := PropertyEditorHelper.create_variant_property(self, "text_horizontal_alignment", _set_text_horizontal_alignment)
-		font_h_alignment.label = "Hor. align"
-		font_h_alignment.add_variant_item(TextAlignment.BEGIN, "Align to the left.", null)
-		font_h_alignment.add_variant_item(TextAlignment.CENTER, "Align to the center.", null)
-		font_h_alignment.add_variant_item(TextAlignment.END, "Align to the right.", null)
-		layout_section.connect_property_to_section(font_h_alignment)
-		properties.push_back(font_h_alignment)
+		var font_h_alignment_property := PropertyEditorHelper.create_variant_property(self, "text_horizontal_alignment", _set_text_horizontal_alignment)
+		font_h_alignment_property.label = "Hor. align"
+		font_h_alignment_property.add_variant_item(TextAlignment.BEGIN, "Align to the left.", preload("res://assets/icons/text-halign-left.png"))
+		font_h_alignment_property.add_variant_item(TextAlignment.CENTER, "Align to the center.", preload("res://assets/icons/text-halign-center.png"))
+		font_h_alignment_property.add_variant_item(TextAlignment.END, "Align to the right.", preload("res://assets/icons/text-halign-right.png"))
+		layout_section.connect_property_to_section(font_h_alignment_property)
+		properties.push_back(font_h_alignment_property)
 	
-		var font_v_alignment := PropertyEditorHelper.create_variant_property(self, "text_vertical_alignment", _set_text_vertical_alignment)
-		font_v_alignment.label = "Ver. align"
-		font_v_alignment.add_variant_item(TextAlignment.BEGIN, "Align to the top.", null)
-		font_v_alignment.add_variant_item(TextAlignment.CENTER, "Align to the middle.", null)
-		font_v_alignment.add_variant_item(TextAlignment.END, "Align to the bottom.", null)
-		layout_section.connect_property_to_section(font_v_alignment)
-		properties.push_back(font_v_alignment)
+		var font_v_alignment_property := PropertyEditorHelper.create_variant_property(self, "text_vertical_alignment", _set_text_vertical_alignment)
+		font_v_alignment_property.label = "Ver. align"
+		font_v_alignment_property.add_variant_item(TextAlignment.BEGIN, "Align to the top.", preload("res://assets/icons/text-valign-top.png"))
+		font_v_alignment_property.add_variant_item(TextAlignment.CENTER, "Align to the middle.", preload("res://assets/icons/text-valign-middle.png"))
+		font_v_alignment_property.add_variant_item(TextAlignment.END, "Align to the bottom.", preload("res://assets/icons/text-valign-bottom.png"))
+		layout_section.connect_property_to_section(font_v_alignment_property)
+		properties.push_back(font_v_alignment_property)
 		
-		# Font properties.
+		# Text properties.
 		
-		var font_section := PropertyEditorHelper.create_section(self, "Font", null) #preload("res://assets/icons/text-fill.png")
-		properties.push_back(font_section)
+		var text_section := PropertyEditorHelper.create_section(self, "Text", null) #preload("res://assets/icons/text-layout.png")
+		properties.push_back(text_section)
 		
 		var font_property := PropertyEditorHelper.create_font_file_property(self, "font_path", _set_font_path)
 		font_property.label = "Font"
 		font_property.set_font_resource_getter(_get_font_resource)
+		text_section.connect_property_to_section(font_property)
 		properties.push_back(font_property)
 		
 		var font_size_fit_property := PropertyEditorHelper.create_toggle_property(self, "font_size_fit", _toggle_fit_font_size)
 		font_size_fit_property.label = "Fit to height"
+		text_section.connect_property_to_section(font_size_fit_property)
 		properties.push_back(font_size_fit_property)
 		
 		var font_size_property := PropertyEditorHelper.create_stepper_property(self, "font_size", _set_font_size)
 		font_size_property.label = "Font size"
 		font_size_property.set_value_limits(0.0, 120.0, false, true)
 		font_size_property.set_value_step(1.0)
+		text_section.connect_property_to_section(font_size_property)
 		properties.push_back(font_size_property)
 	
 	elif editing_mode == EditingMode.STYLING_TOOLS:
-		# Font properties.
+		# Text properties.
 		
-		var font_section := PropertyEditorHelper.create_section(self, "Font", null) #preload("res://assets/icons/text-fill.png")
-		properties.push_back(font_section)
+		var text_section := PropertyEditorHelper.create_section(self, "Fill", null) #preload("res://assets/icons/text-fill.png")
+		properties.push_back(text_section)
 		
 		var font_color_property := PropertyEditorHelper.create_color_property(self, "font_color", _set_font_color)
 		font_color_property.label = "Color"
-		font_section.connect_property_to_section(font_color_property)
+		text_section.connect_property_to_section(font_color_property)
 		properties.push_back(font_color_property)
 		
 		# Shadow properties.

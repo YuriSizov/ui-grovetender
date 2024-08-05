@@ -135,6 +135,7 @@ func _update_font_name() -> void:
 	var font_resource: Font = _font_resource_getter.call()
 	var font_name := font_resource.get_font_name()
 	_font_name_label.text = font_name
+	_font_name_label.tooltip_text = font_name
 
 
 func _select_font(value: String) -> void:

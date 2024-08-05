@@ -35,7 +35,7 @@ mouse_filter = 2
 
 [node name="SectionToggle" type="TextureRect" parent="Layout"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2

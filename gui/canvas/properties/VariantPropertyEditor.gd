@@ -86,7 +86,7 @@ func _create_variant_buttons() -> void:
 		variant_button.icon = item.icon
 		variant_button.expand_icon = true
 		variant_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		variant_button.custom_minimum_size = Vector2(36, 36)
+		variant_button.custom_minimum_size = Vector2(28, 28)
 		_update_variant_button_theme(variant_button)
 		
 		variant_button.toggle_mode = true

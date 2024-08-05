@@ -140,7 +140,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
-		var layout_section := PropertyEditorHelper.create_section(self, "Layout", null)
+		var layout_section := PropertyEditorHelper.create_section(self, "Layout", preload("res://assets/icons/base-layout.png"))
 		properties.push_back(layout_section)
 		
 		var size_property := PropertyEditorHelper.create_stepper_property(self, "rect:size", _set_size)

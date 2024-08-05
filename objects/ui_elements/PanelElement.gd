@@ -158,7 +158,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		
 		# Corner properties.
 		
-		var corner_section := PropertyEditorHelper.create_section(self, "Corners", null)
+		var corner_section := PropertyEditorHelper.create_section(self, "Corners", preload("res://assets/icons/panel-corners.png"))
 		properties.push_back(corner_section)
 		
 		var corner_radius_property := PropertyEditorHelper.create_stepper_property(self, "corner_curved_radius", _set_corner_curve_radius)
