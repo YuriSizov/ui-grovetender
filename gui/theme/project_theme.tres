@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=59 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=62 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -249,6 +249,51 @@ shadow_color = Color(0, 0, 0, 0.313726)
 shadow_size = 1
 shadow_offset = Vector2(2, 2)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cy0cx"]
+content_margin_left = 8.0
+content_margin_top = 1.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.51625, 0.663092, 0.775114, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vndfh"]
+content_margin_left = 8.0
+content_margin_top = 1.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.447683, 0.597677, 0.713726, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e07vg"]
+content_margin_left = 8.0
+content_margin_top = 1.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.488228, 0.762116, 0.932688, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hdatb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5q6kb"]
@@ -436,6 +481,9 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4dq1"]
 bg_color = Color(0.447683, 0.597677, 0.713726, 1)
@@ -444,6 +492,9 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gfq45"]
 bg_color = Color(0.488228, 0.762116, 0.932688, 1)
@@ -452,6 +503,9 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 4
+shadow_color = Color(0, 0, 0, 0.392157)
+shadow_size = 1
+shadow_offset = Vector2(1, 1)
 
 [resource]
 default_font = ExtResource("1_32up8")
@@ -556,6 +610,18 @@ ElementEntry/styles/handle_pressed = SubResource("StyleBoxFlat_ndcan")
 ElementEntry/styles/handle_separator = SubResource("StyleBoxLine_hy6iy")
 ElementEntry/styles/panel = SubResource("StyleBoxEmpty_to7qs")
 ElementEntry/styles/panel_selected = SubResource("StyleBoxFlat_wkryf")
+FontFilePropertyEditor/base_type = &"ValuePropertyEditor"
+FontFilePropertyEditor/colors/button_font_clear_color = Color(0, 0, 0, 0)
+FontFilePropertyEditor/colors/button_font_color = Color(1, 1, 1, 1)
+FontFilePropertyEditor/colors/button_font_shadow_color = Color(0.145098, 0.145098, 0.145098, 0.784314)
+FontFilePropertyEditor/constants/button_font_shadow_offset_x = 1
+FontFilePropertyEditor/constants/button_font_shadow_offset_y = 1
+FontFilePropertyEditor/font_sizes/button_font_size = 16
+FontFilePropertyEditor/font_sizes/font_size = 16
+FontFilePropertyEditor/fonts/font = ExtResource("1_nbw0c")
+FontFilePropertyEditor/styles/button_hover = SubResource("StyleBoxFlat_cy0cx")
+FontFilePropertyEditor/styles/button_normal = SubResource("StyleBoxFlat_vndfh")
+FontFilePropertyEditor/styles/button_pressed = SubResource("StyleBoxFlat_e07vg")
 LineEdit/font_sizes/font_size = 16
 LineEdit/fonts/font = ExtResource("1_32up8")
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_hdatb")
@@ -659,6 +725,7 @@ ValuePropertyEditor/constants/margin_right = 8
 ValuePropertyEditor/constants/margin_top = 2
 VariantPropertyEditor/base_type = &"ValuePropertyEditor"
 VariantPropertyEditor/font_sizes/font_size = 16
+VariantPropertyEditor/font_sizes/variant_font_size = 2
 VariantPropertyEditor/fonts/font = ExtResource("1_nbw0c")
 VariantPropertyEditor/styles/button_hover = SubResource("StyleBoxFlat_x8v7q")
 VariantPropertyEditor/styles/button_normal = SubResource("StyleBoxFlat_p4dq1")

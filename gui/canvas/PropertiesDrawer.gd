@@ -19,6 +19,9 @@ func _ready() -> void:
 	_update_element_title()
 	_update_property_list()
 	
+	resized.connect(queue_redraw)
+	sort_children.connect(queue_redraw)
+	
 	if not Engine.is_editor_hint():
 		EndlessCanvas.get_instance().editing_mode_changed.connect(_update_property_list)
 		EndlessCanvas.get_instance().selection_changed.connect(_update_property_list)

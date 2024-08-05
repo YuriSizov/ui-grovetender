@@ -9,6 +9,8 @@ class_name TextElement extends BaseUIElement
 
 signal text_shape_changed()
 
+const PROJECT_DEFAULT_FONT := preload("res://gui/theme/fonts/project_default_font.tres")
+
 enum TextAlignment {
 	BEGIN,
 	CENTER,
@@ -22,8 +24,8 @@ enum TextAlignment {
 ## The vertical alignment of the text within the bounding box.
 @export var text_vertical_alignment: TextAlignment = TextAlignment.CENTER
 
-## The font used for rendering text.
-@export var font: Font = null
+## The file path for the font used for rendering text.
+@export var font_path: String = ""
 ## The flag that enables automatic adjustment of the font size to fit the element size.
 @export var font_size_fit: bool = true
 ## The size of the rendered font.
@@ -47,6 +49,8 @@ enum TextAlignment {
 
 # Runtime properties and rendering data.
 
+var _font: Font = null
+
 var _text_buffer_font_size: int = 0
 var _text_buffer: TextParagraph = TextParagraph.new()
 var _text_buffer_position: Vector2 = Vector2.ZERO
@@ -56,10 +60,7 @@ func _init() -> void:
 	super()
 	element_name = "TextElement"
 	
-	# Use whatever default as a placeholder.
-	# TODO: Add some nice built-in open font as a default option?
-	font = ThemeDB.get_project_theme().get_font("", "")
-	
+	_update_font_resource()
 	_update_text_buffer()
 	rect_changed.connect(func() -> void:
 		if font_size_fit:
@@ -150,6 +151,11 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		var font_section := PropertyEditorHelper.create_section(self, "Font", null) #preload("res://assets/icons/text-fill.png")
 		properties.push_back(font_section)
 		
+		var font_property := PropertyEditorHelper.create_font_file_property(self, "font_path", _set_font_path)
+		font_property.label = "Font"
+		font_property.set_font_resource_getter(_get_font_resource)
+		properties.push_back(font_property)
+		
 		var font_size_fit_property := PropertyEditorHelper.create_toggle_property(self, "font_size_fit", _toggle_fit_font_size)
 		font_size_fit_property.label = "Fit to height"
 		properties.push_back(font_size_fit_property)
@@ -227,7 +233,7 @@ func _update_text_buffer() -> void:
 		# as well as descent, and extra spacing. So we try to approximate a good value before
 		# shaping, although this may not always produce perfect results.
 		_text_buffer_font_size = maximum_height
-		while (font.get_ascent(_text_buffer_font_size) + font.get_descent(_text_buffer_font_size)) > maximum_height:
+		while (_font.get_ascent(_text_buffer_font_size) + _font.get_descent(_text_buffer_font_size)) > maximum_height:
 			_text_buffer_font_size -= 1
 	
 	else:
@@ -235,7 +241,7 @@ func _update_text_buffer() -> void:
 	
 	_text_buffer.clear()
 	if _text_buffer_font_size > 0:
-		_text_buffer.add_string(text, font, _text_buffer_font_size)
+		_text_buffer.add_string(text, _font, _text_buffer_font_size)
 	
 	_update_text_buffer_position()
 
@@ -299,6 +305,36 @@ func _set_text_vertical_alignment(value: TextAlignment) -> void:
 
 
 # Properties - Font.
+
+func _update_font_resource() -> void:
+	if font_path.is_empty() || not FileAccess.file_exists(font_path):
+		# TODO: Add some nice built-in open font as a default option? NotoSans is okay for now.
+		_font = PROJECT_DEFAULT_FONT
+		return
+	
+	var font_data := FileAccess.get_file_as_bytes(font_path)
+	
+	_font = FontFile.new()
+	_font.data = font_data
+	_font.multichannel_signed_distance_field = true
+	_font.msdf_pixel_range = 8
+	_font.msdf_size = 48
+
+
+func _get_font_resource() -> Font:
+	return _font
+
+
+func _set_font_path(value: String) -> void:
+	if font_path == value:
+		return
+	font_path = value
+	
+	_update_font_resource()
+	_update_text_buffer()
+	property_changed.emit("font_path")
+	properties_changed.emit()
+
 
 func _set_font_size(value: float) -> void:
 	if font_size == value:

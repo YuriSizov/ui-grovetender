@@ -43,6 +43,7 @@ func _update_variant_button_theme(variant_button: Button) -> void:
 	variant_button.add_theme_stylebox_override("normal", get_theme_stylebox("button_normal"))
 	variant_button.add_theme_stylebox_override("hover", get_theme_stylebox("button_hover"))
 	variant_button.add_theme_stylebox_override("pressed", get_theme_stylebox("button_pressed"))
+	variant_button.add_theme_font_size_override("font_size", get_theme_font_size("variant_font_size"))
 	
 	variant_button.end_bulk_theme_override()
 
@@ -59,6 +60,7 @@ func _clear_theme() -> void:
 		variant_button.remove_theme_stylebox_override("normal")
 		variant_button.remove_theme_stylebox_override("hover")
 		variant_button.remove_theme_stylebox_override("pressed")
+		variant_button.remove_theme_font_size_override("font_size")
 		
 		variant_button.end_bulk_theme_override()
 

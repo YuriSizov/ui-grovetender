@@ -1,0 +1,41 @@
+[remap]
+
+importer="font_data_dynamic"
+type="FontFile"
+uid="uid://do8xrf3pxc6tj"
+path="res://.godot/imported/NotoSans-SemiBold.ttf-de75c339f3109ffc12c38a883659ba93.fontdata"
+
+[deps]
+
+source_file="res://assets/fonts/NotoSans-SemiBold.ttf"
+dest_files=["res://.godot/imported/NotoSans-SemiBold.ttf-de75c339f3109ffc12c38a883659ba93.fontdata"]
+
+[params]
+
+Rendering=null
+antialiasing=1
+generate_mipmaps=false
+disable_embedded_bitmaps=true
+multichannel_signed_distance_field=true
+msdf_pixel_range=8
+msdf_size=48
+allow_system_fallback=true
+force_autohinter=false
+hinting=1
+subpixel_positioning=1
+oversampling=4.0
+Fallbacks=null
+fallbacks=[]
+Compress=null
+compress=true
+preload=[{
+"chars": [],
+"glyphs": [],
+"name": "New Configuration",
+"size": Vector2i(16, 0),
+"variation_embolden": 0.0,
+"variation_opentype": {}
+}]
+language_support={}
+script_support={}
+opentype_features={}

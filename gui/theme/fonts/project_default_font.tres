@@ -1,0 +1,10 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://iyh55nj1wwne"]
+
+[ext_resource type="FontFile" uid="uid://do8xrf3pxc6tj" path="res://assets/fonts/NotoSans-SemiBold.ttf" id="1_67uvh"]
+
+[resource]
+base_font = ExtResource("1_67uvh")
+variation_opentype = {
+2003072104: 100,
+2003265652: 600
+}
