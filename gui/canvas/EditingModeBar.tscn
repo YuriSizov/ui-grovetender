@@ -19,66 +19,73 @@ resource_local_to_scene = true
 [sub_resource type="Shortcut" id="Shortcut_eh7jy"]
 resource_local_to_scene = true
 
-[node name="EditingModeBar" type="VBoxContainer"]
+[node name="EditingModeBar" type="MarginContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
+mouse_filter = 2
+theme_type_variation = &"EditingModeBar"
 script = ExtResource("1_6ps3l")
 
-[node name="CurrentModeLabel" type="Label" parent="."]
+[node name="Layout" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+
+[node name="CurrentModeLabel" type="Label" parent="Layout"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-theme_type_variation = &"EditingModeBarTitle"
 text = "Current Mode"
 horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
 
-[node name="ButtonContainer" type="VBoxContainer" parent="."]
+[node name="ButtonSection" type="VBoxContainer" parent="Layout"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 12
+mouse_filter = 2
 
-[node name="ButtonsPanel" type="PanelContainer" parent="ButtonContainer"]
+[node name="ButtonSeparator" type="Panel" parent="Layout/ButtonSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 size_flags_vertical = 4
-theme_type_variation = &"EditingModeBarPanel"
+mouse_filter = 2
 
-[node name="Buttons" type="HBoxContainer" parent="ButtonContainer"]
+[node name="Buttons" type="HBoxContainer" parent="Layout/ButtonSection"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 0
-theme_type_variation = &"EditingModeButtons"
 alignment = 1
 
-[node name="LayoutTools" parent="ButtonContainer/Buttons" instance=ExtResource("2_kkye3")]
+[node name="LayoutTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
 unique_name_in_owner = true
 layout_mode = 2
-button_pressed = true
 shortcut = SubResource("Shortcut_7t5c1")
 icon = ExtResource("3_31v4j")
 shortcut_action = &"grove_tool_layout"
 
-[node name="StylingTools" parent="ButtonContainer/Buttons" instance=ExtResource("2_kkye3")]
+[node name="StylingTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
 unique_name_in_owner = true
 layout_mode = 2
 shortcut = SubResource("Shortcut_msxad")
 icon = ExtResource("4_1dskk")
 shortcut_action = &"grove_tool_styling"
 
-[node name="BehaviorTools" parent="ButtonContainer/Buttons" instance=ExtResource("2_kkye3")]
+[node name="BehaviorTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
 unique_name_in_owner = true
 layout_mode = 2
 shortcut = SubResource("Shortcut_emoen")
 icon = ExtResource("5_6n5jh")
 shortcut_action = &"grove_tool_behavior"
 
-[node name="AnimationTools" parent="ButtonContainer/Buttons" instance=ExtResource("2_kkye3")]
+[node name="AnimationTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
 unique_name_in_owner = true
 layout_mode = 2
 shortcut = SubResource("Shortcut_eh7jy")

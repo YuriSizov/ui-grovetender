@@ -28,6 +28,7 @@ var _elements_offset: Vector2 = Vector2.ZERO
 var _canvas_dragging: bool = false
 var _canvas_drag_position: Vector2 = Vector2.ZERO
 
+@onready var _editing_mode_bar: EditingModeBar = %EditingModeBar
 @onready var _element_container: Control = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
@@ -58,6 +59,8 @@ func _ready() -> void:
 	_gizmos_container.gizmos_input_consumed.connect(_context_menu.clear_options)
 	
 	if not Engine.is_editor_hint():
+		_editing_mode_bar.set_editing_mode(_editing_mode)
+		
 		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
@@ -88,7 +91,6 @@ func _gui_input(event: InputEvent) -> void:
 	
 	elif _canvas_dragging && event is InputEventMouseMotion:
 		_process_canvas_dragging(event)
-
 
 
 func _shortcut_input(event: InputEvent) -> void:

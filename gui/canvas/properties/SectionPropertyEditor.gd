@@ -7,6 +7,8 @@
 @tool
 class_name SectionPropertyEditor extends PropertyEditor
 
+signal section_toggled()
+
 const CHECKBOX_ICONS := [
 	preload("res://assets/ui/checkbox-checked.png"),
 	preload("res://assets/ui/checkbox-unchecked.png")
@@ -159,6 +161,8 @@ func _toggle_section() -> void:
 	
 	var current_value: bool = get_property_value()
 	prop_setter.call(not current_value)
+	
+	section_toggled.emit()
 
 
 func is_toggled() -> bool:

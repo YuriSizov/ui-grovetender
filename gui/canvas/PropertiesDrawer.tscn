@@ -21,7 +21,6 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
-theme_type_variation = &"PropertiesDrawerTitle"
 text = "Nothing Selected"
 horizontal_alignment = 2
 
@@ -30,4 +29,3 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 mouse_filter = 0
-theme_type_variation = &"PropertiesDrawerList"

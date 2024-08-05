@@ -16,8 +16,9 @@ var _grabbed_gizmo: BaseGizmo = null
 func _ready() -> void:
 	_update_active_gizmos()
 	
-	EndlessCanvas.get_instance().editing_mode_changed.connect(_update_active_gizmos)
-	EndlessCanvas.get_instance().selection_changed.connect(_update_active_gizmos)
+	if not Engine.is_editor_hint():
+		EndlessCanvas.get_instance().editing_mode_changed.connect(_update_active_gizmos)
+		EndlessCanvas.get_instance().selection_changed.connect(_update_active_gizmos)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -81,6 +82,8 @@ func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 func _update_active_gizmos() -> void:
 	_clear_active_gizmos()
 	
+	if Engine.is_editor_hint():
+		return
 	if not EndlessCanvas.get_instance():
 		return
 	

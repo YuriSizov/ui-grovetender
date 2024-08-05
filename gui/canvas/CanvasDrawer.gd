@@ -4,6 +4,7 @@
 # Provided under MIT                              #
 ###################################################
 
+@tool
 class_name CanvasDrawer extends PanelContainer
 
 signal element_selected(element: BaseUIElement)
@@ -20,15 +21,69 @@ var _dragging_element: ElementEntry = null
 
 
 func _ready() -> void:
+	_update_theme()
 	_edit_current_canvas()
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED:
+		_update_theme()
+	
+	# This is so hacky, but it allows us to use one theme definition for all elements of a complex
+	# scene, with in-editor preview, without polluting saved scenes.
+	elif what == NOTIFICATION_EDITOR_PRE_SAVE:
+		_clear_theme()
+	elif what == NOTIFICATION_EDITOR_POST_SAVE:
+		_update_theme()
+
+
+## Called when it's a proper time to update visuals according to theme changes.
+func _update_theme() -> void:
+	if not is_node_ready():
+		return
+	
+	_element_list.add_theme_constant_override("separation", get_theme_constant("base_separation"))
+	
+	_canvas_title.begin_bulk_theme_override()
+	_canvas_title.add_theme_font_override("font", get_theme_font("font"))
+	_canvas_title.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
+	_canvas_title.add_theme_color_override("font_color", get_theme_color("font_color"))
+	_canvas_title.add_theme_color_override("font_outline_color", get_theme_color("font_outline_color"))
+	_canvas_title.add_theme_color_override("font_shadow_color", get_theme_color("font_shadow_color"))
+	_canvas_title.add_theme_constant_override("outline_size", get_theme_constant("font_outline_size"))
+	_canvas_title.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
+	_canvas_title.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
+	_canvas_title.end_bulk_theme_override()
+
+
+## Called when the theme overrides need to be reset, e.g. before the scene is saved.
+func _clear_theme() -> void:
+	if not is_node_ready():
+		return
+	
+	_element_list.remove_theme_constant_override("separation")
+	
+	_canvas_title.begin_bulk_theme_override()
+	_canvas_title.remove_theme_font_override("font")
+	_canvas_title.remove_theme_font_size_override("font_size")
+	_canvas_title.remove_theme_color_override("font_color")
+	_canvas_title.remove_theme_color_override("font_outline_color")
+	_canvas_title.remove_theme_color_override("font_shadow_color")
+	_canvas_title.remove_theme_constant_override("outline_size")
+	_canvas_title.remove_theme_constant_override("shadow_offset_x")
+	_canvas_title.remove_theme_constant_override("shadow_offset_y")
+	_canvas_title.end_bulk_theme_override()
+
+
 # Canvas management.
 
 func _edit_current_canvas() -> void:
+	if Engine.is_editor_hint():
+		return
+	
 	_clear_title()
 	_clear_element_entries()
 	
