@@ -148,7 +148,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		
 		# Text properties.
 		
-		var text_section := PropertyEditorHelper.create_section(self, "Text", null) #preload("res://assets/icons/text-layout.png")
+		var text_section := PropertyEditorHelper.create_section(self, "Text", preload("res://assets/icons/text-layout.png"))
 		properties.push_back(text_section)
 		
 		var font_property := PropertyEditorHelper.create_font_file_property(self, "font_path", _set_font_path)
@@ -172,7 +172,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	elif editing_mode == EditingMode.STYLING_TOOLS:
 		# Text properties.
 		
-		var text_section := PropertyEditorHelper.create_section(self, "Fill", null) #preload("res://assets/icons/text-fill.png")
+		var text_section := PropertyEditorHelper.create_section(self, "Fill", preload("res://assets/icons/text-fill.png"))
 		properties.push_back(text_section)
 		
 		var font_color_property := PropertyEditorHelper.create_color_property(self, "font_color", _set_font_color)
@@ -184,7 +184,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		
 		var shadow_section := PropertyEditorHelper.create_togglable_section(
 			self, "draw_shadow", _toggle_draw_shadow,
-			"Shadow", null #preload("res://assets/icons/text-shadow.png")
+			"Shadow", preload("res://assets/icons/text-shadow.png")
 		)
 		properties.push_back(shadow_section)
 		
@@ -204,7 +204,7 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		
 		var outline_section := PropertyEditorHelper.create_togglable_section(
 			self, "draw_outline", _toggle_draw_outline,
-			"Outline", null #preload("res://assets/icons/text-outline.png")
+			"Outline", preload("res://assets/icons/text-outline.png")
 		)
 		properties.push_back(outline_section)
 		
