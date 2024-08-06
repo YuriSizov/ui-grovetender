@@ -14,6 +14,12 @@ signal selection_changed()
 # Our singleton instance.
 static var _instance: EndlessCanvas = null
 
+enum SelectionMode {
+	REPLACE_SELECTION,
+	ADD_TO_SELECTION,
+	REMOVE_FROM_SELECTION,
+}
+
 var _editing_mode: int = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
@@ -29,7 +35,7 @@ var _canvas_dragging: bool = false
 var _canvas_drag_position: Vector2 = Vector2.ZERO
 
 @onready var _editing_mode_bar: EditingModeBar = %EditingModeBar
-@onready var _element_container: Control = %CanvasElements
+@onready var _element_container: CanvasElements = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
 @onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
@@ -55,7 +61,7 @@ func _ready() -> void:
 	_update_zoom_label()
 	
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
-	_canvas_drawer.element_selected.connect(_select_element.bind(true))
+	_canvas_drawer.element_selected.connect(_select_element.bind(SelectionMode.REPLACE_SELECTION))
 	_gizmos_container.gizmos_input_consumed.connect(_context_menu.clear_options)
 	
 	if not Engine.is_editor_hint():
@@ -81,7 +87,7 @@ func _gui_input(event: InputEvent) -> void:
 		
 		else: # Events triggered on release.
 			if mb.button_index == MOUSE_BUTTON_LEFT:
-				_try_select_element(to_canvas_coordinates(mb.global_position))
+				_try_select_element(to_canvas_coordinates(mb.global_position), SelectionMode.REPLACE_SELECTION)
 			
 			elif mb.button_index == MOUSE_BUTTON_RIGHT:
 				_show_create_context_menu(mb.global_position)
@@ -99,18 +105,23 @@ func _shortcut_input(event: InputEvent) -> void:
 		_show_create_context_menu(mouse_position)
 		
 		get_viewport().set_input_as_handled()
+	
+	elif event.is_action_pressed("grove_group_elements", false, true):
+		_group_selected_elements()
+		
+		get_viewport().set_input_as_handled()
 
 
 # Canvas management.
 
 func _edit_current_canvas() -> void:
 	if _current_canvas:
-		_current_canvas.element_created.disconnect(_select_element.bind(true))
+		_current_canvas.element_created.disconnect(_select_element.bind(SelectionMode.REPLACE_SELECTION))
 	
 	_current_canvas = Controller.get_current_canvas()
 	
 	if _current_canvas:
-		_current_canvas.element_created.connect(_select_element.bind(true))
+		_current_canvas.element_created.connect(_select_element.bind(SelectionMode.REPLACE_SELECTION))
 
 
 func _change_editing_mode(new_mode: int) -> void:
@@ -221,8 +232,10 @@ func _unselect_all_elements() -> void:
 	_selected_element = null
 
 
-func _select_element(element: BaseUIElement, exclusive: bool = false) -> void:
-	if exclusive:
+func _select_element(element: BaseUIElement, mode: SelectionMode) -> void:
+	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
+	# TODO: Add support for multi-element selections.
+	if mode == SelectionMode.REPLACE_SELECTION:
 		_unselect_all_elements()
 	
 	# TODO: Support selecting multiple elements at once.
@@ -232,25 +245,23 @@ func _select_element(element: BaseUIElement, exclusive: bool = false) -> void:
 	selection_changed.emit()
 
 
-func _try_select_element(canvas_position: Vector2) -> void:
+func _try_select_element(canvas_position: Vector2, mode: SelectionMode) -> void:
 	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
 	# TODO: Add support for multi-element selections.
-	_unselect_all_elements()
+	if mode == SelectionMode.REPLACE_SELECTION:
+		_unselect_all_elements()
 	
-	var drawn_elements_count := _element_container.get_child_count()
-	for i in drawn_elements_count:
-		var element_index := drawn_elements_count - 1 - i # Iterate backwards, from the topmost.
-		var canvas_element := _element_container.get_child(element_index)
-		
-		if not canvas_element.is_visible_on_screen() || not canvas_element.data:
-			break
-		
-		if canvas_element.is_selectable(canvas_position):
-			_select_element(canvas_element.data)
-			break # For now, select the first match only.
+	var selected_element := _element_container.find_element_at_position(canvas_position)
+	if selected_element:
+		_select_element(selected_element, SelectionMode.ADD_TO_SELECTION)
 	
 	selection_changed.emit()
 
 
 func get_selected_element() -> BaseUIElement:
 	return _selected_element
+
+
+func _group_selected_elements() -> void:
+	# TODO: This is temporary, as we don't support multi-element selections yet.
+	_current_canvas.group_elements(_current_canvas.elements.duplicate())

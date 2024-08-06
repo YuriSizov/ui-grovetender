@@ -10,14 +10,14 @@ class_name CanvasDrawer extends PanelContainer
 signal element_selected(element: BaseUIElement)
 
 const ELEMENT_ENTRY_SCENE := preload("res://gui/canvas/entries/ElementEntry.tscn")
+const COMPOSITE_ENTRY_SCENE := preload("res://gui/canvas/entries/CompositeElementEntry.tscn")
 
 var _current_canvas: UICanvas = null
 var _element_data_map: Dictionary = {}
+var _composite_data_map: Dictionary = {}
 
 @onready var _canvas_title: Label = %CanvasTitle
-@onready var _element_list: Control = %ElementsList
-
-var _dragging_element: ElementEntry = null
+@onready var _element_list: VBoxContainer = %ElementsList
 
 
 func _ready() -> void:
@@ -89,12 +89,14 @@ func _edit_current_canvas() -> void:
 	
 	if _current_canvas:
 		_current_canvas.element_created.disconnect(_create_element_entry)
+		_current_canvas.element_removed.disconnect(_remove_element_entry)
 		_current_canvas.elements_sorted.disconnect(_resort_element_entries)
 	
 	_current_canvas = Controller.get_current_canvas()
 	
 	if _current_canvas:
 		_current_canvas.element_created.connect(_create_element_entry)
+		_current_canvas.element_removed.connect(_remove_element_entry)
 		_current_canvas.elements_sorted.connect(_resort_element_entries)
 	
 	_update_title()
@@ -115,19 +117,99 @@ func _update_title() -> void:
 
 # Element management.
 
+func _get_element_list(owner_element: BaseUIElement) -> VBoxContainer:
+	if not owner_element:
+		return _element_list
+	
+	if _composite_data_map.has(owner_element):
+		var composite_entry: CompositeElementEntry = _composite_data_map[owner_element]
+		return composite_entry.get_element_sublist()
+	
+	return null
+
+
+func _get_owner_element_list(element: BaseUIElement) -> VBoxContainer:
+	if not element.has_owner():
+		return _element_list
+	
+	var owner_element := element.get_owner()
+	if _composite_data_map.has(owner_element):
+		var composite_entry: CompositeElementEntry = _composite_data_map[owner_element]
+		return composite_entry.get_element_sublist()
+	
+	return null
+
+
 func _create_element_entry(element: BaseUIElement) -> void:
-	var element_entry := ELEMENT_ENTRY_SCENE.instantiate()
+	var owner_list := _get_owner_element_list(element)
+	if not owner_list:
+		printerr("CanvasDrawer: Attempting to create an entry but the owner context is invalid.")
+		return
+	
+	# Instantiate the appropriate scene based on the element type.
+	
+	var element_entry: ElementEntry = null
+	var composite_entry: CompositeElementEntry = null
+	
+	if element is CompositeElement:
+		composite_entry = COMPOSITE_ENTRY_SCENE.instantiate()
+		_composite_data_map[element] = composite_entry
+		element_entry = composite_entry.get_element_entry()
+	
+	else:
+		element_entry = ELEMENT_ENTRY_SCENE.instantiate()
+	
+	# Set up the element entry.
+	
 	element_entry.data = element
 	_element_data_map[element] = element_entry
 	
-	_element_list.add_child(element_entry)
-	element_entry.entry_released.connect(_handle_entry_released.bind(element_entry))
+	var drag_ref_node: Control = composite_entry
+	if not composite_entry:
+		drag_ref_node = element_entry
 	
 	element_entry.set_drag_forwarding(
-		_get_element_drag_data.bind(element_entry),
-		_can_drop_element_data.bind(element_entry),
-		_drop_element_data.bind(element_entry)
+		_get_element_drag_data.bind(element_entry, drag_ref_node),
+		_can_drop_element_data.bind(element_entry.data, drag_ref_node),
+		_drop_element_data.bind(drag_ref_node)
 	)
+	element_entry.entry_released.connect(_handle_entry_released.bind(element_entry))
+	
+	# Add the entry to the owner element list, and then create sub-entries if necessary.
+	
+	if element is CompositeElement:
+		owner_list.add_child(composite_entry)
+		
+		for sub_element in element.elements:
+			_create_element_entry(sub_element)
+	
+	else:
+		owner_list.add_child(element_entry)
+
+
+func _remove_element_entry(element: BaseUIElement) -> void:
+	if not _element_data_map.has(element):
+		return
+	
+	var element_entry: ElementEntry = _element_data_map[element]
+	_free_element_entry(element_entry)
+	
+	_element_data_map.erase(element)
+	if _composite_data_map.has(element):
+		_composite_data_map.erase(element)
+
+
+func _free_element_entry(element_entry: ElementEntry) -> void:
+	element_entry.entry_released.disconnect(_handle_entry_released.bind(element_entry))
+	
+	if element_entry.data is CompositeElement:
+		var composite_entry: CompositeElementEntry = _composite_data_map[element_entry.data]
+		composite_entry.get_parent().remove_child(composite_entry)
+		composite_entry.queue_free()
+	
+	else:
+		element_entry.get_parent().remove_child(element_entry)
+		element_entry.queue_free()
 
 
 func _set_element_entries() -> void:
@@ -139,30 +221,44 @@ func _set_element_entries() -> void:
 
 
 func _clear_element_entries() -> void:
-	_element_data_map.clear()
+	for element_entry: ElementEntry in _element_data_map.values():
+		_free_element_entry(element_entry)
 	
-	for element_entry: ElementEntry in _element_list.get_children():
-		element_entry.entry_released.disconnect(_handle_entry_released.bind(element_entry))
-		
-		_element_list.remove_child(element_entry)
-		element_entry.queue_free()
+	_element_data_map.clear()
+	_composite_data_map.clear()
 
 
-func _resort_element_entries() -> void:
+func _resort_element_entries(owner_element: CompositeElement) -> void:
 	if not _current_canvas:
 		return
 	
+	var owner_elements := owner_element.elements if owner_element else _current_canvas.elements
+	var owner_list := _get_element_list(owner_element)
+	if not owner_list:
+		return
+	
+	# First remove all elements from the owner list, keeping track of the nodes.
+	# We creat an ad-hoc list because nodes can have varying types.
 	# TODO: Potentially optimize this to avoid doing excessive work when the state is already correct.
 	
-	for element_entry: ElementEntry in _element_list.get_children():
-		_element_list.remove_child(element_entry)
+	var unsorted_list: Dictionary = {}
 	
-	for element in _current_canvas.elements:
-		if not _element_data_map.has(element):
+	for child_node: Control in owner_list.get_children():
+		if child_node is CompositeElementEntry:
+			unsorted_list[child_node.get_element_entry().data] = child_node
+		elif child_node is ElementEntry:
+			unsorted_list[child_node.data] = child_node
+		
+		owner_list.remove_child(child_node)
+	
+	# Then reinsert the nodes based on the order in the owner element or canvas list.
+	
+	for element in owner_elements:
+		if not unsorted_list.has(element):
 			continue # This shouldn't happen.
 		
-		var element_entry: ElementEntry = _element_data_map[element]
-		_element_list.add_child(element_entry)
+		var element_entry: Control = unsorted_list[element]
+		owner_list.add_child(element_entry)
 
 
 # Interactions.
@@ -174,48 +270,67 @@ func _handle_entry_released(element_entry: ElementEntry) -> void:
 	element_selected.emit(element_entry.data)
 
 
-func _get_element_drag_data(at_position: Vector2, element_entry: ElementEntry) -> Variant:
-	if not element_entry.is_sorting_drag(at_position):
+func _get_element_drag_data(at_position: Vector2, source_entry: ElementEntry, source_node: Control) -> Variant:
+	if not source_entry.is_sorting_drag(at_position):
 		return null
 	
-	element_entry.set_dragging(true)
-	_dragging_element = element_entry
-	
 	var preview_entry := ELEMENT_ENTRY_SCENE.instantiate()
-	preview_entry.data = element_entry.data
+	preview_entry.data = source_entry.data
 	set_drag_preview(preview_entry)
 	
-	# When drag ends, clear the state.
+	# Set the dragging state now; when the preview is removed, clear the state.
+	source_entry.set_dragging(true)
+	# Remember the original position, it can change without triggering the drop handler.
+	var original_index := source_node.get_index()
+	
 	preview_entry.tree_exited.connect(func() -> void:
-		element_entry.set_dragging(false)
-		_dragging_element = null
+		source_entry.set_dragging(false)
+		
+		if source_node.get_index() != original_index:
+			_current_canvas.sort_element(source_entry.data, source_node.get_index())
 	)
 	
 	var data := ElementSortingData.new()
-	data.element = element_entry.data
+	data.element_node = source_node
+	data.element_data = source_entry.data
 	return data
 
 
-func _can_drop_element_data(_at_position: Vector2, data: Variant, element_entry: ElementEntry) -> bool:
+func _can_drop_element_data(_at_position: Vector2, data: Variant, target_data: BaseUIElement, target_node: Control) -> bool:
 	if data is not ElementSortingData:
 		return false
 	
-	var drop_index := element_entry.get_index()
-	if drop_index != _dragging_element.get_index():
-		_element_list.move_child(_dragging_element, drop_index)
+	var sorting_data := data as ElementSortingData
+	
+	var source_owner_id := sorting_data.element_data.get_owner_id()
+	var target_owner_id := target_data.get_owner_id()
+	if source_owner_id != target_owner_id:
+		return false
+	
+	var source_index := sorting_data.element_node.get_index()
+	var target_index := target_node.get_index()
+	if source_index != target_index:
+		var owner_list := _get_owner_element_list(sorting_data.element_data)
+		if not owner_list:
+			return false
+		
+		owner_list.move_child(sorting_data.element_node, target_index)
 	
 	return true
 
 
-func _drop_element_data(_at_position: Vector2, data: Variant, element_entry: ElementEntry) -> void:
+func _drop_element_data(_at_position: Vector2, data: Variant, target_node: Control) -> void:
 	if not _current_canvas:
 		return
 	if data is not ElementSortingData:
 		return
 	
-	var drop_index := element_entry.get_index()
-	_current_canvas.sort_element(data.element, drop_index)
+	var sorting_data := data as ElementSortingData
+	var target_index := target_node.get_index()
+	
+	_current_canvas.sort_element(sorting_data.element_data, target_index)
 
 
 class ElementSortingData:
-	var element: BaseUIElement = null
+	var element_node: Control = null
+	var element_data: BaseUIElement = null

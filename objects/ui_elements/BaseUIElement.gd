@@ -7,13 +7,13 @@
 ## A base class for all types of UI elements. Encapsulates shared logic and universal data members.
 class_name BaseUIElement extends Resource
 
-signal editor_selected()
-signal editor_deselected()
-
 signal rect_changed()
 signal visibility_changed()
 signal property_changed(property_name: String)
 signal properties_changed()
+
+signal editor_selected()
+signal editor_deselected()
 
 ## The unique name of this UI element.
 @export var element_name: String = "EmptyElement"
@@ -23,9 +23,11 @@ signal properties_changed()
 @export var visible: bool = true:
 	set = set_visible
 
+## The instance ID of the owner element. Runtime only.
+var _owner_id: int = 0
 ## The instance ID of the control. Runtime only.
 var _control_id: int = 0
-## Selected status in the editor.
+## Selected status in the editor. Runtime only.
 var _selected: bool = false
 
 
@@ -34,6 +36,34 @@ func _init() -> void:
 
 
 # Metadata.
+
+func get_owner() -> BaseUIElement:
+	if not is_instance_id_valid(_owner_id):
+		return null
+	
+	return instance_from_id(_owner_id)
+
+
+func get_owner_id() -> int:
+	return _owner_id
+
+
+func has_owner() -> bool:
+	return is_instance_id_valid(_owner_id)
+
+
+## Sets the composite element that contains this UI element by its instance ID.
+func set_owner_id(instance_id: int) -> void:
+	if not is_instance_id_valid(instance_id):
+		return
+	
+	_owner_id = instance_id
+
+
+## Clears the composite element that contains this UI element.
+func clear_owner_id() -> void:
+	_owner_id = 0
+
 
 ## Returns the Control node responsible for rendering of this UI element.
 func get_control() -> CanvasElementControl:
@@ -47,11 +77,11 @@ func get_control() -> CanvasElementControl:
 func set_control_id(instance_id: int) -> void:
 	if not is_instance_id_valid(instance_id):
 		return
-
+	
 	_control_id = instance_id
 
 
-## Clears the Control node responsible for renderingt this UI element.
+## Clears the Control node responsible for rendering this UI element.
 func clear_control_id() -> void:
 	_control_id = 0
 

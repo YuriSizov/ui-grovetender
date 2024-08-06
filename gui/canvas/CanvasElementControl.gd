@@ -63,7 +63,7 @@ func is_selectable(at_position: Vector2) -> bool:
 ## Returns whether this proxy control is currently visible on screen.
 # FIXME: Can be optimized with caching.
 func is_visible_on_screen() -> bool:
-	if not is_inside_tree() || not visible || not is_visible_in_tree():
+	if not visible || not is_inside_tree() || not is_visible_in_tree():
 		return false
 	
 	var global_rect := get_global_rect()

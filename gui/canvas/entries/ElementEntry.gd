@@ -76,7 +76,6 @@ func _update_theme() -> void:
 	_element_name.end_bulk_theme_override()
 
 
-
 func _clear_theme() -> void:
 	if not is_node_ready():
 		return
