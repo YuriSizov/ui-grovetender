@@ -35,18 +35,16 @@ func create_element(element_type: int, at_position: Vector2) -> BaseUIElement:
 	
 	if element:
 		element.rect.position = at_position
-		_setup_created_element(element)
+		_name_created_element(element)
+		elements.push_back(element)
+		element_created.emit(element)
 	
 	return element
 
 
-func _setup_created_element(element: BaseUIElement) -> void:
+func _name_created_element(element: BaseUIElement) -> void:
 	# TODO: Implement a more robust system for avoiding name collisions.
 	element.element_name += "%d" % [ element_increment ]
-	
-	elements.push_back(element)
-	element_created.emit(element)
-	
 	element_increment += 1
 
 
@@ -55,9 +53,17 @@ func remove_element(element: BaseUIElement) -> void:
 		printerr("UICanvas: Cannot remove the element that doesn't belong to this canvas, %s." % [ element ])
 		return
 	
-	# TODO: Implement removal, both from canvas (topmost) and from groups (composite elements).
-	# TODO: Dissolve empty composite elements.
-	pass
+	if element.has_owner():
+		var owner_element: CompositeElement = element.get_owner()
+		owner_element.elements.erase(element)
+		element_removed.emit(element)
+		
+		if owner_element.elements.is_empty():
+			remove_element(owner_element)
+	
+	else:
+		elements.erase(element)
+		element_removed.emit(element)
 
 
 func sort_element(element: BaseUIElement, to_index: int) -> void:
@@ -91,22 +97,22 @@ func group_elements(grouped_elements: Array[BaseUIElement]) -> void:
 			printerr("UICanvas: Cannot group elements, because not all of them have the same owner.")
 			return
 	
-	# Group topmost elements of this canvas.
-	if common_owner_id == 0:
-		for element in grouped_elements:
-			elements.erase(element)
-			element_removed.emit(element)
-		
-		var owner_element := CompositeElement.new()
-		owner_element.set_elements(grouped_elements)
-		_setup_created_element(owner_element)
+	# Use the element list either from the canvas or from the common owner element.
+	var owner_elements := elements
+	if is_instance_id_valid(common_owner_id):
+		var common_owner_element: CompositeElement = instance_from_id(common_owner_id)
+		owner_elements = common_owner_element.elements
 	
-	# Group elements in a composite element.
-	else:
-		var base_owner_element := instance_from_id(common_owner_id)
-		for element in grouped_elements:
-			# TODO: Implement grouping within other groups.
-			pass
+	for element in grouped_elements:
+		owner_elements.erase(element)
+		element_removed.emit(element)
+	
+	var composite_element := CompositeElement.new()
+	composite_element.set_elements(grouped_elements)
+	_name_created_element(composite_element)
+	
+	owner_elements.push_back(composite_element)
+	element_created.emit(composite_element)
 
 
 func _is_element_owned_by_canvas(element: BaseUIElement) -> bool:
