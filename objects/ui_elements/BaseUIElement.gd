@@ -105,14 +105,24 @@ func set_selected(value: bool) -> void:
 
 # Position and sizing.
 
+func get_owner_offset() -> Vector2:
+	if not has_owner():
+		return Vector2.ZERO
+	
+	var owner_element := get_owner()
+	var owner_rect := owner_element.rect.get_bounding_rect()
+	return owner_rect.position
+
+
 ## Returns the area for this UI element, relative to the control node.
 func get_rect_in_control() -> Rect2:
 	var control := get_control()
 	if not control:
 		return Rect2()
 	
+	var owner_offset := get_owner_offset()
 	var bounding_rect := rect.get_bounding_rect()
-	bounding_rect.position -= control.position
+	bounding_rect.position -= owner_offset + control.position
 	
 	return bounding_rect
 

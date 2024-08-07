@@ -42,6 +42,8 @@ func _add_element(element: BaseUIElement) -> void:
 	
 	element.set_owner_id(get_instance_id())
 	elements.push_back(element)
+	
+	element.rect_changed.connect(_update_bounding_box)
 
 
 # Helpers.
@@ -58,8 +60,8 @@ func _update_bounding_box() -> void:
 	
 	var bounding_box := elements[0].rect.get_bounding_rect()
 	for element in elements:
-		var other_box := element.rect.get_bounding_rect()
-		bounding_box = bounding_box.merge(other_box)
+		var element_box := element.rect.get_bounding_rect()
+		bounding_box = bounding_box.merge(element_box)
 	
 	rect.set_position(bounding_box.position + bounding_box.size / 2.0)
 	rect.set_size(bounding_box.size)
@@ -70,19 +72,28 @@ func _update_bounding_box() -> void:
 
 
 func _expand_bounding_box(new_element: BaseUIElement) -> void:
-	pass
+	if elements.size() < 2:
+		_update_bounding_box() # There is only one element, just do a full update.
+		return
+	
+	var bounding_box := rect.get_bounding_rect()
+	var element_box := new_element.rect.get_bounding_rect()
+	bounding_box = bounding_box.merge(element_box)
+	
+	rect.set_position(bounding_box.position + bounding_box.size / 2.0)
+	rect.set_size(bounding_box.size)
+	
+	property_changed.emit("rect:size")
+	property_changed.emit("rect:position")
+	properties_changed.emit()
 
 
 # Implementation.
 
-func draw() -> void:
-	for element in elements:
-		if not element.visible:
-			continue
-		
-		element.set_control_id(_control_id)
-		element.draw()
-		element.clear_control_id()
+func can_select(_at_position: Vector2) -> bool:
+	# Composite elements are used for grouping, but they are otherwise invisible. Making them
+	# selectable on canvas can be confusing, so disabling this for now.
+	return false
 
 
 func get_gizmos(_editing_mode: int) -> Array[BaseGizmo]:

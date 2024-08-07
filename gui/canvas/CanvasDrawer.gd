@@ -117,7 +117,7 @@ func _update_title() -> void:
 
 # Element management.
 
-func _get_element_list(owner_element: BaseUIElement) -> VBoxContainer:
+func _get_owner_element_list(owner_element: BaseUIElement) -> VBoxContainer:
 	if not owner_element:
 		return _element_list
 	
@@ -128,20 +128,8 @@ func _get_element_list(owner_element: BaseUIElement) -> VBoxContainer:
 	return null
 
 
-func _get_owner_element_list(element: BaseUIElement) -> VBoxContainer:
-	if not element.has_owner():
-		return _element_list
-	
-	var owner_element := element.get_owner()
-	if _composite_data_map.has(owner_element):
-		var composite_entry: CompositeElementEntry = _composite_data_map[owner_element]
-		return composite_entry.get_element_sublist()
-	
-	return null
-
-
 func _create_element_entry(element: BaseUIElement) -> void:
-	var owner_list := _get_owner_element_list(element)
+	var owner_list := _get_owner_element_list(element.get_owner())
 	if not owner_list:
 		printerr("CanvasDrawer: Attempting to create an entry but the owner context is invalid.")
 		return
@@ -233,12 +221,12 @@ func _resort_element_entries(owner_element: CompositeElement) -> void:
 		return
 	
 	var owner_elements := owner_element.elements if owner_element else _current_canvas.elements
-	var owner_list := _get_element_list(owner_element)
+	var owner_list := _get_owner_element_list(owner_element)
 	if not owner_list:
 		return
 	
 	# First remove all elements from the owner list, keeping track of the nodes.
-	# We creat an ad-hoc list because nodes can have varying types.
+	# We create an ad-hoc list because nodes can have varying types.
 	# TODO: Potentially optimize this to avoid doing excessive work when the state is already correct.
 	
 	var unsorted_list: Dictionary = {}
@@ -251,7 +239,7 @@ func _resort_element_entries(owner_element: CompositeElement) -> void:
 		
 		owner_list.remove_child(child_node)
 	
-	# Then reinsert the nodes based on the order in the owner element or canvas list.
+	# Then reinsert the nodes based on the order in the owner element or the current canvas.
 	
 	for element in owner_elements:
 		if not unsorted_list.has(element):
@@ -310,7 +298,7 @@ func _can_drop_element_data(_at_position: Vector2, data: Variant, target_data: B
 	var source_index := sorting_data.element_node.get_index()
 	var target_index := target_node.get_index()
 	if source_index != target_index:
-		var owner_list := _get_owner_element_list(sorting_data.element_data)
+		var owner_list := _get_owner_element_list(sorting_data.element_data.get_owner())
 		if not owner_list:
 			return false
 		

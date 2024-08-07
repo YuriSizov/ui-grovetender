@@ -17,40 +17,66 @@ func _init() -> void:
 	mouse_filter = MOUSE_FILTER_IGNORE
 
 
+func _enter_tree() -> void:
+	_update_global_rect()
+
+
 func _draw() -> void:
 	if not data || not is_visible_on_screen():
 		return
 	
-	if data.visible:
-		data.draw()
+	data.draw()
 
 
 ## Sets the UI element data.
 func set_data(value: BaseUIElement) -> void:
 	if data:
 		data.clear_control_id()
-		data.rect_changed.disconnect(_on_data_rect_changed)
-		data.visibility_changed.disconnect(queue_redraw)
+		data.rect_changed.disconnect(_propagate_update_global_rect)
+		data.visibility_changed.disconnect(_update_visibility)
 		data.properties_changed.disconnect(queue_redraw)
 	
 	data = value
 	
 	if data:
 		data.set_control_id(get_instance_id())
-		data.rect_changed.connect(_on_data_rect_changed)
-		data.visibility_changed.connect(queue_redraw)
+		data.rect_changed.connect(_propagate_update_global_rect)
+		data.visibility_changed.connect(_update_visibility)
 		data.properties_changed.connect(queue_redraw)
-		_on_data_rect_changed()
+	
+	_update_global_rect()
+	_update_visibility()
 
 
 # Position and sizing.
 
-func _on_data_rect_changed() -> void:
+func _update_global_rect() -> void:
+	if not data || not is_inside_tree():
+		return
+	
+	var owner_offset := data.get_owner_offset()
 	var element_rect := data.rect.get_bounding_rect()
-	position = element_rect.position
+	position = element_rect.position - owner_offset
 	size = element_rect.size
 	
 	queue_redraw()
+
+
+func _propagate_update_global_rect() -> void:
+	if not data:
+		return
+	
+	if data is CompositeElement:
+		propagate_call("_update_global_rect", [], true)
+	else:
+		_update_global_rect()
+
+
+func _update_visibility() -> void:
+	if not data:
+		return
+	
+	visible = data.visible
 
 
 func is_selectable(at_position: Vector2) -> bool:
