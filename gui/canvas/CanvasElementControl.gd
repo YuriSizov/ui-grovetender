@@ -66,6 +66,10 @@ func _propagate_update_global_rect() -> void:
 	if not data:
 		return
 	
+	# FIXME: Avoid unnecessary calls/propagations because of the bidirectional feedback on rect changes.
+	# Right now we have checks to prevent excessive data changes, but the calls are still propagated here,
+	# which will result in lags at some point. This should be avoided, perhaps with some dirty flag.
+	
 	if data is CompositeElement:
 		propagate_call("_update_global_rect", [], true)
 	else:

@@ -46,26 +46,40 @@ func _add_element(element: BaseUIElement) -> void:
 	element.rect_changed.connect(_update_bounding_box)
 
 
+func remove_element(element: BaseUIElement) -> void:
+	if not elements.has(element):
+		printerr("CompositeElement: Trying to remove an element (%d) that is not owned by this composite element (%d)." % [ element.get_instance_id(), get_instance_id() ])
+		return
+	
+	element.rect_changed.disconnect(_update_bounding_box)
+	
+	elements.erase(element)
+	element.clear_owner_id()
+	_update_bounding_box()
+
+
 # Helpers.
 
 func _update_bounding_box() -> void:
+	var center_rect := Rect2()
+
 	if elements.is_empty():
-		rect.set_position(Vector2.ZERO)
-		rect.set_size(Vector2.ZERO)
+		center_rect.position = Vector2.ZERO
+		center_rect.size = Vector2.ZERO
+	
+	else:
+		var bounding_box := elements[0].rect.get_bounding_rect()
+		for element in elements:
+			var element_box := element.rect.get_bounding_rect()
+			bounding_box = bounding_box.merge(element_box)
 		
-		property_changed.emit("rect:size")
-		property_changed.emit("rect:position")
-		properties_changed.emit()
+		center_rect.position = bounding_box.position + bounding_box.size / 2.0
+		center_rect.size = bounding_box.size
+	
+	if rect.position == center_rect.position && rect.size == center_rect.size:
 		return
 	
-	var bounding_box := elements[0].rect.get_bounding_rect()
-	for element in elements:
-		var element_box := element.rect.get_bounding_rect()
-		bounding_box = bounding_box.merge(element_box)
-	
-	rect.set_position(bounding_box.position + bounding_box.size / 2.0)
-	rect.set_size(bounding_box.size)
-	
+	rect.set_size_and_position(center_rect)
 	property_changed.emit("rect:size")
 	property_changed.emit("rect:position")
 	properties_changed.emit()
@@ -80,9 +94,14 @@ func _expand_bounding_box(new_element: BaseUIElement) -> void:
 	var element_box := new_element.rect.get_bounding_rect()
 	bounding_box = bounding_box.merge(element_box)
 	
-	rect.set_position(bounding_box.position + bounding_box.size / 2.0)
-	rect.set_size(bounding_box.size)
+	var center_rect := Rect2()
+	center_rect.position = bounding_box.position + bounding_box.size / 2.0
+	center_rect.size = bounding_box.size
 	
+	if rect.position == center_rect.position && rect.size == center_rect.size:
+		return
+	
+	rect.set_size_and_position(center_rect)
 	property_changed.emit("rect:size")
 	property_changed.emit("rect:position")
 	properties_changed.emit()
