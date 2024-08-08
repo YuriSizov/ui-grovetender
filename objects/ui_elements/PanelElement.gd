@@ -7,6 +7,7 @@
 ## A panel UI element, which can be used as a background or foreground plane element. Configurable with
 ## background and border properties, or with a 9-patch texture.
 # TODO: Implement support for 9-patch textures.
+# TODO: Implement support for gradients.
 class_name PanelElement extends BaseUIElement
 
 enum CornerStyle {

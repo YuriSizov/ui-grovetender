@@ -4,6 +4,9 @@
 # Provided under MIT                              #
 ###################################################
 
+## A grouping element. Doesn't have properties of its own, doesn't render. It is used
+## to define a UI widget or a complex part of a UI widget. It typically owns the behavior
+## setup (but states are defined on individual elements).
 class_name CompositeElement extends BaseUIElement
 
 ## The collection of elements grouped by this composite element.

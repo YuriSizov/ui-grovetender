@@ -4,6 +4,7 @@
 # Provided under MIT                              #
 ###################################################
 
+## An icon/image UI element, handy for displaying graphics associated with more complex widgets.
 class_name IconElement extends BaseUIElement
 
 ## The texture/image of the icon.

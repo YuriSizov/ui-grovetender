@@ -23,7 +23,7 @@ enum SelectionMode {
 var _editing_mode: int = EditingMode.LAYOUT_TOOLS
 
 var _current_canvas: UICanvas = null
-var _selected_element: BaseUIElement = null
+var _selection_object: SelectionElement = SelectionElement.new()
 
 const ZOOM_STEP := 1.2
 const ZOOM_MIN := 1 / pow(ZOOM_STEP, 8)
@@ -60,8 +60,9 @@ func _ready() -> void:
 	_edit_current_canvas()
 	_update_zoom_label()
 	
+	_selection_object.selection_changed.connect(selection_changed.emit)
 	_editing_mode_buttons.pressed.connect(_change_editing_mode_by_button)
-	_canvas_drawer.element_selected.connect(_select_element.bind(SelectionMode.REPLACE_SELECTION))
+	_canvas_drawer.element_selected.connect(_select_element)
 	_gizmos_container.gizmos_input_consumed.connect(_context_menu.clear_options)
 	
 	if not Engine.is_editor_hint():
@@ -87,7 +88,13 @@ func _gui_input(event: InputEvent) -> void:
 		
 		else: # Events triggered on release.
 			if mb.button_index == MOUSE_BUTTON_LEFT:
-				_try_select_element(to_canvas_coordinates(mb.global_position), SelectionMode.REPLACE_SELECTION)
+				var selection_mode := SelectionMode.REPLACE_SELECTION
+				if mb.shift_pressed && not mb.alt_pressed:
+					selection_mode = SelectionMode.ADD_TO_SELECTION
+				elif mb.alt_pressed && not mb.shift_pressed:
+					selection_mode = SelectionMode.REMOVE_FROM_SELECTION
+				
+				_try_select_element(to_canvas_coordinates(mb.global_position), selection_mode)
 			
 			elif mb.button_index == MOUSE_BUTTON_RIGHT:
 				_show_create_context_menu(mb.global_position)
@@ -211,21 +218,7 @@ func from_canvas_coordinates(canvas_position: Vector2) -> Vector2:
 	return canvas_position * _elements_scale - _elements_offset
 
 
-# Element management.
-
-func _handle_created_element(element: BaseUIElement) -> void:
-	_select_element(element, SelectionMode.REPLACE_SELECTION)
-
-
-func _handle_removed_element(element: BaseUIElement) -> void:
-	# TODO: Add support for multi-element selections.
-	# TODO: Selectively remove elements from multi-element selections instead of complete selection reset.
-	if _selected_element == element:
-		_unselect_all_elements()
-		selection_changed.emit()
-
-
-# Selection management.
+# Canvas actions.
 
 func _show_create_context_menu(mouse_position: Vector2) -> void:
 	_context_menu.clear_options()
@@ -247,58 +240,53 @@ func _show_create_context_menu(mouse_position: Vector2) -> void:
 	_context_menu.show_options(context_options, mouse_position)
 
 
-func _unselect_all_elements() -> void:
-	if _selected_element:
-		_selected_element.set_selected(false)
-	_selected_element = null
+# Element management.
 
+func _handle_created_element(element: BaseUIElement) -> void:
+	_select_element(element, SelectionMode.REPLACE_SELECTION)
+
+
+func _handle_removed_element(element: BaseUIElement) -> void:
+	_selection_object.deselect_element(element)
+
+
+# Selection management.
 
 func _select_element(element: BaseUIElement, mode: SelectionMode) -> void:
-	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
-	# TODO: Add support for multi-element selections.
 	if mode == SelectionMode.REPLACE_SELECTION:
-		_unselect_all_elements()
+		_selection_object.clear_selection()
 	
-	# TODO: Support selecting multiple elements at once.
-	_selected_element = element
-	_selected_element.set_selected(true)
-	
-	selection_changed.emit()
+	if element:
+		if mode == SelectionMode.REMOVE_FROM_SELECTION:
+			_selection_object.deselect_element(element)
+		else:
+			_selection_object.select_element(element)
 
 
 func _try_select_element(canvas_position: Vector2, mode: SelectionMode) -> void:
-	# TODO: Add support for multiple selection modes, adding and subtracting elements from the selection.
-	# TODO: Add support for multi-element selections.
-	if mode == SelectionMode.REPLACE_SELECTION:
-		_unselect_all_elements()
-	
 	var found_element := _element_container.find_element_at_position(canvas_position)
-	if found_element:
-		_select_element(found_element, SelectionMode.ADD_TO_SELECTION)
-	
-	selection_changed.emit()
+	_select_element(found_element, mode)
 
 
 func get_selected_element() -> BaseUIElement:
-	return _selected_element
+	if _selection_object.get_selection_size() < 2:
+		return _selection_object.get_first_element()
+	
+	return _selection_object
 
 
 func _remove_selected_elements() -> void:
 	if not Controller.current_project || not _current_canvas:
 		return
 	
-	# TODO: Add support for multi-element selections.
-	# TODO: Add a confirmation dialog.
-	
-	if not _selected_element:
-		return
-	
-	_current_canvas.remove_element(_selected_element)
+	var selection := _selection_object.get_selection()
+	for element in selection:
+		_current_canvas.remove_element(element)
 
 
 func _group_selected_elements() -> void:
 	if not Controller.current_project || not _current_canvas:
 		return
 	
-	# FIXME: This is temporary, as we don't support multi-element selections yet.
-	_current_canvas.group_elements(_current_canvas.elements.duplicate())
+	var selection := _selection_object.get_selection()
+	_current_canvas.group_elements(selection)

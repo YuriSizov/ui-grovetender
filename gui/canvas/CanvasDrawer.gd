@@ -7,7 +7,7 @@
 @tool
 class_name CanvasDrawer extends PanelContainer
 
-signal element_selected(element: BaseUIElement)
+signal element_selected(element: BaseUIElement, mode: EndlessCanvas.SelectionMode)
 
 const ELEMENT_ENTRY_SCENE := preload("res://gui/canvas/entries/ElementEntry.tscn")
 const COMPOSITE_ENTRY_SCENE := preload("res://gui/canvas/entries/CompositeElementEntry.tscn")
@@ -255,7 +255,13 @@ func _handle_entry_released(element_entry: ElementEntry) -> void:
 	if not element_entry.data:
 		return
 	
-	element_selected.emit(element_entry.data)
+	var selection_mode := EndlessCanvas.SelectionMode.REPLACE_SELECTION
+	if Input.is_key_pressed(KEY_SHIFT) && not Input.is_key_pressed(KEY_ALT):
+		selection_mode = EndlessCanvas.SelectionMode.ADD_TO_SELECTION
+	elif Input.is_key_pressed(KEY_ALT) && not Input.is_key_pressed(KEY_SHIFT):
+		selection_mode = EndlessCanvas.SelectionMode.REMOVE_FROM_SELECTION
+	
+	element_selected.emit(element_entry.data, selection_mode)
 
 
 func _get_element_drag_data(at_position: Vector2, source_entry: ElementEntry, source_node: Control) -> Variant:
