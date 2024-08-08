@@ -112,7 +112,7 @@ func _expand_bounding_box(new_element: BaseUIElement) -> void:
 
 # Implementation.
 
-func can_select(_at_position: Vector2) -> bool:
+func is_selectable() -> bool:
 	# Composite elements are used for grouping, but they are otherwise invisible. Making them
 	# selectable on canvas can be confusing, so disabling this for now.
 	return false

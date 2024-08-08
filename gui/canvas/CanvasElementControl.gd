@@ -83,13 +83,6 @@ func _update_visibility() -> void:
 	visible = data.visible
 
 
-func is_selectable(at_position: Vector2) -> bool:
-	if not data:
-		return false
-	
-	return data.can_select(at_position)
-
-
 ## Returns whether this proxy control is currently visible on screen.
 # FIXME: Can be optimized with caching.
 func is_visible_on_screen() -> bool:

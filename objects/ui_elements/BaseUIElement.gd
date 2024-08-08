@@ -134,11 +134,25 @@ func draw() -> void:
 	pass
 
 
-## Called to check if a click at the given position should select this element. Extending classes
-## may override this method.
-func can_select(at_position: Vector2) -> bool:
+## Called to check if this element is overall selectable. Used together with has_point() and
+## is_inside_area() to determine this element should be selected by clicks or selection drag.
+## Extending classes may override this method.
+func is_selectable() -> bool:
+	return true
+
+
+## Called to check if the given position belongs to this element. Extending classes may override
+## this method.
+func has_point(at_position: Vector2) -> bool:
 	var element_rect := rect.get_bounding_rect()
 	return element_rect.has_point(at_position)
+
+
+## Called to check if the given area completely encloses this element. Extending classes may
+## override this method.
+func is_inside_area(area: Rect2) -> bool:
+	var element_rect := rect.get_bounding_rect()
+	return area.encloses(element_rect)
 
 
 ## Initializes and returns a set of gizmos for editing this UI element. Gizmos with lower indices

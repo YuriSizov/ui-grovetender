@@ -88,7 +88,7 @@ func draw() -> void:
 	_text_buffer.draw(canvas_control.get_canvas_item(), text_position, font_color)
 
 
-func can_select(at_position: Vector2) -> bool:
+func has_point(at_position: Vector2) -> bool:
 	if _text_buffer:
 		var element_rect := rect.get_bounding_rect()
 		var text_rect := Rect2(element_rect.position + _text_buffer_position, _text_buffer.get_size())
@@ -97,6 +97,17 @@ func can_select(at_position: Vector2) -> bool:
 			return true
 	
 	return super(at_position)
+
+
+func is_inside_area(area: Rect2) -> bool:
+	if _text_buffer:
+		var element_rect := rect.get_bounding_rect()
+		var text_rect := Rect2(element_rect.position + _text_buffer_position, _text_buffer.get_size())
+		
+		if area.encloses(text_rect):
+			return true
+	
+	return super(area)
 
 
 func get_gizmos(editing_mode: int) -> Array[BaseGizmo]:

@@ -30,12 +30,34 @@ func select_element(element: BaseUIElement) -> void:
 	selection_changed.emit()
 
 
+func select_multiple_elements(elements: Array[BaseUIElement]) -> void:
+	for element in elements:
+		if _elements.has(element):
+			continue
+		
+		_elements.push_back(element)
+		element.set_selected(true)
+	
+	selection_changed.emit()
+
+
 func deselect_element(element: BaseUIElement) -> void:
 	if not _elements.has(element):
 		return
 	
 	_elements.erase(element)
 	element.set_selected(false)
+	selection_changed.emit()
+
+
+func deselect_multiple_elements(elements: Array[BaseUIElement]) -> void:
+	for element in elements:
+		if not _elements.has(element):
+			continue
+		
+		_elements.erase(element)
+		element.set_selected(false)
+	
 	selection_changed.emit()
 
 
@@ -68,7 +90,7 @@ func clear_selection() -> void:
 
 # Implementation.
 
-func can_select(_at_position: Vector2) -> bool:
+func is_selectable() -> bool:
 	# Selecting a selection, wouldn't that be something?
 	return false
 

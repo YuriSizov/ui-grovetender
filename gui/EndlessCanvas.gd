@@ -21,9 +21,15 @@ enum SelectionMode {
 }
 
 var _editing_mode: int = EditingMode.LAYOUT_TOOLS
-
 var _current_canvas: UICanvas = null
 var _selection_object: SelectionElement = SelectionElement.new()
+
+const SELECTION_DRAG_THRESHOLD := 16.0 # 4 pixels squared?
+
+var _selection_dragging: bool = false
+var _selection_drag_rect: Rect2 = Rect2()
+var _selection_drag_last_position: Vector2 = Vector2.ZERO
+var _selection_drag_total_distance: float = 0.0
 
 const ZOOM_STEP := 1.2
 const ZOOM_MIN := 1 / pow(ZOOM_STEP, 8)
@@ -32,14 +38,15 @@ const ZOOM_MAX := 1 * pow(ZOOM_STEP, 4)
 var _elements_scale: float = 1.0
 var _elements_offset: Vector2 = Vector2.ZERO
 var _canvas_dragging: bool = false
-var _canvas_drag_position: Vector2 = Vector2.ZERO
+var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 
-@onready var _editing_mode_bar: EditingModeBar = %EditingModeBar
 @onready var _element_container: CanvasElements = %CanvasElements
 @onready var _gizmos_container: CanvasGizmos = %CanvasGizmos
+@onready var _canvas_overlay: Control = %CanvasOverlay
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
-@onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
 
+@onready var _context_menu: CanvasContextMenu = %CanvasContextMenu
+@onready var _editing_mode_bar: EditingModeBar = %EditingModeBar
 @onready var _zoom_label: Label = %ZoomLabel
 
 var _editing_mode_buttons := preload("res://gui/canvas/editing_mode_button_group.tres")
@@ -65,6 +72,8 @@ func _ready() -> void:
 	_canvas_drawer.element_selected.connect(_select_element)
 	_gizmos_container.gizmos_input_consumed.connect(_context_menu.clear_options)
 	
+	_canvas_overlay.draw.connect(_draw_canvas_overlay)
+	
 	if not Engine.is_editor_hint():
 		_editing_mode_bar.set_editing_mode(_editing_mode)
 		
@@ -77,7 +86,10 @@ func _gui_input(event: InputEvent) -> void:
 		_context_menu.clear_options()
 		
 		if mb.pressed: # Events triggered on press.
-			if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if mb.button_index == MOUSE_BUTTON_LEFT:
+				_start_selection_dragging(mb)
+			
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 				_zoom_canvas(ZOOM_STEP, mb.global_position)
 			
 			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
@@ -94,7 +106,14 @@ func _gui_input(event: InputEvent) -> void:
 				elif mb.alt_pressed && not mb.shift_pressed:
 					selection_mode = SelectionMode.REMOVE_FROM_SELECTION
 				
-				_try_select_element(to_canvas_coordinates(mb.global_position), selection_mode)
+				# If we're dragging a selection, handle that and try to select/deselect all matching elements.
+				if _selection_dragging && _selection_drag_total_distance >= SELECTION_DRAG_THRESHOLD:
+					_stop_selection_dragging(selection_mode)
+				
+				# Alternatively, treat it as a click and try to select/deselect an element.
+				else:
+					_cancel_selection_dragging()
+					_try_select_element(to_canvas_coordinates(mb.global_position), selection_mode)
 			
 			elif mb.button_index == MOUSE_BUTTON_RIGHT:
 				_show_create_context_menu(mb.global_position)
@@ -102,8 +121,11 @@ func _gui_input(event: InputEvent) -> void:
 			elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 				_stop_canvas_dragging()
 	
-	elif _canvas_dragging && event is InputEventMouseMotion:
-		_process_canvas_dragging(event)
+	elif event is InputEventMouseMotion:
+		if _selection_dragging:
+			_process_selection_dragging(event)
+		if _canvas_dragging:
+			_process_canvas_dragging(event)
 
 
 func _shortcut_input(event: InputEvent) -> void:
@@ -122,6 +144,15 @@ func _shortcut_input(event: InputEvent) -> void:
 		_group_selected_elements()
 		
 		get_viewport().set_input_as_handled()
+
+
+func _draw_canvas_overlay() -> void:
+	if _selection_dragging && _selection_drag_total_distance >= SELECTION_DRAG_THRESHOLD:
+		var selection_style := get_theme_stylebox("selection_frame", "CanvasOverlay")
+		var selection_size := get_theme_constant("selection_size", "CanvasOverlay")
+		var selection_rect := _selection_drag_rect.abs()
+		
+		DrawingUtil.draw_stylebox_frame(_canvas_overlay.get_canvas_item(), selection_style, selection_rect, selection_size)
 
 
 # Canvas management.
@@ -188,12 +219,12 @@ func _zoom_canvas(factor: float, center_at: Vector2) -> void:
 
 func _start_canvas_dragging(event: InputEventMouseButton) -> void:
 	_canvas_dragging = true
-	_canvas_drag_position = event.global_position
+	_canvas_drag_last_position = event.global_position
 
 
 func _stop_canvas_dragging() -> void:
 	_canvas_dragging = false
-	_canvas_drag_position = Vector2.ZERO
+	_canvas_drag_last_position = Vector2.ZERO
 
 
 func _process_canvas_dragging(event: InputEventMouseMotion) -> void:
@@ -201,8 +232,8 @@ func _process_canvas_dragging(event: InputEventMouseMotion) -> void:
 		return
 	
 	# This accounts for skipped mouse events (e.g. consumed by something else).
-	var relative := event.global_position - _canvas_drag_position
-	_canvas_drag_position = event.global_position
+	var relative := event.global_position - _canvas_drag_last_position
+	_canvas_drag_last_position = event.global_position
 	
 	_elements_offset -= relative
 	
@@ -252,6 +283,60 @@ func _handle_removed_element(element: BaseUIElement) -> void:
 
 # Selection management.
 
+func _start_selection_dragging(event: InputEventMouseButton) -> void:
+	_selection_dragging = true
+	
+	_selection_drag_rect.position = event.global_position
+	_selection_drag_rect.size = Vector2.ZERO
+	_selection_drag_last_position = event.global_position
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _stop_selection_dragging(mode: SelectionMode) -> void:
+	_selection_dragging = false
+	
+	# Normalize the rectangle.
+	_selection_drag_rect = _selection_drag_rect.abs()
+	
+	var canvas_rect := Rect2()
+	canvas_rect.position = to_canvas_coordinates(_selection_drag_rect.position)
+	canvas_rect.size = _selection_drag_rect.size / _elements_scale
+	_try_select_multiple_elements(canvas_rect, mode)
+	
+	_selection_drag_rect = Rect2()
+	_selection_drag_last_position = Vector2.ZERO
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _cancel_selection_dragging() -> void:
+	_selection_dragging = false
+	_selection_drag_rect = Rect2()
+	_selection_drag_last_position = Vector2.ZERO
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _process_selection_dragging(event: InputEventMouseMotion) -> void:
+	if not _selection_dragging:
+		return
+	
+	# This accounts for skipped mouse events (e.g. consumed by something else).
+	var relative := event.global_position - _selection_drag_last_position
+	_selection_drag_last_position = event.global_position
+	
+	_selection_drag_rect.size += relative
+	_selection_drag_total_distance += relative.length_squared()
+	# We don't really care for the exact value once it's past the threshold. So truncate the accumulator here.
+	_selection_drag_total_distance = clampf(_selection_drag_total_distance, 0.0, SELECTION_DRAG_THRESHOLD + 1.0)
+	
+	_canvas_overlay.queue_redraw()
+
+
 func _select_element(element: BaseUIElement, mode: SelectionMode) -> void:
 	if mode == SelectionMode.REPLACE_SELECTION:
 		_selection_object.clear_selection()
@@ -266,6 +351,22 @@ func _select_element(element: BaseUIElement, mode: SelectionMode) -> void:
 func _try_select_element(canvas_position: Vector2, mode: SelectionMode) -> void:
 	var found_element := _element_container.find_element_at_position(canvas_position)
 	_select_element(found_element, mode)
+
+
+func _select_multiple_elements(elements: Array[BaseUIElement], mode: SelectionMode) -> void:
+	if mode == SelectionMode.REPLACE_SELECTION:
+		_selection_object.clear_selection()
+	
+	if not elements.is_empty():
+		if mode == SelectionMode.REMOVE_FROM_SELECTION:
+			_selection_object.deselect_multiple_elements(elements)
+		else:
+			_selection_object.select_multiple_elements(elements)
+
+
+func _try_select_multiple_elements(canvas_rect: Rect2, mode: SelectionMode) -> void:
+	var found_elements := _element_container.find_elements_in_rect(canvas_rect)
+	_select_multiple_elements(found_elements, mode)
 
 
 func get_selected_element() -> BaseUIElement:

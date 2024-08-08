@@ -132,7 +132,7 @@ func _find_child_at_position(owner_control: Control, canvas_position: Vector2) -
 	for i in drawn_elements_count:
 		var element_index := drawn_elements_count - 1 - i # Iterate backwards, from the topmost.
 		var canvas_element: CanvasElementControl = owner_control.get_child(element_index)
-		if not canvas_element.is_visible_on_screen():
+		if not canvas_element.is_visible_on_screen() || not canvas_element.data:
 			continue
 		
 		if canvas_element.data is CompositeElement:
@@ -140,7 +140,7 @@ func _find_child_at_position(owner_control: Control, canvas_position: Vector2) -
 			if child_element:
 				return child_element
 		
-		if canvas_element.is_selectable(canvas_position):
+		if canvas_element.data.is_selectable() && canvas_element.data.has_point(canvas_position):
 			return canvas_element.data
 	
 	return null
@@ -148,3 +148,25 @@ func _find_child_at_position(owner_control: Control, canvas_position: Vector2) -
 
 func find_element_at_position(canvas_position: Vector2) -> BaseUIElement:
 	return _find_child_at_position(self, canvas_position)
+
+
+func _find_children_in_rect(owner_control: Control, canvas_rect: Rect2, found_children: Array) -> void:
+	var drawn_elements_count := owner_control.get_child_count()
+	for i in drawn_elements_count:
+		var element_index := drawn_elements_count - 1 - i # Iterate backwards, from the topmost.
+		var canvas_element: CanvasElementControl = owner_control.get_child(element_index)
+		if not canvas_element.is_visible_on_screen() || not canvas_element.data:
+			continue
+		
+		if canvas_element.data is CompositeElement:
+			_find_children_in_rect(canvas_element, canvas_rect, found_children)
+		
+		if canvas_element.data.is_selectable() && canvas_element.data.is_inside_area(canvas_rect):
+			found_children.push_back(canvas_element.data)
+
+
+func find_elements_in_rect(canvas_rect: Rect2) -> Array[BaseUIElement]:
+	var elements: Array[BaseUIElement] = []
+	_find_children_in_rect(self, canvas_rect, elements)
+	
+	return elements
