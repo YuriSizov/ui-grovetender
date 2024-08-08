@@ -330,6 +330,11 @@ func _update_font_resource() -> void:
 	
 	_font = FontFile.new()
 	_font.data = font_data
+	
+	# MSDF introduces issues with some glyphs caused by overlaps; oversampling introduces aliasing,
+	# which also make rendered fonts become crunchy at lower scales. Mipmaps lead to artifacts...
+	# FIXME: Look into potential solutions to either issue?
+	
 	_font.multichannel_signed_distance_field = true
 	_font.msdf_pixel_range = 8
 	_font.msdf_size = 48
