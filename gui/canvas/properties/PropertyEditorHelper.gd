@@ -6,13 +6,21 @@
 
 class_name PropertyEditorHelper extends Object
 
+# Sections.
 const SECTION_PROPERTY_EDITOR := preload("res://gui/canvas/properties/SectionPropertyEditor.tscn")
+
+# Value editors.
 const TOGGLE_PROPERTY_EDITOR := preload("res://gui/canvas/properties/TogglePropertyEditor.tscn")
 const COLOR_PROPERTY_EDITOR := preload("res://gui/canvas/properties/ColorPropertyEditor.tscn")
 const STEPPER_PROPERTY_EDITOR := preload("res://gui/canvas/properties/StepperPropertyEditor.tscn")
 const VARIANT_PROPERTY_EDITOR := preload("res://gui/canvas/properties/VariantPropertyEditor.tscn")
 const FONT_FILE_PROPERTY_EDITOR := preload("res://gui/canvas/properties/FontFilePropertyEditor.tscn")
 
+# Behavior editors.
+const STATE_PROPERTY_EDITOR := preload("res://gui/canvas/properties/StatePropertyEditor.tscn")
+
+
+# Sections.
 
 static func create_section(element: BaseUIElement, label: String, icon: Texture2D = null) -> SectionPropertyEditor:
 	var section_editor := SECTION_PROPERTY_EDITOR.instantiate()
@@ -31,6 +39,8 @@ static func create_togglable_section(element: BaseUIElement, prop_name: String, 
 	
 	return section_editor
 
+
+# Value editors.
 
 static func create_toggle_property(element: BaseUIElement, prop_name: String, prop_setter: Callable) -> TogglePropertyEditor:
 	var toggle_editor := TOGGLE_PROPERTY_EDITOR.instantiate()
@@ -65,3 +75,12 @@ static func create_font_file_property(element: BaseUIElement, prop_name: String,
 	stepper_editor.connect_to_property(element, prop_name, prop_setter)
 	
 	return stepper_editor
+
+
+# Behavior editors.
+
+static func create_state_property(element: BaseUIElement) -> StatePropertyEditor:
+	var state_editor := STATE_PROPERTY_EDITOR.instantiate()
+	state_editor.connect_to_property(element, "", Callable())
+	
+	return state_editor

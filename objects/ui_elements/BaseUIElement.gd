@@ -11,9 +11,12 @@ signal rect_changed()
 signal visibility_changed()
 signal property_changed(property_name: String)
 signal properties_changed()
+signal states_changed()
 
 signal editor_selected()
 signal editor_deselected()
+
+# Basic properties.
 
 ## The unique name of this UI element.
 @export var element_name: String = "EmptyElement"
@@ -22,6 +25,17 @@ signal editor_deselected()
 ## The visibility flag, enabling or disabling rendering of this UI element.
 @export var visible: bool = true:
 	set = set_visible
+
+# Behavior properties.
+
+## The pre-configured set of states and exposed elements used to create standard widgets.
+@export var behavior_preset: int = BehaviorPreset.PRESET_CUSTOM
+## The collection of states that this element and its children can take.
+@export var states: Array[UIState] = []
+## The collection of exposed slots, either to fulfill a preset role or for custom user-defined behavior.
+@export var exposed_slots: Array[ExposedSlot] = []
+
+# Runtime properties.
 
 ## The instance ID of the owner element. Runtime only.
 var _owner_id: int = 0
@@ -37,6 +51,8 @@ func _init() -> void:
 
 # Metadata.
 
+## Returns the element, normally a CompositeElement instance, that owns/is a parent of
+## this UI element.
 func get_owner() -> BaseUIElement:
 	if not is_instance_id_valid(_owner_id):
 		return null
@@ -44,10 +60,12 @@ func get_owner() -> BaseUIElement:
 	return instance_from_id(_owner_id)
 
 
+## Returns the instance ID of the owner element for this UI element.
 func get_owner_id() -> int:
 	return _owner_id
 
 
+## Returns whether there is a valid owner element for this UI element.
 func has_owner() -> bool:
 	return is_instance_id_valid(_owner_id)
 
@@ -125,6 +143,37 @@ func get_rect_in_control() -> Rect2:
 	bounding_rect.position -= owner_offset + control.position
 	
 	return bounding_rect
+
+
+# Behavior.
+
+func add_state(state_type: int, state_name: String, mandatory: bool = false) -> bool:
+	# For non-custom types check if we already have one. For now we assume all of them unique.
+	if state_type != StateType.STATE_CUSTOM:
+		for other_state in states:
+			if other_state.state_type == state_type:
+				return false
+	
+	# Sanitize the name before checking. This may be unnecessary in the long run, as the name
+	# is always just a string. If we need a sanitized name for the API generation, we can do
+	# it there. But let's keep it for now.
+	state_name = state_name.to_lower().to_snake_case()
+	
+	# For all types check if the name is unique.
+	for other_state in states:
+		if other_state.state_name == state_name:
+			return false
+	
+	var state := UIState.new()
+	state.state_type = state_type
+	state.state_name = state_name
+	state.locked = mandatory
+	
+	state.connect_to_element(self)
+	states.push_back(state)
+	states_changed.emit()
+	
+	return true
 
 
 # Implementation.
@@ -207,10 +256,34 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 		# TODO: Add a property editor for position, when it's an offset inside a composite element.
 		pass
 	
+	elif editing_mode == EditingMode.BEHAVIOR_TOOLS:
+		# General behavior section.
+		
+		var behavior_section := PropertyEditorHelper.create_section(self, "Behavior", null)
+		properties.push_back(behavior_section)
+		
+		# TODO: Implement preset selection.
+		
+		# Slots section.
+		
+		var slots_section := PropertyEditorHelper.create_section(self, "Slots", null)
+		properties.push_back(slots_section)
+		
+		# TODO: Implement slot editor.
+		
+		# States section.
+		
+		var states_section := PropertyEditorHelper.create_section(self, "States", null)
+		properties.push_back(states_section)
+		
+		var states_property := PropertyEditorHelper.create_state_property(self)
+		states_section.connect_property_to_section(states_property)
+		properties.push_back(states_property)
+	
 	return properties
 
 
-# Properties.
+# Property helpers.
 
 func _set_size(value: Vector2) -> void:
 	var center_size := _ensure_positive_size(value)

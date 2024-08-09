@@ -7,6 +7,7 @@
 @tool
 class_name PropertyEditor extends MarginContainer
 
+signal before_property_connected()
 signal property_connected()
 
 ## The element object that owns the property.
@@ -66,6 +67,8 @@ func _clear_theme() -> void:
 func connect_to_property(_element: BaseUIElement, _name: String, _setter: Callable) -> void:
 	if element == _element:
 		return
+	
+	before_property_connected.emit()
 	
 	if element:
 		element.property_changed.disconnect(_handle_property_changes)

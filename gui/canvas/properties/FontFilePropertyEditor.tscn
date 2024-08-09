@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dhkwgqlm4owie"]
+[gd_scene load_steps=3 format=3 uid="uid://dhkwgqlm4owie"]
 
 [ext_resource type="Script" path="res://gui/canvas/properties/FontFilePropertyEditor.gd" id="1_yiha8"]
+[ext_resource type="PackedScene" uid="uid://d3bfs3ikhudtv" path="res://gui/widgets/PropertyEditorButton.tscn" id="2_hvboj"]
 
 [node name="FontFilePropertyEditor" type="MarginContainer"]
 offset_right = 142.0
@@ -31,9 +32,10 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 1
+text = "Font name"
 visible_characters = 16
 
-[node name="FileButton" type="Button" parent="Layout/FontSelector"]
+[node name="FileButton" parent="Layout/FontSelector" instance=ExtResource("2_hvboj")]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Select"
