@@ -35,6 +35,7 @@ func create_element(element_type: int, at_position: Vector2) -> BaseUIElement:
 	
 	if element:
 		element.rect.position = at_position
+		element.initialize_merged_element()
 		_name_created_element(element)
 		elements.push_back(element)
 		element_created.emit(element)
@@ -113,6 +114,7 @@ func group_elements(grouped_elements: Array[BaseUIElement]) -> void:
 	# Create a new composite element to group selected elements.
 	
 	var composite_element := CompositeElement.new()
+	composite_element.initialize_merged_element()
 	composite_element.set_elements(grouped_elements)
 	_name_created_element(composite_element)
 	

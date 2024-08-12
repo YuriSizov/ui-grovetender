@@ -19,6 +19,15 @@ func _init() -> void:
 func _ready() -> void:
 	super()
 	
+	property_connected.connect(func() -> void:
+		queue_redraw()
+		_color_preview.queue_redraw()
+	)
+	property_changed.connect(func() -> void:
+		queue_redraw()
+		_color_preview.queue_redraw()
+	)
+	
 	get_window().size_changed.connect(_update_color_picker_position)
 	
 	_color_picker.get_picker().color_changed.connect(_change_color_value)
@@ -75,8 +84,7 @@ func _toggle_color_picker() -> void:
 
 
 func _change_color_value(color: Color) -> void:
-	if prop_setter.is_valid():
-		prop_setter.call(color)
+	set_property_value(color)
 	
 	queue_redraw()
 	_color_preview.queue_redraw()
@@ -93,12 +101,6 @@ func _handle_outside_clicked(at_global_position: Vector2) -> void:
 		return
 	
 	_cancel_editing()
-
-
-func _handle_property_changes(property_name: String) -> void:
-	if property_name == prop_name:
-		queue_redraw()
-		_color_preview.queue_redraw()
 
 
 func _cancel_editing() -> void:

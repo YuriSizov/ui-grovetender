@@ -25,6 +25,7 @@ func _ready() -> void:
 	
 	_update_property_toggle()
 	property_connected.connect(_update_property_toggle)
+	property_changed.connect(_update_property_toggle)
 	
 	_property_toggle.pressed.connect(_change_toggle_value)
 	_property_toggle.focus_entered.connect(_start_editing)
@@ -76,18 +77,13 @@ func _change_toggle_value() -> void:
 		return
 	
 	var current_value: bool = get_property_value()
-	prop_setter.call(not current_value)
+	set_property_value(not current_value)
 
 
 # Implementation.
 
 func _handle_property_name_clicked() -> void:
 	_change_toggle_value()
-
-
-func _handle_property_changes(property_name: String) -> void:
-	if property_name == prop_name:
-		_update_property_toggle()
 
 
 func _cancel_editing() -> void:

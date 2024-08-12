@@ -83,9 +83,7 @@ func _update_bounding_box() -> void:
 		return
 	
 	rect.set_size_and_position(center_rect)
-	property_changed.emit("rect:size")
-	property_changed.emit("rect:position")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size", "rect:position" ])
 
 
 func _expand_bounding_box(new_element: BaseUIElement) -> void:
@@ -105,9 +103,7 @@ func _expand_bounding_box(new_element: BaseUIElement) -> void:
 		return
 	
 	rect.set_size_and_position(center_rect)
-	property_changed.emit("rect:size")
-	property_changed.emit("rect:position")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size", "rect:position" ])
 
 
 # Implementation.

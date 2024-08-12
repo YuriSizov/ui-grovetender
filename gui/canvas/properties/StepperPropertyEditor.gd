@@ -35,6 +35,7 @@ func _ready() -> void:
 	
 	_update_property_steppers()
 	property_connected.connect(_update_property_steppers)
+	property_changed.connect(_update_stepper_values)
 	
 	for stepper: SpinBox in _stepper_grid.get_children():
 		stepper.value_changed.connect(_change_property_value.bind(stepper.get_index()))
@@ -252,11 +253,11 @@ func _change_property_value(value: float, value_index: int) -> void:
 	var value_type := typeof(full_value)
 	
 	if value_type == TYPE_INT || value_type == TYPE_FLOAT:
-		prop_setter.call(value) # For single-unit values, just replace it as a whole.
+		set_property_value(value) # For single-unit values, just replace it as a whole.
 		return
 	
 	full_value[value_index] = value
-	prop_setter.call(full_value)
+	set_property_value(full_value)
 
 
 # Implementation.
@@ -267,11 +268,6 @@ func _handle_property_name_clicked() -> void:
 		return
 	
 	_property_stepper1.get_line_edit().grab_focus()
-
-
-func _handle_property_changes(property_name: String) -> void:
-	if property_name == prop_name:
-		_update_stepper_values()
 
 
 func _cancel_editing() -> void:

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=64 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=68 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -467,6 +467,31 @@ grow_begin = 0.0
 grow_end = 0.0
 thickness = 2
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_csva5"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mhi34"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvpv1"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmxom"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b2ki6"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -744,6 +769,10 @@ StatePropertyEntry/constants/font_shadow_offset_x = 1
 StatePropertyEntry/constants/font_shadow_offset_y = 1
 StatePropertyEntry/font_sizes/font_size = 16
 StatePropertyEntry/fonts/font = ExtResource("1_nbw0c")
+StatePropertyEntry/styles/button_focus = SubResource("StyleBoxEmpty_csva5")
+StatePropertyEntry/styles/button_hover = SubResource("StyleBoxFlat_mhi34")
+StatePropertyEntry/styles/button_normal = SubResource("StyleBoxFlat_cvpv1")
+StatePropertyEntry/styles/button_pressed = SubResource("StyleBoxFlat_cmxom")
 StepperPropertyEditor/base_type = &"ValuePropertyEditor"
 StepperPropertyEditor/font_sizes/font_size = 16
 StepperPropertyEditor/fonts/font = ExtResource("1_nbw0c")

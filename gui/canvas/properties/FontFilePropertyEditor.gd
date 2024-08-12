@@ -23,6 +23,8 @@ func _ready() -> void:
 	super()
 	
 	_update_font_name()
+	property_connected.connect(_update_font_name)
+	property_changed.connect(_update_font_name)
 	
 	_file_button.pressed.connect(_show_dialog)
 	_file_button.focus_entered.connect(_start_editing)
@@ -87,10 +89,7 @@ func _update_font_name() -> void:
 
 
 func _select_font(value: String) -> void:
-	if not prop_setter.is_valid():
-		return
-	
-	prop_setter.call(value)
+	set_property_value(value)
 
 
 # Implementation.
@@ -99,8 +98,3 @@ func _cancel_editing() -> void:
 	if _file_button.has_focus():
 		_file_button.release_focus()
 	super()
-
-
-func _handle_property_changes(property_name: String) -> void:
-	if property_name == prop_name:
-		_update_font_name()

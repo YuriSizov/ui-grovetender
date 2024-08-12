@@ -35,6 +35,7 @@ func set_data(value: BaseUIElement) -> void:
 		data.rect_changed.disconnect(_propagate_update_global_rect)
 		data.visibility_changed.disconnect(_update_visibility)
 		data.properties_changed.disconnect(queue_redraw)
+		data.active_states_changed.disconnect(queue_redraw)
 	
 	data = value
 	
@@ -43,6 +44,7 @@ func set_data(value: BaseUIElement) -> void:
 		data.rect_changed.connect(_propagate_update_global_rect)
 		data.visibility_changed.connect(_update_visibility)
 		data.properties_changed.connect(queue_redraw)
+		data.active_states_changed.connect(queue_redraw)
 	
 	_update_global_rect()
 	_update_visibility()

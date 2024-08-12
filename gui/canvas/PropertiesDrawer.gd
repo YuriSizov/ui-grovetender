@@ -7,6 +7,7 @@
 @tool
 class_name PropertiesDrawer extends PanelContainer
 
+var _selected_element: BaseUIElement = null
 var _active_editors: Array[PropertyEditor] = []
 var _section_containers: Array[VBoxContainer] = []
 
@@ -16,16 +17,15 @@ var _section_containers: Array[VBoxContainer] = []
 
 func _ready() -> void:
 	_update_theme()
-	_update_element_title()
-	_update_property_list()
 	
 	resized.connect(queue_redraw)
 	sort_children.connect(queue_redraw)
 	
+	_edit_selected_element()
+	
 	if not Engine.is_editor_hint():
+		EndlessCanvas.get_instance().selection_changed.connect(_edit_selected_element)
 		EndlessCanvas.get_instance().editing_mode_changed.connect(_update_property_list)
-		EndlessCanvas.get_instance().selection_changed.connect(_update_property_list)
-		EndlessCanvas.get_instance().selection_changed.connect(_update_element_title)
 
 
 func _notification(what: int) -> void:
@@ -106,19 +106,29 @@ func _draw() -> void:
 
 # Element data.
 
-func _update_element_title() -> void:
-	_clear_element_title()
-	
+func _edit_selected_element() -> void:
 	if Engine.is_editor_hint():
 		return
 	if not EndlessCanvas.get_instance():
 		return
 	
-	var selected_element := EndlessCanvas.get_instance().get_selected_element()
-	if not selected_element:
+	var next_element := EndlessCanvas.get_instance().get_selected_element()
+	if _selected_element == next_element:
 		return
 	
-	_element_title.text = selected_element.element_name
+	_selected_element = next_element
+	
+	_update_element_title()
+	_update_property_list()
+
+
+func _update_element_title() -> void:
+	_clear_element_title()
+	
+	if not _selected_element:
+		return
+	
+	_element_title.text = _selected_element.element_name
 
 
 func _clear_element_title() -> void:
@@ -128,17 +138,11 @@ func _clear_element_title() -> void:
 func _update_property_list() -> void:
 	_clear_property_list()
 	
-	if Engine.is_editor_hint():
-		return
-	if not EndlessCanvas.get_instance():
-		return
-	
-	var selected_element := EndlessCanvas.get_instance().get_selected_element()
-	if not selected_element:
+	if not _selected_element:
 		return
 	
 	var editing_mode := EndlessCanvas.get_instance().get_editing_mode()
-	var active_properties := selected_element.get_editable_properties(editing_mode)
+	var active_properties := _selected_element.get_editable_properties(editing_mode)
 	
 	var current_section_container: VBoxContainer = null
 	

@@ -129,10 +129,7 @@ func _handle_variant_button_unfocused(variant_button: Button) -> void:
 
 
 func _select_property_variant(variant_id: int) -> void:
-	if not prop_setter.is_valid():
-		return
-	
-	prop_setter.call(variant_id)
+	set_property_value(variant_id)
 
 
 # Implementation.

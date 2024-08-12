@@ -7,9 +7,12 @@
 @tool
 class_name StatePropertyEntry extends HBoxContainer
 
+signal preview_toggled()
+
 var _state: UIState = null
 
 @onready var _state_name_label: Label = %StateName
+@onready var _preview_state_button: Button = %PreviewButton
 @onready var _rename_state_button: Button = %RenameButton
 @onready var _delete_state_button: Button = %DeleteButton
 @onready var _locked_state_icon: TextureRect = %LockedIcon
@@ -17,9 +20,10 @@ var _state: UIState = null
 
 func _ready() -> void:
 	_update_theme()
-	
 	_update_name_label()
 	_update_locked_state()
+	
+	_preview_state_button.pressed.connect(preview_toggled.emit)
 
 
 func _notification(what: int) -> void:
@@ -38,6 +42,15 @@ func _update_theme() -> void:
 	if not is_node_ready():
 		return
 	
+	var buttons: Array[Button] = [ _preview_state_button, _rename_state_button, _delete_state_button ]
+	for button in buttons:
+		button.begin_bulk_theme_override()
+		button.add_theme_stylebox_override("normal", get_theme_stylebox("button_normal"))
+		button.add_theme_stylebox_override("hover", get_theme_stylebox("button_hover"))
+		button.add_theme_stylebox_override("pressed", get_theme_stylebox("button_pressed"))
+		button.add_theme_stylebox_override("focus", get_theme_stylebox("button_focus"))
+		button.end_bulk_theme_override()
+	
 	_state_name_label.begin_bulk_theme_override()
 	_state_name_label.add_theme_font_override("font", get_theme_font("font"))
 	_state_name_label.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
@@ -52,6 +65,15 @@ func _clear_theme() -> void:
 	if not is_node_ready():
 		return
 	
+	var buttons: Array[Button] = [ _preview_state_button, _rename_state_button, _delete_state_button ]
+	for button in buttons:
+		button.begin_bulk_theme_override()
+		button.remove_theme_stylebox_override("normal")
+		button.remove_theme_stylebox_override("hover")
+		button.remove_theme_stylebox_override("pressed")
+		button.remove_theme_stylebox_override("focus")
+		button.end_bulk_theme_override()
+	
 	_state_name_label.begin_bulk_theme_override()
 	_state_name_label.remove_theme_font_override("font")
 	_state_name_label.remove_theme_font_size_override("font_size")
@@ -63,6 +85,10 @@ func _clear_theme() -> void:
 
 
 # Properties.
+
+func get_state_data() -> UIState:
+	return _state
+
 
 func set_state_data(state: UIState) -> void:
 	_state = state

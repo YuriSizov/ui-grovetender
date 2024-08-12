@@ -72,7 +72,7 @@ func _init() -> void:
 
 # Implementation.
 
-func draw() -> void:
+func _draw() -> void:
 	var canvas_control := get_control()
 	var element_rect := get_rect_in_control()
 	
@@ -293,9 +293,9 @@ func _set_text(value: String) -> void:
 		return
 	text = value
 	
-	_update_text_buffer()
-	property_changed.emit("text")
-	properties_changed.emit()
+	emit_properties_changed([ "text" ], func() -> void:
+		_update_text_buffer()
+	)
 
 
 func _set_text_horizontal_alignment(value: TextAlignment) -> void:
@@ -303,9 +303,9 @@ func _set_text_horizontal_alignment(value: TextAlignment) -> void:
 		return
 	text_horizontal_alignment = value
 	
-	_update_text_buffer_position()
-	property_changed.emit("text_horizontal_alignment")
-	properties_changed.emit()
+	emit_properties_changed([ "text_horizontal_alignment" ], func() -> void:
+		_update_text_buffer_position()
+	)
 
 
 func _set_text_vertical_alignment(value: TextAlignment) -> void:
@@ -313,9 +313,9 @@ func _set_text_vertical_alignment(value: TextAlignment) -> void:
 		return
 	text_vertical_alignment = value
 	
-	_update_text_buffer_position()
-	property_changed.emit("text_vertical_alignment")
-	properties_changed.emit()
+	emit_properties_changed([ "text_vertical_alignment" ], func() -> void:
+		_update_text_buffer_position()
+	)
 
 
 # Properties - Font.
@@ -349,10 +349,10 @@ func _set_font_path(value: String) -> void:
 		return
 	font_path = value
 	
-	_update_font_resource()
-	_update_text_buffer()
-	property_changed.emit("font_path")
-	properties_changed.emit()
+	emit_properties_changed([ "font_path" ], func() -> void:
+		_update_font_resource()
+		_update_text_buffer()
+	)
 
 
 func _set_font_size(value: float) -> void:
@@ -360,9 +360,9 @@ func _set_font_size(value: float) -> void:
 		return
 	font_size = value
 	
-	_update_text_buffer()
-	property_changed.emit("font_size")
-	properties_changed.emit()
+	emit_properties_changed([ "font_size" ], func() -> void:
+		_update_text_buffer()
+	)
 
 
 func _toggle_fit_font_size(value: bool) -> void:
@@ -370,9 +370,9 @@ func _toggle_fit_font_size(value: bool) -> void:
 		return
 	font_size_fit = value
 	
-	_update_text_buffer()
-	property_changed.emit("font_size_fit")
-	properties_changed.emit()
+	emit_properties_changed([ "font_size_fit" ], func() -> void:
+		_update_text_buffer()
+	)
 
 
 func _set_font_color(value: Color) -> void:
@@ -380,8 +380,7 @@ func _set_font_color(value: Color) -> void:
 		return
 	font_color = value
 	
-	property_changed.emit("font_color")
-	properties_changed.emit()
+	emit_properties_changed([ "font_color" ])
 
 
 # Properties - Shadow.
@@ -391,8 +390,7 @@ func _toggle_draw_shadow(value: bool) -> void:
 		return
 	draw_shadow = value
 	
-	property_changed.emit("draw_shadow")
-	properties_changed.emit()
+	emit_properties_changed([ "draw_shadow" ])
 
 
 func _set_shadow_color(value: Color) -> void:
@@ -400,8 +398,7 @@ func _set_shadow_color(value: Color) -> void:
 		return
 	shadow_color = value
 	
-	property_changed.emit("shadow_color")
-	properties_changed.emit()
+	emit_properties_changed([ "shadow_color" ])
 
 
 func _set_shadow_offset(value: Vector2) -> void:
@@ -409,8 +406,7 @@ func _set_shadow_offset(value: Vector2) -> void:
 		return
 	shadow_offset = value
 	
-	property_changed.emit("shadow_offset")
-	properties_changed.emit()
+	emit_properties_changed([ "shadow_offset" ])
 
 
 func _adjust_shadow_offset(delta: Vector2) -> void:
@@ -419,8 +415,7 @@ func _adjust_shadow_offset(delta: Vector2) -> void:
 	
 	shadow_offset += delta
 	
-	property_changed.emit("shadow_offset")
-	properties_changed.emit()
+	emit_properties_changed([ "shadow_offset" ])
 
 
 # Properties - Outline.
@@ -430,8 +425,7 @@ func _toggle_draw_outline(value: bool) -> void:
 		return
 	draw_outline = value
 	
-	property_changed.emit("draw_outline")
-	properties_changed.emit()
+	emit_properties_changed([ "draw_outline" ])
 
 
 func _set_outline_color(value: Color) -> void:
@@ -439,8 +433,7 @@ func _set_outline_color(value: Color) -> void:
 		return
 	outline_color = value
 	
-	property_changed.emit("outline_color")
-	properties_changed.emit()
+	emit_properties_changed([ "outline_color" ])
 
 
 func _set_outline_size(value: float) -> void:
@@ -448,5 +441,4 @@ func _set_outline_size(value: float) -> void:
 		return
 	outline_size = value
 	
-	property_changed.emit("outline_size")
-	properties_changed.emit()
+	emit_properties_changed([ "outline_size" ])

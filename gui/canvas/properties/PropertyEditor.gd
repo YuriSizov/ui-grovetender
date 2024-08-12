@@ -9,6 +9,7 @@ class_name PropertyEditor extends MarginContainer
 
 signal before_property_connected()
 signal property_connected()
+signal property_changed()
 
 ## The element object that owns the property.
 var element: BaseUIElement = null
@@ -71,16 +72,18 @@ func connect_to_property(_element: BaseUIElement, _name: String, _setter: Callab
 	before_property_connected.emit()
 	
 	if element:
-		element.property_changed.disconnect(_handle_property_changes)
+		element.property_changed.disconnect(_check_property_changes)
 		element.properties_changed.disconnect(_check_visibility_condition)
+		element.active_states_changed.disconnect(property_changed.emit)
 	
 	element = _element
 	prop_name = _name
 	prop_setter = _setter
 	
 	if element:
-		element.property_changed.connect(_handle_property_changes)
+		element.property_changed.connect(_check_property_changes)
 		element.properties_changed.connect(_check_visibility_condition)
+		element.active_states_changed.connect(property_changed.emit)
 	
 	property_connected.emit()
 
@@ -93,10 +96,26 @@ func get_property_value() -> Variant:
 	if not element || prop_name.is_empty():
 		return null
 	
-	if prop_name.contains(":"):
-		return element.get_indexed(prop_name)
-	else:
-		return element.get(prop_name)
+	return element.get_stateful_property(prop_name)
+
+
+func set_property_value(value: Variant) -> void:
+	if not element || not prop_setter.is_valid():
+		return
+	
+	if not element.has_active_states():
+		prop_setter.call(value)
+		return
+	
+	var active_state := element.get_active_state()
+	var state_setter := Callable(active_state.overridden_element, prop_setter.get_method())
+	active_state.override_property(prop_name)
+	state_setter.call(value)
+
+
+func _check_property_changes(property_name: String) -> void:
+	if has_property() && property_name == prop_name:
+		property_changed.emit()
 
 
 func set_visibility_condition(callable: Callable) -> void:
@@ -137,12 +156,6 @@ func _stop_editing() -> void:
 
 
 # Implementation.
-
-## Called when one of the reference element properties changes. Extending classes implement this
-## method.
-func _handle_property_changes(_property_name: String) -> void:
-	pass
-
 
 ## Called when the editing state must be exited due to external circumstances, e.g. a click outside.
 ## Extending classes can implement and/or call this method.

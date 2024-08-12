@@ -53,6 +53,9 @@ func _ready() -> void:
 		_update_section_name()
 		_update_section_toggle()
 	)
+	property_changed.connect(func() -> void:
+		_update_section_toggle()
+	)
 
 
 func _update_theme() -> void:
@@ -160,7 +163,7 @@ func _toggle_section() -> void:
 		return
 	
 	var current_value: bool = get_property_value()
-	prop_setter.call(not current_value)
+	set_property_value(not current_value)
 	
 	section_toggled.emit()
 
@@ -179,10 +182,3 @@ func connect_property_to_section(property_editor: PropertyEditor) -> void:
 	property_editor.set_visibility_condition(func() -> bool:
 		return get_property_value()
 	)
-
-
-# Implementation.
-
-func _handle_property_changes(property_name: String) -> void:
-	if property_name == prop_name:
-		_update_section_toggle()

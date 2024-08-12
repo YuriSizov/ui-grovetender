@@ -8,17 +8,18 @@ class_name CanvasGizmos extends Control
 
 signal gizmos_input_consumed()
 
+var _selected_element: BaseUIElement = null
 var _grabbed_gizmo: BaseGizmo = null
 
 @onready var _gizmo_container: Control = %Gizmos
 
 
 func _ready() -> void:
-	_update_active_gizmos()
+	_edit_selected_element()
 	
 	if not Engine.is_editor_hint():
+		EndlessCanvas.get_instance().selection_changed.connect(_edit_selected_element)
 		EndlessCanvas.get_instance().editing_mode_changed.connect(_update_active_gizmos)
-		EndlessCanvas.get_instance().selection_changed.connect(_update_active_gizmos)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -64,6 +65,8 @@ func _get_tooltip(at_position: Vector2) -> String:
 	return ""
 
 
+# Gizmo management.
+
 func _update_grabbed_gizmo(gizmo: BaseGizmo) -> void:
 	_grabbed_gizmo = gizmo
 
@@ -79,20 +82,31 @@ func _update_cursor_shape(cursor_shape: CursorShape) -> void:
 	mouse_default_cursor_shape = cursor_shape
 
 
-func _update_active_gizmos() -> void:
-	_clear_active_gizmos()
-	
+# Element management.
+
+func _edit_selected_element() -> void:
 	if Engine.is_editor_hint():
 		return
 	if not EndlessCanvas.get_instance():
 		return
 	
-	var selected_element := EndlessCanvas.get_instance().get_selected_element()
-	if not selected_element:
+	var next_element := EndlessCanvas.get_instance().get_selected_element()
+	if _selected_element == next_element:
+		return
+	
+	_selected_element = next_element
+	
+	_update_active_gizmos()
+
+
+func _update_active_gizmos() -> void:
+	_clear_active_gizmos()
+	
+	if not _selected_element:
 		return
 	
 	var editing_mode := EndlessCanvas.get_instance().get_editing_mode()
-	var active_gizmos := selected_element.get_gizmos(editing_mode)
+	var active_gizmos := _selected_element.get_gizmos(editing_mode)
 	
 	var mouse_position := get_global_mouse_position()
 	

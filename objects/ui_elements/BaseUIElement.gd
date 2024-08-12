@@ -12,18 +12,24 @@ signal visibility_changed()
 signal property_changed(property_name: String)
 signal properties_changed()
 signal states_changed()
+signal active_states_changed()
 
 signal editor_selected()
 signal editor_deselected()
+
+# Stealing this unused property usage flag for our needs. Let's hope it is never reclaimed by the engine.
+const PROPERTY_USAGE_ELEMENT_MERGEABLE := PROPERTY_USAGE_SCRIPT_DEFAULT_VALUE
 
 # Basic properties.
 
 ## The unique name of this UI element.
 @export var element_name: String = "EmptyElement"
 ## The rectangle defining the size and position of this UI element.
-@export var rect: UIRect = UIRect.new()
+@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_MERGEABLE)
+var rect: UIRect = UIRect.new()
 ## The visibility flag, enabling or disabling rendering of this UI element.
-@export var visible: bool = true:
+@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_MERGEABLE)
+var visible: bool = true:
 	set = set_visible
 
 # Behavior properties.
@@ -41,12 +47,22 @@ signal editor_deselected()
 var _owner_id: int = 0
 ## The instance ID of the control. Runtime only.
 var _control_id: int = 0
-## Selected status in the editor. Runtime only.
+## The selected status in the editor. Runtime only.
 var _selected: bool = false
+## The number of active states, used to determine if there are any states currently affecting this element.
+## Runtime only.
+var _states_active: int = 0
+## The instance of this element that combines all active states into one for ease of reference. Runtime only.
+var _merged_element: BaseUIElement = null
 
 
 func _init() -> void:
 	rect.changed.connect(rect_changed.emit) # Pass through the signal.
+
+
+func draw() -> void:
+	if _merged_element:
+		_merged_element._draw()
 
 
 # Metadata.
@@ -97,11 +113,15 @@ func set_control_id(instance_id: int) -> void:
 		return
 	
 	_control_id = instance_id
+	if _merged_element:
+		_merged_element._control_id = _control_id
 
 
 ## Clears the Control node responsible for rendering this UI element.
 func clear_control_id() -> void:
 	_control_id = 0
+	if _merged_element:
+		_merged_element._control_id = _control_id
 
 
 ## Returns whether the element is selected in the editor.
@@ -145,6 +165,45 @@ func get_rect_in_control() -> Rect2:
 	return bounding_rect
 
 
+# Properties.
+
+func get_merged_element() -> BaseUIElement:
+	return _merged_element
+
+
+func initialize_merged_element() -> void:
+	# I think this is the best way to make a new instance of the same type, since we cannot
+	# pass the type itself as an argument.
+	var class_script: GDScript = get_script()
+	_merged_element = class_script.new()
+	_merged_element._control_id = _control_id
+	_rebuild_merged_element()
+
+
+func _rebuild_merged_element() -> void:
+	var all_properties := get_property_list()
+	
+	for property_info: Dictionary in all_properties:
+		if property_info.usage & PROPERTY_USAGE_ELEMENT_MERGEABLE:
+			var property_value: Variant = get_stateful_property(property_info.name)
+			_merged_element.set(property_info.name, property_value)
+
+
+func emit_properties_changed(properties: Array[String], updater_func: Callable = Callable()) -> void:
+	# TODO: This must also be done when restoring projects from disk.
+	if _merged_element:
+		for property_name in properties:
+			var property_value: Variant = get_stateful_property(property_name)
+			_merged_element.set(property_name, property_value)
+	
+	if updater_func.is_valid():
+		updater_func.call()
+	
+	for property_name in properties:
+		property_changed.emit(property_name)
+	properties_changed.emit()
+
+
 # Behavior.
 
 func add_state(state_type: int, state_name: String, mandatory: bool = false) -> bool:
@@ -169,6 +228,22 @@ func add_state(state_type: int, state_name: String, mandatory: bool = false) -> 
 	state.state_name = state_name
 	state.locked = mandatory
 	
+	state.state_activated.connect(func() -> void:
+		_states_active += 1
+		_rebuild_merged_element()
+		active_states_changed.emit()
+	)
+	state.state_deactivated.connect(func() -> void:
+		_states_active -= 1
+		_rebuild_merged_element()
+		active_states_changed.emit()
+	)
+	state.property_changed.connect(func(property_name: String) -> void:
+		if _merged_element:
+			var property_value: Variant = get_stateful_property(property_name)
+			_merged_element.set(property_name, property_value)
+	)
+	
 	state.connect_to_element(self)
 	states.push_back(state)
 	states_changed.emit()
@@ -176,10 +251,56 @@ func add_state(state_type: int, state_name: String, mandatory: bool = false) -> 
 	return true
 
 
+func set_state_active(state: UIState, exclusive: bool = false) -> void:
+	if state not in states:
+		printerr("BaseUIElement: Trying to activate a state (%s) that doesn't belong to this element (%s)." % [ state, self ])
+		return
+	
+	if exclusive:
+		for other_state in states:
+			other_state.deactivate()
+	
+	state.activate()
+
+
+func has_active_states() -> bool:
+	return _states_active > 0
+
+
+func get_active_state() -> UIState:
+	var states_amount := states.size()
+	var i := states_amount - 1
+	while i >= 0:
+		var state := states[i]
+		if state.is_active():
+			return state
+	
+	return null
+
+
+func get_stateful_property(prop_name: String) -> Variant:
+	var prop_element := self
+	
+	var states_amount := states.size()
+	var i := states_amount - 1
+	while i >= 0:
+		var state := states[i]
+		if state.is_active() && state.is_property_overridden(prop_name):
+			prop_element = state.overridden_element
+			break
+		
+		i -=1
+	
+	if prop_name.contains(":"):
+		return prop_element.get_indexed(prop_name)
+	else:
+		return prop_element.get(prop_name)
+
+
 # Implementation.
 
 ## Renders this UI element. Extending classes override this method.
-func draw() -> void:
+func _draw() -> void:
 	pass
 
 
@@ -289,8 +410,7 @@ func _set_size(value: Vector2) -> void:
 	var center_size := _ensure_positive_size(value)
 	
 	rect.set_size(center_size)
-	property_changed.emit("rect:size")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size" ])
 
 
 func _ensure_positive_size(value: Vector2) -> Vector2:
@@ -343,9 +463,7 @@ func _resize_by_corner(corner: Corner, delta: Vector2, keep_ratio: bool) -> void
 	
 	center_rect.position += effective_delta / 2.0
 	rect.set_size_and_position(center_rect)
-	property_changed.emit("rect:size")
-	property_changed.emit("rect:position")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size", "rect:position" ])
 
 
 func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool) -> void:
@@ -366,8 +484,7 @@ func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool) ->
 		center_size = _ensure_ratio_size(center_size, rect.get_size())
 	
 	rect.set_size(center_size)
-	property_changed.emit("rect:size")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size" ])
 
 
 func _resize_by_side(side: Side, delta: Vector2) -> void:
@@ -397,9 +514,7 @@ func _resize_by_side(side: Side, delta: Vector2) -> void:
 	
 	center_rect.position += effective_delta / 2.0
 	rect.set_size_and_position(center_rect)
-	property_changed.emit("rect:size")
-	property_changed.emit("rect:position")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size", "rect:position" ])
 
 
 func _resize_by_all_sides(side: Side, delta: Vector2) -> void:
@@ -422,8 +537,7 @@ func _resize_by_all_sides(side: Side, delta: Vector2) -> void:
 	center_size = _ensure_positive_size(center_size)
 	
 	rect.set_size(center_size)
-	property_changed.emit("rect:size")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size" ])
 
 
 func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
@@ -442,14 +556,12 @@ func _resize_by_opposite_sides(side: Side, delta: Vector2) -> void:
 	center_size = _ensure_positive_size(center_size)
 	
 	rect.set_size(center_size)
-	property_changed.emit("rect:size")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:size" ])
 
 
 func _reposition_by_center(delta: Vector2) -> void:
 	rect.position += delta
-	property_changed.emit("rect:position")
-	properties_changed.emit()
+	emit_properties_changed([ "rect:position" ])
 
 
 func set_visible(value: bool) -> void:

@@ -88,10 +88,20 @@ func _create_state() -> void:
 		_create_state_name.clear()
 
 
+func _change_previewed_state(state_entry: StatePropertyEntry) -> void:
+	if not element:
+		return
+	
+	var state := state_entry.get_state_data()
+	element.set_state_active(state, true)
+
+
 # Implementation.
 
 func _update_state_list() -> void:
 	for state_entry: StatePropertyEntry in _states_container.get_children():
+		state_entry.preview_toggled.disconnect(_change_previewed_state.bind(state_entry))
+		
 		_states_container.remove_child(state_entry)
 		state_entry.queue_free()
 	
@@ -110,3 +120,4 @@ func _update_state_list() -> void:
 		state_entry.set_state_data(state)
 		
 		_states_container.add_child(state_entry)
+		state_entry.preview_toggled.connect(_change_previewed_state.bind(state_entry))
