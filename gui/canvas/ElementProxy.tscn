@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dkt8ontenpshw"]
+
+[ext_resource type="Script" path="res://gui/canvas/ElementProxy.gd" id="1_2odwx"]
+
+[node name="ElementProxy" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_2odwx")
+
+[node name="ElementRenderer" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 0
+mouse_filter = 2
