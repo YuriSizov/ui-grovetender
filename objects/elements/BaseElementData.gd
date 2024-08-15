@@ -31,7 +31,7 @@ const PROPERTY_USAGE_ELEMENT_DATA := PROPERTY_USAGE_SCRIPT_DEFAULT_VALUE
 var offset: Vector2 = Vector2.ZERO
 ## The size of the owner element.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
-var size: Vector2 = Vector2.ZERO
+var size: Vector2 = Vector2(64, 64)
 
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
 var debug_color: Color = Color.WHITE

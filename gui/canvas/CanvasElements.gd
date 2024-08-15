@@ -9,51 +9,18 @@ class_name CanvasElements extends Control
 
 const ELEMENT_PROXY_SCENE := preload("res://gui/canvas/ElementProxy.tscn")
 
-var _current_proxy: ElementProxy = null
+var _edited_canvas: UICanvas = null
+var _element_proxy_map: Dictionary = {}
 
-
-func _init() -> void:
-	_current_proxy = ELEMENT_PROXY_SCENE.instantiate()
-	_current_proxy.element = UIElement.new(BaseElementData)
-	_current_proxy.element.set_anchor_point(Vector2(512, 256))
-	_current_proxy.element.default_state.set_size(Vector2(64, 64))
-	add_child(_current_proxy)
-	
-	for i in 3:
-		var extra_state := _current_proxy.element.create_state(StateType.STATE_PRESSED, "pressed")
-		
-		if i == 0 || i == 2:
-			# When doing this for real, we must set the value to the default state's current value.
-			extra_state.state.override_property("size")
-			extra_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
-		
-		if i == 1 || i == 2:
-			extra_state.state.override_property("debug_color")
-			extra_state.set_debug_color(Color(randf(), randf(), randf()))
-		
-		extra_state.state_in_transition.duration = 0.3
-		extra_state.state_out_transition.duration = 0.1
 
 func _ready() -> void:
+	_edit_current_canvas()
+	
 	if not Engine.is_editor_hint():
 		_update_transform()
 		
 		CanvasView.get_instance().canvas_transformed.connect(_update_transform)
-
-
-func _unhandled_key_input(event: InputEvent) -> void:
-	var ke := event as InputEventKey
-	if not ke.pressed:
-		
-		if ke.keycode == KEY_0:
-			var some_state := _current_proxy.element.variant_states[0]
-			some_state.state.set_active(not some_state.state.is_active())
-		if ke.keycode == KEY_9:
-			var some_state := _current_proxy.element.variant_states[1]
-			some_state.state.set_active(not some_state.state.is_active())
-		if ke.keycode == KEY_8:
-			var some_state := _current_proxy.element.variant_states[2]
-			some_state.state.set_active(not some_state.state.is_active())
+		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
 # Canvas transform.
@@ -64,3 +31,52 @@ func _update_transform() -> void:
 	
 	scale = CanvasView.get_instance().get_canvas_scale_vector()
 	position = Vector2.ZERO - CanvasView.get_instance().get_canvas_offset()
+
+
+# Canvas management.
+
+func _edit_current_canvas() -> void:
+	if Engine.is_editor_hint():
+		return
+	
+	_clear_element_proxies()
+	if _edited_canvas:
+		_edited_canvas.element_added.disconnect(_create_element_proxy)
+		_edited_canvas.element_removed.disconnect(_destroy_element_proxy)
+	
+	_edited_canvas = Controller.get_current_canvas()
+	
+	_create_element_proxies()
+	if _edited_canvas:
+		_edited_canvas.element_added.connect(_create_element_proxy)
+		_edited_canvas.element_removed.connect(_destroy_element_proxy)
+
+
+func _clear_element_proxies() -> void:
+	for element in _element_proxy_map:
+		_destroy_element_proxy(element)
+
+
+func _destroy_element_proxy(element: UIElement) -> void:
+	if not _element_proxy_map.has(element):
+		return
+	
+	var proxy_node: ElementProxy = _element_proxy_map[element]
+	proxy_node.get_parent().remove_child(proxy_node)
+	proxy_node.queue_free()
+
+
+func _create_element_proxies() -> void:
+	if not _edited_canvas:
+		return
+	
+	for element in _edited_canvas.elements:
+		_create_element_proxy(element)
+
+
+func _create_element_proxy(element: UIElement) -> void:
+	var proxy_node := ELEMENT_PROXY_SCENE.instantiate()
+	proxy_node.element = element
+	add_child(proxy_node)
+	
+	_element_proxy_map[element] = proxy_node

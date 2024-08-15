@@ -5,3 +5,7 @@
 ###################################################
 
 extends Control
+
+
+func _ready() -> void:
+	Controller.create_new_canvas()
