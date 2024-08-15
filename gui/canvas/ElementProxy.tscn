@@ -8,7 +8,15 @@ anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1_2odwx")
 
-[node name="ElementRenderer" type="Control" parent="."]
+[node name="MainRenderer" type="Control" parent="."]
 unique_name_in_owner = true
 anchors_preset = 0
 mouse_filter = 2
+
+[node name="TransitionRenderer" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 0
+
+[node name="States" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 0

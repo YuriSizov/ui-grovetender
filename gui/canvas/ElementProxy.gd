@@ -6,32 +6,51 @@
 
 class_name ElementProxy extends Control
 
+# TODO: Make this adjustible, probably. Possibly together with the "combined size" too.
+const STATE_RENDERER_PADDING := 32.0
+
 @export var element: UIElement = null:
 	set = set_element
 
-@onready var _renderer: Control = %ElementRenderer
+var _renderer_data_map: Dictionary = {}
+
+@onready var _main_renderer: Control = %MainRenderer
+@onready var _transition_renderer: Control = %TransitionRenderer
+@onready var _state_renderers: Control = %States
 
 
 func _enter_tree() -> void:
 	_update_anchor_position()
-	_update_renderer()
+	_create_renderers()
+	_update_renderers()
 
 
 func _ready() -> void:
-	_renderer.draw.connect(_renderer_draw)
+	_main_renderer.draw.connect(_renderer_draw.bind(_main_renderer))
+	_transition_renderer.draw.connect(_renderer_draw.bind(_transition_renderer))
 
 
 func _notification(what: int) -> void:
-	# Since we're working with a packaged scene here, child nodes are available
+	# Since we're working with a packed scene here, child nodes are available
 	# way ahead of ready and can be used pretty much immediately. This fixes the
 	# references.
 	if what == NOTIFICATION_SCENE_INSTANTIATED:
-		_renderer = %ElementRenderer
+		_main_renderer = %MainRenderer
+		_transition_renderer = %TransitionRenderer
+		_state_renderers = %States
 
 
-func _renderer_draw() -> void:
-	if element:
-		element.draw_element()
+func _process(_delta: float) -> void:
+	if _transition_renderer:
+		_transition_renderer.queue_redraw()
+
+
+func _renderer_draw(renderer: Control) -> void:
+	if renderer not in _renderer_data_map:
+		return
+	
+	var element_data: BaseElementData = _renderer_data_map[renderer]
+	element_data.draw(renderer)
 
 
 # Element management.
@@ -41,19 +60,20 @@ func set_element(value: UIElement) -> void:
 		return
 	
 	if element:
-		element.clear_control_id()
-		element.data_changed.disconnect(_update_renderer)
+		element.states_changed.disconnect(_create_renderers)
+		element.data_changed.disconnect(_update_renderers)
 		element.anchor_point_changed.disconnect(_update_anchor_position)
 	
 	element = value
 	
 	if element:
-		element.set_control_id(_renderer.get_instance_id())
-		element.data_changed.connect(_update_renderer)
+		element.states_changed.connect(_create_renderers)
+		element.data_changed.connect(_update_renderers)
 		element.anchor_point_changed.connect(_update_anchor_position)
 	
 	_update_anchor_position()
-	_update_renderer()
+	_create_renderers()
+	_update_renderers()
 
 
 func _update_anchor_position() -> void:
@@ -63,11 +83,91 @@ func _update_anchor_position() -> void:
 	global_position = element.get_anchor_point()
 
 
-func _update_renderer() -> void:
+# Renderer management.
+
+func _create_renderers() -> void:
+	if not element:
+		_remove_renderers()
+		return
+	
+	# Make sure the main renderer is always present in the map. We don't
+	# need to create a node for it.
+	if _main_renderer not in _renderer_data_map:
+		_renderer_data_map[_main_renderer] = element.get_default_state_data()
+	if _transition_renderer not in _renderer_data_map:
+		_renderer_data_map[_transition_renderer] = element.get_active_data()
+	
+	# Update renderer nodes for variant states.
+	
+	var renderers_to_remove: Array[Control] = []
+	var states_to_add := element.get_combined_state_data()
+	
+	# Check existing renderers and track the ones which are no longer needed.
+	# Also ignore the ones which are present and don't need to be added.
+	for renderer: Control in _renderer_data_map:
+		if renderer == _main_renderer || renderer == _transition_renderer:
+			continue
+		
+		var element_data: BaseElementData = _renderer_data_map[renderer]
+		if element_data not in states_to_add:
+			renderers_to_remove.push_back(renderer)
+		else:
+			states_to_add.erase(element_data)
+	
+	# Removes the ones to be removed.
+	for renderer in renderers_to_remove:
+		renderer.draw.disconnect(_renderer_draw.bind(renderer))
+		renderer.get_parent().remove_child(renderer)
+		renderer.queue_free()
+	
+	# Add the ones to be added.
+	for element_data in states_to_add:
+		var renderer := Control.new()
+		renderer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_state_renderers.add_child(renderer)
+		renderer.draw.connect(_renderer_draw.bind(renderer))
+		
+		_renderer_data_map[renderer] = element_data
+
+
+func _remove_renderers() -> void:
+	for renderer: Control in _renderer_data_map:
+		if renderer == _main_renderer || renderer == _transition_renderer:
+			continue
+		
+		renderer.draw.disconnect(_renderer_draw.bind(renderer))
+		renderer.get_parent().remove_child(renderer)
+		renderer.queue_free()
+	
+	_renderer_data_map.clear()
+
+
+func _update_renderers() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	var element_rect := element.get_local_rect()
-	_renderer.position = element_rect.position
-	_renderer.size = element_rect.size
-	_renderer.queue_redraw()
+	var variant_states := element.get_combined_state_data()
+	var combined_size := element.get_combined_size()
+	
+	for renderer: Control in _renderer_data_map:
+		var element_data: BaseElementData = _renderer_data_map[renderer]
+		renderer.position = element_data.offset
+		renderer.size = element_data.size
+		renderer.queue_redraw()
+		
+		# For the main renderer, nothing else needs updating changes.
+		if renderer == _main_renderer:
+			continue
+		
+		# For the transition renderer, small adjustment is made.
+		if renderer == _transition_renderer:
+			renderer.position.y += combined_size.y + STATE_RENDERER_PADDING
+			continue
+		
+		# Renderers and states are out of sync, this shouldn't happen.
+		var data_index := variant_states.find(element_data)
+		if data_index < 0:
+			continue
+		
+		renderer.position.x += combined_size.x + STATE_RENDERER_PADDING
+		renderer.position.y += (combined_size.y + STATE_RENDERER_PADDING) * data_index
