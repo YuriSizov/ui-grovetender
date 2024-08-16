@@ -4,6 +4,8 @@
 # Provided under MIT                              #
 ###################################################
 
+## The state sub-object that contains state-specific data of the parent element
+## data object. It is owned by a BaseElementData instance.
 class_name UIState extends Resource
 
 signal state_activated()

@@ -80,7 +80,7 @@ func _update_anchor_position() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	global_position = element.get_anchor_point()
+	position = element.get_anchor_point()
 
 
 # Renderer management.
@@ -171,3 +171,22 @@ func _update_renderers() -> void:
 		
 		renderer.position.x += combined_size.x + STATE_RENDERER_PADDING
 		renderer.position.y += (combined_size.y + STATE_RENDERER_PADDING) * data_index
+
+
+# Helpers.
+
+func is_visible_on_screen() -> bool:
+	# FIXME: Can be optimized with caching.
+	
+	if not visible || not is_inside_tree() || not is_visible_in_tree():
+		return false
+	
+	var global_rect := get_global_rect()
+	if global_rect.end.x < 0 || global_rect.end.y < 0:
+		return false
+	
+	var window_size := get_window().size
+	if global_rect.position.x > window_size.x || global_rect.position.y > window_size.y:
+		return false
+	
+	return true

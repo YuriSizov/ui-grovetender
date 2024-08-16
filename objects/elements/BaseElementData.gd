@@ -4,6 +4,10 @@
 # Provided under MIT                              #
 ###################################################
 
+## The base element data object defines properties and methods shared by
+## all possible data objects. It can exist as a standalone data object,
+## or as a state. It also describes how properties should be transitioned,
+## if this state object is activated or deactivated.
 class_name BaseElementData extends Resource
 
 signal property_changed(property_name: String)
@@ -33,10 +37,12 @@ var offset: Vector2 = Vector2.ZERO
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
 var size: Vector2 = Vector2(64, 64)
 
+# HACK: This property shouldn't exist in the base data object, but is needed for now to debug.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
 var debug_color: Color = Color.WHITE
 
 
+# HACK: This is only needed for temporary debug. Base element data has nothing to draw normally.
 func draw(proxy: Control) -> void:
 	proxy.draw_rect(Rect2(offset, size), debug_color)
 

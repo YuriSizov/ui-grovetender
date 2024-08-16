@@ -7,27 +7,49 @@
 @tool
 class_name CanvasView extends Control
 
-## Our singleton instance.
+signal canvas_transformed()
+
+## Singleton instance.
+
 static var _instance: CanvasView = null
 
-# Instance members.
+static func get_instance() -> CanvasView:
+	return _instance
+
+#
+
+var _edited_canvas: UICanvas = null
+
+# Selection properties.
+
+enum SelectionMode {
+	REPLACE_SELECTION,
+	ADD_TO_SELECTION,
+	REMOVE_FROM_SELECTION,
+}
+
+var _selection: CanvasSelection = CanvasSelection.new()
+
+const SELECTION_DRAG_THRESHOLD := 16.0 # 4 pixels squared?
+
+var _selection_dragging: bool = false
+var _selection_drag_rect: Rect2 = Rect2()
+var _selection_drag_last_position: Vector2 = Vector2.ZERO
+var _selection_drag_total_distance: float = 0.0
+
+# Canvas transform properties.
 
 const SCALE_STEP := 1.2
 const MIN_SCALE := 1.0 / pow(SCALE_STEP, 8.0)
 const MAX_SCALE := 1.0 * pow(SCALE_STEP, 4.0)
-
-signal canvas_transformed()
-
-var _edited_canvas: UICanvas = null
 
 var _canvas_offset: Vector2 = Vector2.ZERO
 var _canvas_scale: float = 1.0
 var _canvas_dragging: bool = false
 var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 
-
-static func get_instance() -> CanvasView:
-	return _instance
+@onready var _canvas_elements: CanvasElements = %Elements
+@onready var _canvas_overlay: Control = %Overlay
 
 
 func _init() -> void:
@@ -43,6 +65,12 @@ func _ready() -> void:
 	_update_canvas_grid()
 	_edit_current_canvas()
 	
+	_canvas_overlay.draw.connect(_draw_canvas_overlay)
+	# HACK: This is just for debugging purposes while we don't have selection visualization.
+	_selection.selection_changed.connect(func() -> void:
+		prints(_selection.get_selection_size(), _selection.get_selection())
+	)
+	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
 
@@ -53,24 +81,47 @@ func _gui_input(event: InputEvent) -> void:
 		
 		if mb.pressed: # Events triggered on mouse press.
 			match mb.button_index:
+				MOUSE_BUTTON_LEFT:
+					_start_selection_dragging(mb)
+				
+				MOUSE_BUTTON_MIDDLE:
+					_start_canvas_dragging(mb.global_position)
+				
 				MOUSE_BUTTON_WHEEL_UP:
 					_adjust_canvas_scale(SCALE_STEP, mb.global_position)
 				
 				MOUSE_BUTTON_WHEEL_DOWN:
 					_adjust_canvas_scale(1.0 / SCALE_STEP, mb.global_position)
 			
-				MOUSE_BUTTON_MIDDLE:
-					_start_canvas_dragging(mb.global_position)
-		
 		else: # Events triggered on mouse release.
 			match mb.button_index:
+				MOUSE_BUTTON_LEFT:
+					var selection_mode := SelectionMode.REPLACE_SELECTION
+					if mb.shift_pressed && not mb.alt_pressed:
+						selection_mode = SelectionMode.ADD_TO_SELECTION
+					elif mb.alt_pressed && not mb.shift_pressed:
+						selection_mode = SelectionMode.REMOVE_FROM_SELECTION
+					
+					# If we're dragging a selection, handle that and try to select/deselect all matching elements.
+					if _selection_dragging && _selection_drag_total_distance >= SELECTION_DRAG_THRESHOLD:
+						_stop_selection_dragging(selection_mode)
+					
+					# Alternatively, treat it as a click and try to select/deselect one element.
+					else:
+						_cancel_selection_dragging()
+						_try_select_element(to_canvas_coordinates(mb.global_position), selection_mode)
+				
 				MOUSE_BUTTON_RIGHT:
-					_add_element_to_canvas(mb.global_position)
+					_add_element_to_canvas(to_canvas_coordinates(mb.global_position))
+				
 				MOUSE_BUTTON_MIDDLE:
 					_stop_canvas_dragging()
 	
 	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
+		
+		if _selection_dragging:
+			_process_selection_dragging(mm.global_position)
 		
 		if _canvas_dragging:
 			_process_canvas_dragging(mm.global_position)
@@ -79,23 +130,24 @@ func _gui_input(event: InputEvent) -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if event.is_action_pressed("grove_create_element", false, true):
 		var mouse_position := get_global_mouse_position()
-		_add_element_to_canvas(mouse_position)
+		_add_element_to_canvas(to_canvas_coordinates(mouse_position))
 		
 		get_viewport().set_input_as_handled()
 	
 	elif event.is_action_pressed("grove_remove_elements", false, true):
-		_remove_element_from_canvas()
+		_remove_elements_from_canvas()
 		
 		get_viewport().set_input_as_handled()
 
 
+# HACK: This is temporary just to debug features without other ways to trigger them.
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not _edited_canvas:
 		return
 	
 	var ke := event as InputEventKey
-	if not ke.pressed && not _edited_canvas.elements.is_empty():
-		var some_element := _edited_canvas.elements[0]
+	if not ke.pressed && not _edited_canvas.element_group.is_empty():
+		var some_element := _edited_canvas.element_group.fetch(0)
 		
 		if ke.keycode == KEY_0:
 			var some_state := some_element.variant_states[0]
@@ -106,11 +158,24 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if ke.keycode == KEY_8:
 			var some_state := some_element.variant_states[2]
 			some_state.state.set_active(not some_state.state.is_active())
+		
+		if ke.keycode == KEY_1:
+			var random_index := randi_range(0, _edited_canvas.elements.size() - 1)
+			_edited_canvas.sort_element(some_element, random_index)
 
 
 func _draw() -> void:
 	# Draw anything just so we can use a shader.
 	draw_rect(Rect2(Vector2.ZERO, size), Color.WHITE)
+
+
+func _draw_canvas_overlay() -> void:
+	if _selection_dragging && _selection_drag_total_distance >= SELECTION_DRAG_THRESHOLD:
+		var selection_style := get_theme_stylebox("selection_frame", "CanvasOverlay")
+		var selection_size := get_theme_constant("selection_size", "CanvasOverlay")
+		var selection_rect := _selection_drag_rect.abs()
+		
+		DrawingUtil.draw_stylebox_frame(_canvas_overlay.get_canvas_item(), selection_style, selection_rect, selection_size)
 
 
 # Canvas transform.
@@ -198,16 +263,31 @@ func _edit_current_canvas() -> void:
 	if Engine.is_editor_hint():
 		return
 	
+	_selection.clear()
+	reset_canvas_transform()
+	
+	if _edited_canvas:
+		_edited_canvas.element_created.disconnect(_handle_created_element)
+		_edited_canvas.element_removed.disconnect(_handle_removed_element)
+	
 	_edited_canvas = Controller.get_current_canvas()
+	
+	if _edited_canvas:
+		_edited_canvas.element_created.connect(_handle_created_element)
+		_edited_canvas.element_removed.connect(_handle_removed_element)
 
 
-func _add_element_to_canvas(at_position: Vector2) -> void:
+func _add_element_to_canvas(canvas_position: Vector2) -> void:
 	if not _edited_canvas:
 		return
 	
-	var element := _edited_canvas.create_element()
-	element.set_anchor_point(at_position)
+	_edited_canvas.create_element(null, canvas_position)
+
+
+func _handle_created_element(element: UIElement) -> void:
+	_select_element(element, SelectionMode.REPLACE_SELECTION)
 	
+	# HACK: This is only for debug purposes while we cannot set up this data otherwise.
 	for i in 3:
 		var state_type := 2 + i # Focused, hovered, pressed
 		var extra_state := element.create_state(state_type, StateType.get_state_name(state_type))
@@ -225,10 +305,101 @@ func _add_element_to_canvas(at_position: Vector2) -> void:
 		extra_state.state_out_transition.duration = 0.1
 
 
-func _remove_element_from_canvas() -> void:
+func _remove_elements_from_canvas() -> void:
 	if not _edited_canvas:
 		return
-	if _edited_canvas.elements.is_empty():
+	
+	for element in _selection.get_selection():
+		_edited_canvas.remove_element(element)
+
+
+func _handle_removed_element(element: UIElement) -> void:
+	_select_element(element, SelectionMode.REMOVE_FROM_SELECTION)
+
+
+# Selection management.
+
+func _start_selection_dragging(event: InputEventMouseButton) -> void:
+	_selection_dragging = true
+	
+	_selection_drag_rect.position = event.global_position
+	_selection_drag_rect.size = Vector2.ZERO
+	_selection_drag_last_position = event.global_position
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _stop_selection_dragging(mode: SelectionMode) -> void:
+	_selection_dragging = false
+	
+	# Normalize the rectangle.
+	_selection_drag_rect = _selection_drag_rect.abs()
+	
+	var canvas_rect := Rect2()
+	canvas_rect.position = to_canvas_coordinates(_selection_drag_rect.position)
+	canvas_rect.size = _selection_drag_rect.size / _canvas_scale
+	_try_select_multiple_elements(canvas_rect, mode)
+	
+	_selection_drag_rect = Rect2()
+	_selection_drag_last_position = Vector2.ZERO
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _cancel_selection_dragging() -> void:
+	_selection_dragging = false
+	_selection_drag_rect = Rect2()
+	_selection_drag_last_position = Vector2.ZERO
+	_selection_drag_total_distance = 0.0
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _process_selection_dragging(current_position: Vector2) -> void:
+	if not _selection_dragging:
 		return
 	
-	_edited_canvas.remove_element(_edited_canvas.elements[0])
+	# This accounts for skipped mouse events (e.g. consumed by something else).
+	var relative := current_position - _selection_drag_last_position
+	_selection_drag_last_position = current_position
+	
+	_selection_drag_rect.size += relative
+	_selection_drag_total_distance += relative.length_squared()
+	# We don't really care for the exact value once it's past the threshold. So truncate the accumulator here.
+	_selection_drag_total_distance = clampf(_selection_drag_total_distance, 0.0, SELECTION_DRAG_THRESHOLD + 1.0)
+	
+	_canvas_overlay.queue_redraw()
+
+
+func _select_element(element: UIElement, mode: SelectionMode) -> void:
+	if mode == SelectionMode.REPLACE_SELECTION:
+		_selection.clear()
+	
+	if element:
+		if mode == SelectionMode.REMOVE_FROM_SELECTION:
+			_selection.deselect(element)
+		else:
+			_selection.select(element)
+
+
+func _try_select_element(canvas_position: Vector2, mode: SelectionMode) -> void:
+	var found_element := _canvas_elements.find_element_at_position(canvas_position)
+	_select_element(found_element, mode)
+
+
+func _select_multiple_elements(elements: Array[UIElement], mode: SelectionMode) -> void:
+	if mode == SelectionMode.REPLACE_SELECTION:
+		_selection.clear()
+	
+	if not elements.is_empty():
+		if mode == SelectionMode.REMOVE_FROM_SELECTION:
+			_selection.deselect_multiple(elements)
+		else:
+			_selection.select_multiple(elements)
+
+
+func _try_select_multiple_elements(canvas_rect: Rect2, mode: SelectionMode) -> void:
+	var found_elements := _canvas_elements.find_elements_in_rect(canvas_rect)
+	_select_multiple_elements(found_elements, mode)

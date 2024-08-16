@@ -4,6 +4,9 @@
 # Provided under MIT                              #
 ###################################################
 
+## The state transition sub-object that contains data related to enter
+## and exit transitions when a stateful element data object is (de)activated.
+## It is owned by a BaseElementData instance.
 class_name UITransition extends Resource
 
 ## The duration of this transition.

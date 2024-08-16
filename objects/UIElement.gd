@@ -4,11 +4,21 @@
 # Provided under MIT                              #
 ###################################################
 
+## The base UI element object, responsible for the overall management of each
+## element, while BaseElementData and its derivatives handle element type-
+## specific details, implementation, and drawing.
+##
+## Note that here data objects are often referred to as states. A data object
+## is a state when it has a configured UIState instance. It can also exist
+## without being a state.
 class_name UIElement extends Resource
 
 signal anchor_point_changed()
 signal data_changed()
 signal states_changed()
+
+signal editor_selected()
+signal editor_deselected()
 
 ## The unique name of this element. User-facing and user-adjustible, can be
 ## used when generating the API on export.
@@ -43,6 +53,12 @@ var _combined_state_data: Array[BaseElementData] = []
 var _combined_size: Vector2 = Vector2.ZERO
 ## The map of names and active tweeners for all properties of this element.
 var _property_tweener_map: Dictionary = {}
+
+## The instance ID of the element group this element belongs to. This can be either
+## the group of the owner canvas, or the group of one of the composite elements.
+var _group_id: int = 0
+## The selected state in the editor.
+var _selected: bool = false
 
 
 func _init(data_class: GDScript) -> void:
@@ -215,6 +231,51 @@ func get_combined_state_data() -> Array[BaseElementData]:
 	return _combined_state_data.duplicate()
 
 
+# Group metadata.
+
+func get_group() -> UIElementGroup:
+	if not is_instance_id_valid(_group_id):
+		return null
+	
+	return instance_from_id(_group_id)
+
+
+func has_group() -> bool:
+	return is_instance_id_valid(_group_id)
+
+
+func get_group_id() -> int:
+	return _group_id
+
+
+func set_group_id(instance_id: int) -> void:
+	if not is_instance_id_valid(instance_id):
+		return
+	
+	_group_id = instance_id
+
+
+func clear_group_id() -> void:
+	_group_id = 0
+
+
+# Selection.
+
+func is_selected() -> bool:
+	return _selected
+
+
+func set_selected(value: bool) -> void:
+	if _selected == value:
+		return
+	
+	_selected = value
+	if _selected:
+		editor_selected.emit()
+	else:
+		editor_deselected.emit()
+
+
 # Positioning and anchors.
 
 func get_anchor_point() -> Vector2:
@@ -227,6 +288,14 @@ func set_anchor_point(value: Vector2) -> void:
 	
 	anchor_point = value
 	anchor_point_changed.emit()
+
+
+func get_element_rect() -> Rect2:
+	var element_rect := Rect2()
+	element_rect.position = anchor_point + _active_data.offset
+	element_rect.size = _active_data.size
+	
+	return element_rect
 
 
 func _update_combined_size() -> void:
@@ -245,3 +314,13 @@ func _update_combined_size() -> void:
 
 func get_combined_size() -> Vector2:
 	return _combined_size
+
+
+func has_point(at_position: Vector2) -> bool:
+	var element_rect := get_element_rect()
+	return element_rect.has_point(at_position)
+
+
+func is_inside_area(area: Rect2) -> bool:
+	var element_rect := get_element_rect()
+	return area.encloses(element_rect)
