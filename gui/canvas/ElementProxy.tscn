@@ -21,3 +21,7 @@ mouse_filter = 2
 [node name="States" type="Control" parent="."]
 unique_name_in_owner = true
 anchors_preset = 0
+
+[node name="Children" type="Control" parent="."]
+unique_name_in_owner = true
+anchors_preset = 0

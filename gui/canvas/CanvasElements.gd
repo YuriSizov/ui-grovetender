@@ -11,6 +11,7 @@ const ELEMENT_PROXY_SCENE := preload("res://gui/canvas/ElementProxy.tscn")
 
 var _edited_canvas: UICanvas = null
 var _element_proxy_map: Dictionary = {}
+var _group_control_map: Dictionary = {}
 
 
 func _ready() -> void:
@@ -36,11 +37,13 @@ func _edit_current_canvas() -> void:
 	if Engine.is_editor_hint():
 		return
 	
+	_group_control_map.clear()
 	_clear_element_proxies()
 	
 	if _edited_canvas:
 		_edited_canvas.element_created.disconnect(_create_element_proxy)
 		_edited_canvas.element_removed.disconnect(_destroy_element_proxy)
+		_edited_canvas.element_reparented.disconnect(_reparent_element_proxy)
 		_edited_canvas.element_sorted.disconnect(_sort_element_proxy)
 		_edited_canvas.canvas_transformed.disconnect(_update_transform)
 	
@@ -49,19 +52,29 @@ func _edit_current_canvas() -> void:
 	if _edited_canvas:
 		_edited_canvas.element_created.connect(_create_element_proxy)
 		_edited_canvas.element_removed.connect(_destroy_element_proxy)
+		_edited_canvas.element_reparented.connect(_reparent_element_proxy)
 		_edited_canvas.element_sorted.connect(_sort_element_proxy)
 		_edited_canvas.canvas_transformed.connect(_update_transform)
+		
+		_group_control_map[_edited_canvas.element_group] = self
 	
 	_update_transform()
 	_create_element_proxies()
 
 
 func _create_element_proxy(element: UIElement) -> void:
+	var owner_group := element.get_group()
+	if not _group_control_map.has(owner_group):
+		return # This should never happen.
+	
+	var group_control: Control = _group_control_map[owner_group]
 	var proxy_node := ELEMENT_PROXY_SCENE.instantiate()
 	proxy_node.element = element
-	add_child(proxy_node)
+	group_control.add_child(proxy_node)
 	
 	_element_proxy_map[element] = proxy_node
+	if element is UICompositeElement:
+		_group_control_map[element.element_group] = proxy_node.get_children_root()
 
 
 func _create_element_proxies() -> void:
@@ -74,7 +87,7 @@ func _create_element_proxies() -> void:
 
 func _destroy_element_proxy(element: UIElement) -> void:
 	if not _element_proxy_map.has(element):
-		return
+		return # This should never happen.
 	
 	var proxy_node: ElementProxy = _element_proxy_map[element]
 	proxy_node.get_parent().remove_child(proxy_node)
@@ -84,11 +97,29 @@ func _destroy_element_proxy(element: UIElement) -> void:
 func _clear_element_proxies() -> void:
 	for element in _element_proxy_map:
 		_destroy_element_proxy(element)
+	
+	_element_proxy_map.clear()
+
+
+func _reparent_element_proxy(element: UIElement, to_index: int) -> void:
+	if not _element_proxy_map.has(element):
+		return # This should never happen.
+	
+	var owner_group := element.get_group()
+	if not _group_control_map.has(owner_group):
+		return # This should never happen.
+	
+	var proxy_node: ElementProxy = _element_proxy_map[element]
+	proxy_node.get_parent().remove_child(proxy_node)
+	
+	var group_control: Control = _group_control_map[owner_group]
+	group_control.add_child(proxy_node)
+	group_control.move_child(proxy_node, to_index)
 
 
 func _sort_element_proxy(element: UIElement, to_index: int) -> void:
 	if not _element_proxy_map.has(element):
-		return
+		return # This should never happen.
 	
 	var proxy_node: ElementProxy = _element_proxy_map[element]
 	proxy_node.get_parent().move_child(proxy_node, to_index)
@@ -107,6 +138,11 @@ func _find_child_at_position(owner_control: Control, canvas_position: Vector2) -
 		var proxy_node: ElementProxy = owner_control.get_child(element_index)
 		if not proxy_node.is_visible_on_screen() || not proxy_node.element:
 			continue
+		
+		if proxy_node.element is UICompositeElement:
+			var child_element := _find_child_at_position(proxy_node.get_children_root(), canvas_position)
+			if child_element:
+				return child_element
 		
 		if proxy_node.element.has_point(canvas_position):
 			return proxy_node.element
@@ -128,6 +164,9 @@ func _find_children_in_rect(owner_control: Control, canvas_rect: Rect2, found_ch
 		var proxy_node: ElementProxy = owner_control.get_child(element_index)
 		if not proxy_node.is_visible_on_screen() || not proxy_node.element:
 			continue
+		
+		if proxy_node.element is UICompositeElement:
+			_find_children_in_rect(proxy_node.get_children_root(), canvas_rect, found_children)
 		
 		if proxy_node.element.is_inside_area(canvas_rect):
 			found_children.push_back(proxy_node.element)

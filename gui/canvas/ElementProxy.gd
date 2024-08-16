@@ -17,6 +17,7 @@ var _renderer_data_map: Dictionary = {}
 @onready var _main_renderer: Control = %MainRenderer
 @onready var _transition_renderer: Control = %TransitionRenderer
 @onready var _state_renderers: Control = %States
+@onready var _children_root: Control = %Children
 
 
 func _enter_tree() -> void:
@@ -81,6 +82,10 @@ func _update_anchor_position() -> void:
 		return
 	
 	position = element.get_anchor_point()
+
+
+func get_children_root() -> Control:
+	return _children_root
 
 
 # Renderer management.

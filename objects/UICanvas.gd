@@ -14,10 +14,11 @@ class_name UICanvas extends Resource
 signal element_created(element: UIElement)
 signal element_removed(element: UIElement)
 signal element_sorted(element: UIElement, to_index: int)
+signal element_reparented(element: UIElement, to_index: int)
 
 signal canvas_transformed()
 
-@export var element_group: UIElementGroup = UIElementGroup.new()
+@export var element_group: UIElementGroup = UIElementGroup.new(self)
 
 # Runtime properties.
 
@@ -52,8 +53,67 @@ func sort_element(element: UIElement, to_index: int) -> void:
 		element_sorted.emit(element, to_index)
 
 
+func _find_common_owner_group(elements: Array[UIElement]) -> UIElementGroup:
+	# Find the closest common owner for every element. This is a very naive approach.
+	
+	# First, collect all owner chains for each element.
+	var owner_chains := [] # Array of Array[UIElementGroup]
+	var longest_chain: Array[UIElementGroup] = []
+	for element in elements:
+		var chain: Array[UIElementGroup] = []
+		
+		var group := element.get_group()
+		while group:
+			chain.push_front(group)
+			group = group.get_owner_group()
+		
+		owner_chains.push_back(chain)
+		if chain.size() > longest_chain.size():
+			longest_chain = chain
+	
+	# Then, move through the chains until a discrepancy is found. The last matching group
+	# is our owner.
+	var owner_group := element_group # The group from this canvas is always the first for every chain.
+	for i in longest_chain.size():
+		var match_against := longest_chain[i]
+		var match_found := false
+		
+		for chain in owner_chains:
+			if i >= chain.size():
+				match_found = true
+				break
+			
+			var chain_item: UIElementGroup = chain[i]
+			if chain_item != match_against:
+				match_found = true
+				break
+		
+		if match_found:
+			break
+		
+		owner_group = longest_chain[i]
+	
+	return owner_group
+
+
 func group_elements(elements: Array[UIElement]) -> void:
-	pass
+	var owner_group := _find_common_owner_group(elements)
+	
+	# Remove each element from its current group.
+	for element in elements:
+		var group := element.get_group()
+		group.erase(element)
+	
+	var composite := UICompositeElement.new(BaseElementData)
+	
+	# TODO: Insert at the position of the highest (lowest index) affected element in the common owner.
+	owner_group.add(composite)
+	element_created.emit(composite)
+	
+	for i in elements.size():
+		var element := elements[i]
+		composite.element_group.add(element)
+		element_reparented.emit(element, i)
 
 
 # Transform management.

@@ -10,6 +10,29 @@ class_name UIElementGroup extends Resource
 
 @export var elements: Array[UIElement] = []
 
+var _owner_id: int = 0
+
+
+func _init(owner: Object) -> void:
+	_owner_id = owner.get_instance_id()
+
+
+func get_owner() -> Object:
+	if not is_instance_id_valid(_owner_id):
+		return null
+	
+	return instance_from_id(_owner_id)
+
+
+func get_owner_group() -> UIElementGroup:
+	var owner := get_owner()
+	
+	if owner && owner is UICompositeElement:
+		var owner_element := owner as UICompositeElement
+		return owner_element.get_group()
+	
+	return null
+
 
 # Element management.
 

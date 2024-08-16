@@ -112,6 +112,11 @@ func _shortcut_input(event: InputEvent) -> void:
 		_remove_elements_from_canvas()
 		
 		get_viewport().set_input_as_handled()
+	
+	elif event.is_action_pressed("grove_group_elements", false, true):
+		_group_elements_on_canvas()
+		
+		get_viewport().set_input_as_handled()
 
 
 # HACK: This is temporary just to debug features without other ways to trigger them.
@@ -136,6 +141,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if ke.keycode == KEY_1:
 			var random_index := randi_range(0, _edited_canvas.elements.size() - 1)
 			_edited_canvas.sort_element(some_element, random_index)
+		
+		if ke.keycode == KEY_2:
+			_print_element_tree(_edited_canvas.element_group)
+
+
+func _print_element_tree(element_group: UIElementGroup, depth: int = 0) -> void:
+	for element in element_group.elements:
+		prints(" ".repeat(depth) + "-", element.get_script().get_global_name(), element.element_name)
+		
+		if element is UICompositeElement:
+			_print_element_tree(element.element_group, depth + 1)
 
 
 func _draw() -> void:
@@ -232,6 +248,10 @@ func _handle_created_element(element: UIElement) -> void:
 	_select_element(element, SelectionMode.REPLACE_SELECTION)
 	
 	# HACK: This is only for debug purposes while we cannot set up this data otherwise.
+	
+	if element is UICompositeElement:
+		return
+	
 	for i in 3:
 		var state_type := 2 + i # Focused, hovered, pressed
 		var extra_state := element.create_state(state_type, StateType.get_state_name(state_type))
@@ -259,6 +279,15 @@ func _remove_elements_from_canvas() -> void:
 
 func _handle_removed_element(element: UIElement) -> void:
 	_select_element(element, SelectionMode.REMOVE_FROM_SELECTION)
+
+
+func _group_elements_on_canvas() -> void:
+	if not _edited_canvas:
+		return
+	
+	var selected_elements := _selection.get_selection()
+	if not selected_elements.is_empty():
+		_edited_canvas.group_elements(selected_elements)
 
 
 # Selection management.

@@ -9,4 +9,4 @@
 ## widget that must share configuration (states, behavior model, etc.)
 class_name UICompositeElement extends UIElement
 
-@export var element_group: UIElementGroup = UIElementGroup.new()
+@export var element_group: UIElementGroup = UIElementGroup.new(self)

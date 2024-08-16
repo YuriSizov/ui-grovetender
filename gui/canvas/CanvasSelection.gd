@@ -86,10 +86,3 @@ func get_selection_size() -> int:
 
 func get_selection() -> Array[UIElement]:
 	return _selected_elements.duplicate()
-
-
-func get_first_selected() -> UIElement:
-	if _selected_elements.is_empty():
-		return null
-	
-	return _selected_elements[0]
