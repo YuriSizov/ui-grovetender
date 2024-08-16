@@ -7,17 +7,6 @@
 @tool
 class_name CanvasView extends Control
 
-signal canvas_transformed()
-
-## Singleton instance.
-
-static var _instance: CanvasView = null
-
-static func get_instance() -> CanvasView:
-	return _instance
-
-#
-
 var _edited_canvas: UICanvas = null
 
 # Selection properties.
@@ -39,26 +28,11 @@ var _selection_drag_total_distance: float = 0.0
 
 # Canvas transform properties.
 
-const SCALE_STEP := 1.2
-const MIN_SCALE := 1.0 / pow(SCALE_STEP, 8.0)
-const MAX_SCALE := 1.0 * pow(SCALE_STEP, 4.0)
-
-var _canvas_offset: Vector2 = Vector2.ZERO
-var _canvas_scale: float = 1.0
 var _canvas_dragging: bool = false
 var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 
 @onready var _canvas_elements: CanvasElements = %Elements
 @onready var _canvas_overlay: Control = %Overlay
-
-
-func _init() -> void:
-	if Engine.is_editor_hint():
-		return
-	if _instance:
-		printerr("CanvasView: Only one instance of CanvasView is allowed.")
-	
-	_instance = self
 
 
 func _ready() -> void:
@@ -88,10 +62,10 @@ func _gui_input(event: InputEvent) -> void:
 					_start_canvas_dragging(mb.global_position)
 				
 				MOUSE_BUTTON_WHEEL_UP:
-					_adjust_canvas_scale(SCALE_STEP, mb.global_position)
+					_adjust_canvas_scale(UICanvas.SCALE_STEP, mb.global_position)
 				
 				MOUSE_BUTTON_WHEEL_DOWN:
-					_adjust_canvas_scale(1.0 / SCALE_STEP, mb.global_position)
+					_adjust_canvas_scale(1.0 / UICanvas.SCALE_STEP, mb.global_position)
 			
 		else: # Events triggered on mouse release.
 			match mb.button_index:
@@ -109,10 +83,10 @@ func _gui_input(event: InputEvent) -> void:
 					# Alternatively, treat it as a click and try to select/deselect one element.
 					else:
 						_cancel_selection_dragging()
-						_try_select_element(to_canvas_coordinates(mb.global_position), selection_mode)
+						_try_select_element(mb.global_position, selection_mode)
 				
 				MOUSE_BUTTON_RIGHT:
-					_add_element_to_canvas(to_canvas_coordinates(mb.global_position))
+					_add_element_to_canvas(mb.global_position)
 				
 				MOUSE_BUTTON_MIDDLE:
 					_stop_canvas_dragging()
@@ -130,7 +104,7 @@ func _gui_input(event: InputEvent) -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if event.is_action_pressed("grove_create_element", false, true):
 		var mouse_position := get_global_mouse_position()
-		_add_element_to_canvas(to_canvas_coordinates(mouse_position))
+		_add_element_to_canvas(mouse_position)
 		
 		get_viewport().set_input_as_handled()
 	
@@ -180,41 +154,12 @@ func _draw_canvas_overlay() -> void:
 
 # Canvas transform.
 
-func get_canvas_scale() -> float:
-	return _canvas_scale
-
-
-func get_canvas_scale_vector() -> Vector2:
-	return Vector2(_canvas_scale, _canvas_scale)
-
-
-func get_canvas_offset() -> Vector2:
-	return _canvas_offset
-
-
-func reset_canvas_transform() -> void:
-	_canvas_scale = 1.0
-	_canvas_offset = Vector2.ZERO
-	
-	_update_canvas_grid()
-	canvas_transformed.emit()
-
-
-func _set_canvas_scale(value: float, towards_position: Vector2) -> void:
-	var clean_value := clampf(value, MIN_SCALE, MAX_SCALE)
-	if _canvas_scale == clean_value:
+func _adjust_canvas_scale(factor: float, towards_position: Vector2) -> void:
+	if not _edited_canvas:
 		return
 	
-	var old_offset := (_canvas_offset + towards_position) / _canvas_scale
-	_canvas_scale = clean_value
-	_canvas_offset = old_offset * _canvas_scale - towards_position
-	
-	_update_canvas_grid()
-	canvas_transformed.emit()
-
-
-func _adjust_canvas_scale(factor: float, towards_position: Vector2) -> void:
-	_set_canvas_scale(_canvas_scale * factor, towards_position)
+	var current_scale := _edited_canvas.get_canvas_scale()
+	_edited_canvas.set_canvas_scale(current_scale * factor, towards_position)
 
 
 func _start_canvas_dragging(from_position: Vector2) -> void:
@@ -228,6 +173,8 @@ func _stop_canvas_dragging() -> void:
 
 
 func _process_canvas_dragging(current_position: Vector2) -> void:
+	if not _edited_canvas:
+		return
 	if not _canvas_dragging:
 		return
 	
@@ -235,26 +182,19 @@ func _process_canvas_dragging(current_position: Vector2) -> void:
 	var relative := current_position - _canvas_drag_last_position
 	_canvas_drag_last_position = current_position
 	
-	_canvas_offset -= relative
-	
-	_update_canvas_grid()
-	canvas_transformed.emit()
-
-
-func to_canvas_coordinates(ui_position: Vector2) -> Vector2:
-	return (ui_position + _canvas_offset) / _canvas_scale
-
-
-func from_canvas_coordinates(canvas_position: Vector2) -> Vector2:
-	return canvas_position * _canvas_scale - _canvas_offset
+	var current_offset := _edited_canvas.get_canvas_offset()
+	_edited_canvas.set_canvas_offset(current_offset - relative)
 
 
 # Grid visuals.
 
 func _update_canvas_grid() -> void:
+	if not _edited_canvas:
+		return
+	
 	var shader := (material as ShaderMaterial)
-	shader.set_shader_parameter("grid_offset", _canvas_offset)
-	shader.set_shader_parameter("grid_scale", _canvas_scale)
+	shader.set_shader_parameter("grid_offset", _edited_canvas.get_canvas_offset())
+	shader.set_shader_parameter("grid_scale", _edited_canvas.get_canvas_scale())
 
 
 # Canvas management.
@@ -264,23 +204,27 @@ func _edit_current_canvas() -> void:
 		return
 	
 	_selection.clear()
-	reset_canvas_transform()
 	
 	if _edited_canvas:
 		_edited_canvas.element_created.disconnect(_handle_created_element)
 		_edited_canvas.element_removed.disconnect(_handle_removed_element)
+		_edited_canvas.canvas_transformed.disconnect(_update_canvas_grid)
 	
 	_edited_canvas = Controller.get_current_canvas()
 	
 	if _edited_canvas:
 		_edited_canvas.element_created.connect(_handle_created_element)
 		_edited_canvas.element_removed.connect(_handle_removed_element)
+		_edited_canvas.canvas_transformed.connect(_update_canvas_grid)
+	
+	_update_canvas_grid()
 
 
-func _add_element_to_canvas(canvas_position: Vector2) -> void:
+func _add_element_to_canvas(mouse_position: Vector2) -> void:
 	if not _edited_canvas:
 		return
 	
+	var canvas_position := _edited_canvas.to_canvas_coordinates(mouse_position)
 	_edited_canvas.create_element(null, canvas_position)
 
 
@@ -336,10 +280,11 @@ func _stop_selection_dragging(mode: SelectionMode) -> void:
 	# Normalize the rectangle.
 	_selection_drag_rect = _selection_drag_rect.abs()
 	
-	var canvas_rect := Rect2()
-	canvas_rect.position = to_canvas_coordinates(_selection_drag_rect.position)
-	canvas_rect.size = _selection_drag_rect.size / _canvas_scale
-	_try_select_multiple_elements(canvas_rect, mode)
+	if _edited_canvas:
+		var canvas_rect := Rect2()
+		canvas_rect.position = _edited_canvas.to_canvas_coordinates(_selection_drag_rect.position)
+		canvas_rect.size = _selection_drag_rect.size / _edited_canvas.get_canvas_scale()
+		_try_select_multiple_elements(canvas_rect, mode)
 	
 	_selection_drag_rect = Rect2()
 	_selection_drag_last_position = Vector2.ZERO
@@ -384,7 +329,11 @@ func _select_element(element: UIElement, mode: SelectionMode) -> void:
 			_selection.select(element)
 
 
-func _try_select_element(canvas_position: Vector2, mode: SelectionMode) -> void:
+func _try_select_element(mouse_position: Vector2, mode: SelectionMode) -> void:
+	if not _edited_canvas:
+		return
+	
+	var canvas_position := _edited_canvas.to_canvas_coordinates(mouse_position)
 	var found_element := _canvas_elements.find_element_at_position(canvas_position)
 	_select_element(found_element, mode)
 

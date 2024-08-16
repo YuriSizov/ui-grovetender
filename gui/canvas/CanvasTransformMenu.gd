@@ -7,6 +7,7 @@
 @tool
 class_name CanvasTransformMenu extends HBoxContainer
 
+var _edited_canvas: UICanvas = null
 var _label_pressed: bool = false
 
 @onready var _zoom_label: Label = %ZoomLabel
@@ -18,10 +19,10 @@ func _ready() -> void:
 		_label_pressed = false
 	)
 	
+	_edit_current_canvas()
+	
 	if not Engine.is_editor_hint():
-		_update_transform_menu()
-		
-		CanvasView.get_instance().canvas_transformed.connect(_update_transform_menu)
+		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
 func _label_gui_input(event: InputEvent) -> void:
@@ -36,16 +37,32 @@ func _label_gui_input(event: InputEvent) -> void:
 			_label_pressed = false
 			_zoom_label.accept_event()
 			
-			CanvasView.get_instance().reset_canvas_transform()
+			if _edited_canvas:
+				_edited_canvas.reset_canvas_transform()
 
 
 # Helpers.
 
-func _update_transform_menu() -> void:
-	if not CanvasView.get_instance():
+func _edit_current_canvas() -> void:
+	if Engine.is_editor_hint():
 		return
 	
-	var canvas_scale := CanvasView.get_instance().get_canvas_scale()
+	if _edited_canvas:
+		_edited_canvas.canvas_transformed.disconnect(_update_transform_menu)
+	
+	_edited_canvas = Controller.get_current_canvas()
+	
+	if _edited_canvas:
+		_edited_canvas.canvas_transformed.connect(_update_transform_menu)
+	
+	_update_transform_menu()
+
+
+func _update_transform_menu() -> void:
+	if not _edited_canvas:
+		return
+	
+	var canvas_scale := _edited_canvas.get_canvas_scale()
 	var normalized_scale := roundi(canvas_scale * 100.0)
 	_zoom_label.text = "%d%%" % [ normalized_scale ]
 	_zoom_label.tooltip_text = "Current zoom: %d%%\nClick to reset zoom and position." % [ normalized_scale ]

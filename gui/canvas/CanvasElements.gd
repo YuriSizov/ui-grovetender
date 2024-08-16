@@ -17,20 +17,17 @@ func _ready() -> void:
 	_edit_current_canvas()
 	
 	if not Engine.is_editor_hint():
-		_update_transform()
-		
-		CanvasView.get_instance().canvas_transformed.connect(_update_transform)
 		Controller.canvas_changed.connect(_edit_current_canvas)
 
 
 # Canvas transform.
 
 func _update_transform() -> void:
-	if not CanvasView.get_instance():
+	if not _edited_canvas:
 		return
 	
-	scale = CanvasView.get_instance().get_canvas_scale_vector()
-	position = Vector2.ZERO - CanvasView.get_instance().get_canvas_offset()
+	scale = _edited_canvas.get_canvas_scale_vector()
+	position = Vector2.ZERO - _edited_canvas.get_canvas_offset()
 
 
 # Canvas management.
@@ -40,18 +37,23 @@ func _edit_current_canvas() -> void:
 		return
 	
 	_clear_element_proxies()
+	
 	if _edited_canvas:
 		_edited_canvas.element_created.disconnect(_create_element_proxy)
 		_edited_canvas.element_removed.disconnect(_destroy_element_proxy)
 		_edited_canvas.element_sorted.disconnect(_sort_element_proxy)
+		_edited_canvas.canvas_transformed.disconnect(_update_transform)
 	
 	_edited_canvas = Controller.get_current_canvas()
 	
-	_create_element_proxies()
 	if _edited_canvas:
 		_edited_canvas.element_created.connect(_create_element_proxy)
 		_edited_canvas.element_removed.connect(_destroy_element_proxy)
 		_edited_canvas.element_sorted.connect(_sort_element_proxy)
+		_edited_canvas.canvas_transformed.connect(_update_transform)
+	
+	_update_transform()
+	_create_element_proxies()
 
 
 func _create_element_proxy(element: UIElement) -> void:
