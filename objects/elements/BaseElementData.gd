@@ -44,6 +44,9 @@ var debug_color: Color = Color.WHITE
 
 # HACK: This is only needed for temporary debug. Base element data has nothing to draw normally.
 func draw(proxy: Control) -> void:
+	# HACK: Debugging the proxy size vs the data size.
+	proxy.draw_rect(Rect2(Vector2.ZERO, proxy.size).grow(2), Color.RED)
+	
 	proxy.draw_rect(Rect2(offset, size), debug_color)
 
 

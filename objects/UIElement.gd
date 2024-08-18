@@ -13,8 +13,9 @@
 ## without being a state.
 class_name UIElement extends Resource
 
-signal anchor_point_changed()
 signal data_changed()
+signal transform_queued()
+signal transform_changed()
 signal states_changed()
 
 signal editor_selected()
@@ -93,6 +94,8 @@ func _update_stateful_property(property_name: String) -> void:
 		_update_combined_size()
 	
 	data_changed.emit()
+	if property_name == "size" || property_name == "offset":
+		transform_queued.emit()
 
 
 func _transition_stateful_property(property_name: String, state_data: BaseElementData, transition: UITransition) -> void:
@@ -166,8 +169,10 @@ func create_state(state_type: int, state_name: String) -> BaseElementData:
 
 func _handle_activated_state(state_data: BaseElementData) -> void:
 	# Only consider properties that this state can potentially affect.
-	var affected_properties := state_data.state.properties
-	for property_name in affected_properties:
+	var state_properties := state_data.state.properties
+	var affected_properties: PackedStringArray = PackedStringArray()
+	
+	for property_name in state_properties:
 		var i := variant_states.size() - 1
 		while i >= 0:
 			# Check other states from the topmost.
@@ -177,6 +182,7 @@ func _handle_activated_state(state_data: BaseElementData) -> void:
 			# If we reach our just activated state, stop here and start the transition.
 			if other_state == state_data:
 				_transition_stateful_property(property_name, state_data, state_data.state_in_transition)
+				affected_properties.push_back(property_name)
 				break
 			
 			# If we reach another state before we reach our just activated one, there is nothing
@@ -184,13 +190,18 @@ func _handle_activated_state(state_data: BaseElementData) -> void:
 			if other_state.state.is_active() && other_state.state.has_property(property_name):
 				break
 	
-	data_changed.emit()
+	if not affected_properties.is_empty():
+		data_changed.emit()
+	if affected_properties.has("size") || affected_properties.has("offset"):
+		transform_queued.emit()
 
 
 func _handle_deactivated_state(state_data: BaseElementData) -> void:
 	# Only consider properties that this state can potentially affect.
-	var affected_properties := state_data.state.properties
-	for property_name in affected_properties:
+	var state_properties := state_data.state.properties
+	var affected_properties: PackedStringArray = PackedStringArray()
+	
+	for property_name in state_properties:
 		var affected := false
 		var fallback_state := default_state
 		
@@ -215,8 +226,12 @@ func _handle_deactivated_state(state_data: BaseElementData) -> void:
 		
 		if affected:
 			_transition_stateful_property(property_name, fallback_state, state_data.state_out_transition)
+			affected_properties.push_back(property_name)
 	
-	data_changed.emit()
+	if not affected_properties.is_empty():
+		data_changed.emit()
+	if affected_properties.has("size") || affected_properties.has("offset"):
+		transform_queued.emit()
 
 
 func get_active_data() -> BaseElementData:
@@ -276,7 +291,7 @@ func set_selected(value: bool) -> void:
 		editor_deselected.emit()
 
 
-# Positioning and anchors.
+# Transform management.
 
 func get_anchor_point() -> Vector2:
 	return anchor_point
@@ -287,7 +302,11 @@ func set_anchor_point(value: Vector2) -> void:
 		return
 	
 	anchor_point = value
-	anchor_point_changed.emit()
+	transform_queued.emit()
+
+
+func notify_transform_changed() -> void:
+	transform_changed.emit()
 
 
 func get_element_rect() -> Rect2:

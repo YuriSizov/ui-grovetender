@@ -23,7 +23,6 @@ var _renderer_data_map: Dictionary = {}
 func _enter_tree() -> void:
 	_update_anchor_position()
 	_create_renderers()
-	_update_renderers()
 
 
 func _ready() -> void:
@@ -41,6 +40,7 @@ func _notification(what: int) -> void:
 		_state_renderers = %States
 
 
+# HACK: This is temporary to test the system, ideally the transition-aware view should be separate from the canvas.
 func _process(_delta: float) -> void:
 	if _transition_renderer:
 		_transition_renderer.queue_redraw()
@@ -62,26 +62,36 @@ func set_element(value: UIElement) -> void:
 	
 	if element:
 		element.states_changed.disconnect(_create_renderers)
-		element.data_changed.disconnect(_update_renderers)
-		element.anchor_point_changed.disconnect(_update_anchor_position)
+		element.data_changed.disconnect(_redraw_renderers)
+		element.transform_changed.disconnect(_update_element_transform)
 	
 	element = value
 	
 	if element:
 		element.states_changed.connect(_create_renderers)
-		element.data_changed.connect(_update_renderers)
-		element.anchor_point_changed.connect(_update_anchor_position)
+		element.data_changed.connect(_redraw_renderers)
+		element.transform_changed.connect(_update_element_transform)
 	
 	_update_anchor_position()
 	_create_renderers()
-	_update_renderers()
 
 
 func _update_anchor_position() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	position = element.get_anchor_point()
+	var group_owner := element.get_group().get_owner()
+	if group_owner is UICompositeElement:
+		position = element.get_anchor_point() - group_owner.get_anchor_point()
+	else:
+		position = element.get_anchor_point()
+
+
+func _update_element_transform() -> void:
+	print("updating proxy transform")
+	
+	_update_anchor_position()
+	_update_renderers()
 
 
 func get_children_root() -> Control:
@@ -133,6 +143,9 @@ func _create_renderers() -> void:
 		renderer.draw.connect(_renderer_draw.bind(renderer))
 		
 		_renderer_data_map[renderer] = element_data
+	
+	_update_renderers()
+	_redraw_renderers()
 
 
 func _remove_renderers() -> void:
@@ -147,6 +160,14 @@ func _remove_renderers() -> void:
 	_renderer_data_map.clear()
 
 
+func _redraw_renderers() -> void:
+	if not element || not is_inside_tree():
+		return
+	
+	for renderer: Control in _renderer_data_map:
+		renderer.queue_redraw()
+
+
 func _update_renderers() -> void:
 	if not element || not is_inside_tree():
 		return
@@ -158,7 +179,6 @@ func _update_renderers() -> void:
 		var element_data: BaseElementData = _renderer_data_map[renderer]
 		renderer.position = element_data.offset
 		renderer.size = element_data.size
-		renderer.queue_redraw()
 		
 		# For the main renderer, nothing else needs updating changes.
 		if renderer == _main_renderer:

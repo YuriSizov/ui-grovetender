@@ -127,6 +127,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var ke := event as InputEventKey
 	if not ke.pressed && not _edited_canvas.element_group.is_empty():
 		var some_element := _edited_canvas.element_group.fetch(0)
+		if some_element is UICompositeElement:
+			some_element = some_element.element_group.fetch(0)
 		
 		if ke.keycode == KEY_0:
 			var some_state := some_element.variant_states[0]
@@ -144,6 +146,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		
 		if ke.keycode == KEY_2:
 			_print_element_tree(_edited_canvas.element_group)
+		
+		if ke.keycode == KEY_3:
+			some_element.default_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
 
 
 func _print_element_tree(element_group: UIElementGroup, depth: int = 0) -> void:

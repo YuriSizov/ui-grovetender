@@ -18,7 +18,7 @@ signal element_reparented(element: UIElement, to_index: int)
 
 signal canvas_transformed()
 
-@export var element_group: UIElementGroup = UIElementGroup.new(self)
+@export var element_group: UIElementGroup = null
 
 # Runtime properties.
 
@@ -30,7 +30,21 @@ var _canvas_offset: Vector2 = Vector2.ZERO
 var _canvas_scale: float = 1.0
 
 
+func _init() -> void:
+	element_group = UIElementGroup.new(self)
+	element_group.element_added.connect(_track_grouped_element)
+	element_group.element_erased.connect(_untrack_grouped_element)
+
+
 # Element management.
+
+func _track_grouped_element(element: UIElement) -> void:
+	element.transform_queued.connect(element_group.notify_transform)
+
+
+func _untrack_grouped_element(element: UIElement) -> void:
+	element.transform_queued.disconnect(element_group.notify_transform)
+
 
 func create_element(owner_element: UICompositeElement, at_position: Vector2) -> void:
 	var element := UIElement.new(BaseElementData)
@@ -42,6 +56,8 @@ func create_element(owner_element: UICompositeElement, at_position: Vector2) -> 
 
 
 func remove_element(element: UIElement) -> void:
+	# TODO: Dissolve empty composite elements.
+	
 	var owner_group := element.get_group()
 	if owner_group.erase(element):
 		element_removed.emit(element)
@@ -100,6 +116,7 @@ func group_elements(elements: Array[UIElement]) -> void:
 	var owner_group := _find_common_owner_group(elements)
 	
 	# Remove each element from its current group.
+	# TODO: Dissolve empty composite elements.
 	for element in elements:
 		var group := element.get_group()
 		group.erase(element)

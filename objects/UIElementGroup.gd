@@ -8,6 +8,10 @@
 ## either in the canvas or in one of the UICompositeElement instances.
 class_name UIElementGroup extends Resource
 
+signal element_added(element: UIElement)
+signal element_erased(element: UIElement)
+signal element_moved(element: UIElement, to_index: int)
+
 @export var elements: Array[UIElement] = []
 
 var _owner_id: int = 0
@@ -52,6 +56,7 @@ func add(element:UIElement) -> bool:
 	
 	elements.push_back(element)
 	element.set_group_id(get_instance_id())
+	element_added.emit(element)
 	return true
 
 
@@ -62,6 +67,7 @@ func erase(element: UIElement) -> bool:
 	
 	elements.erase(element)
 	element.clear_group_id()
+	element_erased.emit(element)
 	return true
 
 
@@ -76,8 +82,19 @@ func move(element: UIElement, to_index: int) -> bool:
 	
 	elements.erase(element)
 	elements.insert(to_index, element)
+	element_moved.emit(element, to_index)
 	return true
 
 
 func is_empty() -> bool:
 	return elements.is_empty()
+
+
+# Transform management.
+
+func notify_transform() -> void:
+	for element in elements:
+		element.notify_transform_changed()
+		
+		if element is UICompositeElement:
+			element.element_group.notify_transform()
