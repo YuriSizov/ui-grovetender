@@ -173,7 +173,7 @@ func _update_renderers() -> void:
 		return
 	
 	var variant_states := element.get_combined_state_data()
-	var combined_size := element.get_combined_size()
+	var combined_size := element.get_state_preview_spacing()
 	
 	for renderer: Control in _renderer_data_map:
 		var element_data: BaseElementData = _renderer_data_map[renderer]

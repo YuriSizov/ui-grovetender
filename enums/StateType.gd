@@ -24,3 +24,15 @@ const _state_name_map := {
 
 static func get_state_name(type: int) -> String:
 	return _state_name_map[type]
+
+
+static func get_state_type_from_name(name: String) -> int:
+	for type in _state_name_map:
+		if type == STATE_CUSTOM || type == STATE_DEFAULT:
+			continue
+		
+		var type_name: String = _state_name_map[type]
+		if type_name == name:
+			return type
+	
+	return STATE_CUSTOM

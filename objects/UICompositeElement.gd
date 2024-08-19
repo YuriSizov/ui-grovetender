@@ -27,6 +27,14 @@ func _init(data_class: GDScript) -> void:
 func _track_grouped_element(element: UIElement) -> void:
 	element.transform_queued.connect(_update_grouped_transform)
 	
+	# Ensure that the grouped element has all the states from this composite element.
+	var states: Array[Array] = []
+	for state_data in variant_states:
+		var state_tuple := [ state_data.state.state_type, state_data.state.state_name ]
+		states.push_back(state_tuple)
+	
+	_ensure_grouped_states(states, [ element ])
+	
 	_extend_grouped_transform(element)
 
 
@@ -62,6 +70,29 @@ func _extend_grouped_transform(element: UIElement) -> void:
 	_set_global_transform(global_rect)
 
 
+# State and data management.
+
+func create_state(state_type: int, state_name: String) -> BaseElementData:
+	var state_data := super(state_type, state_name)
+	
+	if state_data:
+		# Ensure all grouped elements have the new state.
+		var state_tuple := [ state_data.state.state_type, state_data.state.state_name ]
+		_ensure_grouped_states([ state_tuple ], element_group.elements)
+	
+	return state_data
+
+
+func _ensure_grouped_states(states: Array[Array], elements: Array[UIElement]) -> void:
+	for element in elements:
+		for state_tuple in states:
+			element.ensure_state(state_tuple[0], state_tuple[1])
+		
+		# Propagate further.
+		if element is UICompositeElement:
+			element._ensure_grouped_states(states, element.element_group.elements)
+
+
 # Transform management.
 
 func _set_global_transform(global_rect: Rect2) -> void:
@@ -75,4 +106,3 @@ func _set_global_transform(global_rect: Rect2) -> void:
 	anchor_point = global_rect.position
 	default_state.size = global_rect.size
 	default_state._notify_properties_changed([ "size" ])
-

@@ -126,37 +126,65 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	
 	var ke := event as InputEventKey
 	if not ke.pressed && not _edited_canvas.element_group.is_empty():
+		if ke.keycode == KEY_1:
+			_print_element_tree(_edited_canvas.element_group)
+		
 		var some_element := _edited_canvas.element_group.fetch(0)
-		if some_element is UICompositeElement:
-			some_element = some_element.element_group.fetch(0)
 		
 		if ke.keycode == KEY_0:
+			_create_test_states(some_element)
+		if ke.keycode == KEY_7:
 			var some_state := some_element.variant_states[0]
 			some_state.state.set_active(not some_state.state.is_active())
-		if ke.keycode == KEY_9:
+		if ke.keycode == KEY_8:
 			var some_state := some_element.variant_states[1]
 			some_state.state.set_active(not some_state.state.is_active())
-		if ke.keycode == KEY_8:
+		if ke.keycode == KEY_9:
 			var some_state := some_element.variant_states[2]
 			some_state.state.set_active(not some_state.state.is_active())
 		
-		if ke.keycode == KEY_1:
-			var random_index := randi_range(0, _edited_canvas.elements.size() - 1)
-			_edited_canvas.sort_element(some_element, random_index)
+		var element_group := _edited_canvas.element_group
+		if some_element is UICompositeElement:
+			element_group = some_element.element_group
+			some_element = some_element.element_group.fetch(0)
 		
 		if ke.keycode == KEY_2:
-			_print_element_tree(_edited_canvas.element_group)
+			var random_index := randi_range(0, element_group.elements.size() - 1)
+			_edited_canvas.sort_element(some_element, random_index)
 		
 		if ke.keycode == KEY_3:
 			some_element.default_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
 
 
+# HACK: See above.
 func _print_element_tree(element_group: UIElementGroup, depth: int = 0) -> void:
 	for element in element_group.elements:
 		prints(" ".repeat(depth) + "-", element.get_script().get_global_name(), element.element_name)
 		
 		if element is UICompositeElement:
 			_print_element_tree(element.element_group, depth + 1)
+
+
+# HACK: See above.
+func _create_test_states(element: UIElement) -> void:
+	for i in 3:
+		var state_type := 2 + i # Focused, hovered, pressed
+		var extra_state := element.create_state(state_type, StateType.get_state_name(state_type))
+		
+		if element is UICompositeElement:
+			continue
+		
+		if i == 0 || i == 2:
+			# When doing this for real, we must set the value to the default state's current value.
+			extra_state.state.override_property("size")
+			extra_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
+		
+		if i == 1 || i == 2:
+			extra_state.state.override_property("debug_color")
+			extra_state.set_debug_color(Color(randf(), randf(), randf()))
+		
+		extra_state.state_in_transition.duration = 0.3
+		extra_state.state_out_transition.duration = 0.1
 
 
 func _draw() -> void:
@@ -251,27 +279,6 @@ func _add_element_to_canvas(mouse_position: Vector2) -> void:
 
 func _handle_created_element(element: UIElement) -> void:
 	_select_element(element, SelectionMode.REPLACE_SELECTION)
-	
-	# HACK: This is only for debug purposes while we cannot set up this data otherwise.
-	
-	if element is UICompositeElement:
-		return
-	
-	for i in 3:
-		var state_type := 2 + i # Focused, hovered, pressed
-		var extra_state := element.create_state(state_type, StateType.get_state_name(state_type))
-		
-		if i == 0 || i == 2:
-			# When doing this for real, we must set the value to the default state's current value.
-			extra_state.state.override_property("size")
-			extra_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
-		
-		if i == 1 || i == 2:
-			extra_state.state.override_property("debug_color")
-			extra_state.set_debug_color(Color(randf(), randf(), randf()))
-		
-		extra_state.state_in_transition.duration = 0.3
-		extra_state.state_out_transition.duration = 0.1
 
 
 func _remove_elements_from_canvas() -> void:

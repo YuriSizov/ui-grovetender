@@ -68,11 +68,152 @@ func _init(data_class: GDScript) -> void:
 	
 	_active_data = _data_class.new()
 	default_state = _data_class.new()
+	# The order matters here. First we update it for states, then for the active data.
+	default_state.property_changed.connect(_update_property_in_all_combined_states)
 	default_state.property_changed.connect(_update_stateful_property)
-	default_state.property_changed.connect(_update_all_combined_states_property)
 
 
-# State and data management.
+# State management.
+
+func _check_state_exists(state_type: int, state_name: String) -> bool:
+	if state_type == StateType.STATE_DEFAULT:
+		return true
+	
+	if state_type == StateType.STATE_CUSTOM:
+		for state_data in variant_states:
+			if state_data.state.state_type != StateType.STATE_CUSTOM:
+				continue
+			
+			if state_data.state.state_name == state_name:
+				return true
+	else:
+		for state_data in variant_states:
+			if state_data.state.state_type == state_type:
+				return true
+	
+	return false
+
+
+func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementData:
+	var state_data: BaseElementData = _data_class.new()
+	state_data.state.setup(state_type, state_name)
+	variant_states.push_back(state_data)
+	
+	var combined_data: BaseElementData = _data_class.new()
+	_combined_state_data.push_back(combined_data)
+	
+	# The order matters here. First we update it for the state, then for the active data.
+	state_data.property_changed.connect(_update_property_in_combined_state.bind(state_data, combined_data))
+	state_data.property_changed.connect(_update_stateful_property)
+	state_data.state.state_activated.connect(_handle_activated_state.bind(state_data))
+	state_data.state.state_deactivated.connect(_handle_deactivated_state.bind(state_data))
+	
+	_update_combined_state(state_data, combined_data)
+	_update_combined_size()
+	states_changed.emit()
+	
+	return state_data
+
+
+func create_state(state_type: int, state_name: String) -> BaseElementData:
+	if state_type == StateType.STATE_DEFAULT:
+		printerr("UIElement: Cannot create a variant state typed as default, use the implicit default_state instead.")
+		return null
+	
+	# Normalize the state name.
+	state_name = state_name.strip_edges()
+	
+	# Normalize the state type if the name matches one of the default ones.
+	if state_type == StateType.STATE_CUSTOM:
+		state_type = StateType.get_state_type_from_name(state_name)
+	
+	# Make sure the state is unique (only one per special type, unique name for the custom type).
+	if _check_state_exists(state_type, state_name):
+		printerr("UIElement: Cannot create a variant state typed as %s (%s), only one state of this type and name is allowed." % [ StateType.get_state_name(state_type), state_name ])
+		return null
+	
+	return _create_state_nocheck(state_type, state_name)
+
+
+func ensure_state(state_type: int, state_name: String) -> void:
+	# We skip the checks like the ones in create_state() because this method should only
+	# be called for a state that is already present on one of the elements. So it should
+	# be valid already.
+	
+	if _check_state_exists(state_type, state_name):
+		return
+	
+	_create_state_nocheck(state_type, state_name)
+
+
+func _handle_activated_state(state_data: BaseElementData) -> void:
+	# Only consider properties that this state can potentially affect.
+	var state_properties := state_data.state.properties
+	var affected_properties: PackedStringArray = PackedStringArray()
+	
+	for property_name in state_properties:
+		var i := variant_states.size() - 1
+		while i >= 0:
+			# Check other states from the topmost.
+			var other_state := variant_states[i]
+			i -= 1
+			
+			# If we reach our just activated state, stop here and start the transition.
+			if other_state == state_data:
+				_transition_stateful_property(property_name, state_data, state_data.state_in_transition)
+				affected_properties.push_back(property_name)
+				break
+			
+			# If we reach another state before we reach our just activated one, there is nothing
+			# to do, just break out of the loop.
+			if other_state.state.is_active() && other_state.state.has_property(property_name):
+				break
+	
+	if not affected_properties.is_empty():
+		data_changed.emit()
+		if affected_properties.has("size") || affected_properties.has("offset"):
+			transform_queued.emit()
+
+
+func _handle_deactivated_state(state_data: BaseElementData) -> void:
+	# Only consider properties that this state can potentially affect.
+	var state_properties := state_data.state.properties
+	var affected_properties: PackedStringArray = PackedStringArray()
+	
+	for property_name in state_properties:
+		var affected := false
+		var fallback_state := default_state
+		
+		var i := variant_states.size() - 1
+		while i >= 0:
+			# Check other states from the topmost.
+			var other_state := variant_states[i]
+			i -= 1
+			
+			# If we reach our just deactivated state, start looking for the next available value
+			# in following states.
+			if other_state == state_data:
+				affected = true
+				continue
+			
+			# If we reach another state at any point, we break out of the loop here.
+			if other_state.state.is_active() && other_state.state.has_property(property_name):
+				# If we are looking for the suitable fallback state, track it to start the transition.
+				if affected:
+					fallback_state = other_state
+				break
+		
+		if affected:
+			_transition_stateful_property(property_name, fallback_state, state_data.state_out_transition)
+			affected_properties.push_back(property_name)
+	
+	if not affected_properties.is_empty():
+		data_changed.emit()
+		if affected_properties.has("size") || affected_properties.has("offset"):
+			transform_queued.emit()
+
+
+# Data management.
 
 func _update_stateful_property(property_name: String) -> void:
 	_abort_transition_stateful_property(property_name)
@@ -125,7 +266,7 @@ func _abort_transition_stateful_property(property_name) -> void:
 		_property_tweener_map.erase(property_name)
 
 
-func _update_combined_state_property(property_name: String, state_data: BaseElementData, combined_data: BaseElementData) -> void:
+func _update_property_in_combined_state(property_name: String, state_data: BaseElementData, combined_data: BaseElementData) -> void:
 	var value: Variant = default_state.get(property_name)
 	if state_data.state.has_property(property_name):
 		value = state_data.get(property_name)
@@ -133,105 +274,15 @@ func _update_combined_state_property(property_name: String, state_data: BaseElem
 	combined_data.set(property_name, value)
 
 
-func _update_all_combined_states_property(property_name: String) -> void:
+func _update_property_in_all_combined_states(property_name: String) -> void:
 	for i in variant_states.size():
-		_update_combined_state_property(property_name, variant_states[i], _combined_state_data[i])
+		_update_property_in_combined_state(property_name, variant_states[i], _combined_state_data[i])
 
 
 func _update_combined_state(state_data: BaseElementData, combined_data: BaseElementData) -> void:
 	var all_properties := default_state.get_data_properties()
 	for property_name in all_properties:
-		_update_combined_state_property(property_name, state_data, combined_data)
-
-
-func create_state(state_type: int, state_name: String) -> BaseElementData:
-	# TODO: Ensure that the name is unique.
-	
-	var state_data: BaseElementData = _data_class.new()
-	state_data.state.setup(state_type, state_name)
-	
-	var combined_data: BaseElementData = _data_class.new()
-	state_data.state.setup(state_type, state_name)
-	
-	state_data.property_changed.connect(_update_stateful_property)
-	state_data.property_changed.connect(_update_combined_state_property.bind(state_data, combined_data))
-	state_data.state.state_activated.connect(_handle_activated_state.bind(state_data))
-	state_data.state.state_deactivated.connect(_handle_deactivated_state.bind(state_data))
-	
-	variant_states.push_back(state_data)
-	_combined_state_data.push_back(combined_data)
-	_update_combined_state(state_data, combined_data)
-	_update_combined_size()
-	states_changed.emit()
-	
-	return state_data
-
-
-func _handle_activated_state(state_data: BaseElementData) -> void:
-	# Only consider properties that this state can potentially affect.
-	var state_properties := state_data.state.properties
-	var affected_properties: PackedStringArray = PackedStringArray()
-	
-	for property_name in state_properties:
-		var i := variant_states.size() - 1
-		while i >= 0:
-			# Check other states from the topmost.
-			var other_state := variant_states[i]
-			i -= 1
-			
-			# If we reach our just activated state, stop here and start the transition.
-			if other_state == state_data:
-				_transition_stateful_property(property_name, state_data, state_data.state_in_transition)
-				affected_properties.push_back(property_name)
-				break
-			
-			# If we reach another state before we reach our just activated one, there is nothing
-			# to do, just break out of the loop.
-			if other_state.state.is_active() && other_state.state.has_property(property_name):
-				break
-	
-	if not affected_properties.is_empty():
-		data_changed.emit()
-	if affected_properties.has("size") || affected_properties.has("offset"):
-		transform_queued.emit()
-
-
-func _handle_deactivated_state(state_data: BaseElementData) -> void:
-	# Only consider properties that this state can potentially affect.
-	var state_properties := state_data.state.properties
-	var affected_properties: PackedStringArray = PackedStringArray()
-	
-	for property_name in state_properties:
-		var affected := false
-		var fallback_state := default_state
-		
-		var i := variant_states.size() - 1
-		while i >= 0:
-			# Check other states from the topmost.
-			var other_state := variant_states[i]
-			i -= 1
-			
-			# If we reach our just deactivated state, start looking for the next available value
-			# in following states.
-			if other_state == state_data:
-				affected = true
-				continue
-			
-			# If we reach another state at any point, we break out of the loop here.
-			if other_state.state.is_active() && other_state.state.has_property(property_name):
-				# If we are looking for the suitable fallback state, track it to start the transition.
-				if affected:
-					fallback_state = other_state
-				break
-		
-		if affected:
-			_transition_stateful_property(property_name, fallback_state, state_data.state_out_transition)
-			affected_properties.push_back(property_name)
-	
-	if not affected_properties.is_empty():
-		data_changed.emit()
-	if affected_properties.has("size") || affected_properties.has("offset"):
-		transform_queued.emit()
+		_update_property_in_combined_state(property_name, state_data, combined_data)
 
 
 func get_active_data() -> BaseElementData:
@@ -331,7 +382,11 @@ func _update_combined_size() -> void:
 	_combined_size = base_size
 
 
-func get_combined_size() -> Vector2:
+func get_state_preview_spacing() -> Vector2:
+	var owner := get_group().get_owner()
+	if owner is UIElement:
+		return owner.get_state_preview_spacing()
+	
 	return _combined_size
 
 
