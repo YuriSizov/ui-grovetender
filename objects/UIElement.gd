@@ -17,6 +17,7 @@ signal data_changed()
 signal transform_queued()
 signal transform_changed()
 signal states_changed()
+signal visibility_changed()
 
 signal editor_selected()
 signal editor_deselected()
@@ -27,6 +28,9 @@ signal editor_deselected()
 ## The anchor point for this element. Element's position is combined from this,
 ## global-facing relationship and the combined data's offset.
 @export var anchor_point: Vector2 = Vector2.ZERO
+## The visibility flag. Making an element invisible also hides all of its sub-
+## elements.
+@export var visible: bool = true
 
 # State data objects of this element. A data object is responsible for all
 # unique properties and features each element type has.
@@ -323,6 +327,20 @@ func set_group_id(instance_id: int) -> void:
 
 func clear_group_id() -> void:
 	_group_id = 0
+
+
+# Visibility.
+
+func is_visible() -> bool:
+	return visible
+
+
+func set_visible(value: bool) -> void:
+	if visible == value:
+		return
+	
+	visible = value
+	visibility_changed.emit()
 
 
 # Selection.

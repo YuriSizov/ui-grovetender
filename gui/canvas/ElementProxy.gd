@@ -64,6 +64,7 @@ func set_element(value: UIElement) -> void:
 		element.states_changed.disconnect(_create_renderers)
 		element.data_changed.disconnect(_redraw_renderers)
 		element.transform_changed.disconnect(_update_element_transform)
+		element.visibility_changed.disconnect(_update_visibility)
 	
 	element = value
 	
@@ -71,6 +72,7 @@ func set_element(value: UIElement) -> void:
 		element.states_changed.connect(_create_renderers)
 		element.data_changed.connect(_redraw_renderers)
 		element.transform_changed.connect(_update_element_transform)
+		element.visibility_changed.connect(_update_visibility)
 	
 	_update_anchor_position()
 	_create_renderers()
@@ -92,6 +94,14 @@ func _update_element_transform() -> void:
 	
 	_update_anchor_position()
 	_update_renderers()
+
+
+func _update_visibility() -> void:
+	if not element:
+		visible = false
+		return
+	
+	visible = element.is_visible()
 
 
 func get_children_root() -> Control:

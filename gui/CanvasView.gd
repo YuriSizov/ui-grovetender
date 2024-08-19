@@ -143,6 +143,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			var some_state := some_element.variant_states[2]
 			some_state.state.set_active(not some_state.state.is_active())
 		
+		if ke.keycode == KEY_4:
+			some_element.set_visible(not some_element.is_visible())
+		
 		var element_group := _edited_canvas.element_group
 		if some_element is UICompositeElement:
 			element_group = some_element.element_group
