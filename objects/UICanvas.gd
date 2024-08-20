@@ -58,6 +58,10 @@ func create_element(owner_element: UICompositeElement, at_position: Vector2) -> 
 func remove_element(element: UIElement) -> void:
 	# TODO: Dissolve empty composite elements.
 	
+	if element is UICompositeElement:
+		for sub_element in element.element_group.elements:
+			remove_element(sub_element)
+	
 	var owner_group := element.get_group()
 	if owner_group.erase(element):
 		element_removed.emit(element)
@@ -178,3 +182,19 @@ func to_canvas_coordinates(ui_position: Vector2) -> Vector2:
 
 func from_canvas_coordinates(canvas_position: Vector2) -> Vector2:
 	return canvas_position * _canvas_scale - _canvas_offset
+
+
+func to_canvas_rect(ui_rect: Rect2) -> Rect2:
+	var canvas_rect := Rect2()
+	canvas_rect.position = to_canvas_coordinates(ui_rect.position)
+	canvas_rect.size = ui_rect.size / _canvas_scale
+	
+	return canvas_rect
+
+
+func from_canvas_rect(canvas_rect: Rect2) -> Rect2:
+	var ui_rect := Rect2()
+	ui_rect.position = from_canvas_coordinates(canvas_rect.position)
+	ui_rect.size = canvas_rect.size * _canvas_scale
+	
+	return ui_rect

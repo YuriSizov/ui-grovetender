@@ -1,11 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://cdjcin7p6vyx1"]
+[gd_scene load_steps=7 format=3 uid="uid://cdjcin7p6vyx1"]
 
 [ext_resource type="Shader" path="res://gui/CanvasView.gdshader" id="1_gduw8"]
 [ext_resource type="Script" path="res://gui/CanvasView.gd" id="1_y0kqo"]
 [ext_resource type="Script" path="res://gui/canvas/CanvasElements.gd" id="3_ri0j2"]
 [ext_resource type="PackedScene" uid="uid://76w0cft25n6d" path="res://gui/canvas/CanvasTransformMenu.tscn" id="4_3y3oo"]
+[ext_resource type="PackedScene" uid="uid://bcmui3stg187s" path="res://gui/canvas/CanvasRenderTarget.tscn" id="5_f4nd8"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_rvaml"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8i3rp"]
+resource_local_to_scene = true
 shader = ExtResource("1_gduw8")
 shader_parameter/grid_offset = Vector2(0, 0)
 shader_parameter/grid_scale = 1.0
@@ -18,7 +20,7 @@ shader_parameter/major_line_width = 0.03
 shader_parameter/major_color = Color(0.802984, 0.824771, 0.85943, 1)
 
 [node name="CanvasView" type="Control"]
-material = SubResource("ShaderMaterial_rvaml")
+material = SubResource("ShaderMaterial_8i3rp")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,3 +54,6 @@ theme_type_variation = &"CanvasOverlay"
 [node name="TransformMenu" parent="Overlay" instance=ExtResource("4_3y3oo")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="CanvasRenderTarget" parent="." instance=ExtResource("5_f4nd8")]
+unique_name_in_owner = true

@@ -8,6 +8,7 @@ uniform vec2 grid_offset = vec2(0.0);
 uniform float grid_scale = 1.0;
 // Ad-hoc fix to make the grid appear in line with the pixel grid.
 uniform vec2 render_offset = vec2(0.0);
+uniform sampler2D local_mask : hint_default_white;
 // Periods.
 group_uniforms minor;
 uniform float minor_period = 16.0;
@@ -37,6 +38,9 @@ void fragment() {
 	vec4 c1 = make_grid(area_size, uv, minor_period, minor_line_width, minor_color);
 	vec4 c2 = make_grid(area_size, uv, major_period, major_line_width, major_color);
 	
+	vec4 grid_color = mix(c1, c2, c2.a);
+	vec4 mask = texture(local_mask, UV);
+	
 	// Output.
-	COLOR = mix(c1, c2, c2.a);
+	COLOR = mix(vec4(0.0), grid_color, mask.r);
 }

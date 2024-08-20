@@ -325,9 +325,7 @@ func _stop_selection_dragging(mode: SelectionMode) -> void:
 	_selection_drag_rect = _selection_drag_rect.abs()
 	
 	if _edited_canvas:
-		var canvas_rect := Rect2()
-		canvas_rect.position = _edited_canvas.to_canvas_coordinates(_selection_drag_rect.position)
-		canvas_rect.size = _selection_drag_rect.size / _edited_canvas.get_canvas_scale()
+		var canvas_rect := _edited_canvas.to_canvas_rect(_selection_drag_rect)
 		_try_select_multiple_elements(canvas_rect, mode)
 	
 	_selection_drag_rect = Rect2()

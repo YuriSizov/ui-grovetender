@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcmui3stg187s"]
+
+[ext_resource type="Script" path="res://gui/canvas/CanvasRenderTarget.gd" id="1_xsrb4"]
+
+[node name="CanvasRenderTarget" type="SubViewport"]
+disable_3d = true
+handle_input_locally = false
+render_target_update_mode = 4
+script = ExtResource("1_xsrb4")
+
+[node name="Renderer" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
