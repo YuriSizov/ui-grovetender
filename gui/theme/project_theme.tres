@@ -680,6 +680,7 @@ PropertiesDrawer/constants/font_shadow_offset_x = 3
 PropertiesDrawer/constants/font_shadow_offset_y = 3
 PropertiesDrawer/constants/section_separation = 8
 PropertiesDrawer/font_sizes/font_size = 28
+PropertiesDrawer/font_sizes/state_font_size = 20
 PropertiesDrawer/fonts/font = ExtResource("1_8ropx")
 PropertiesDrawer/styles/panel = SubResource("StyleBoxEmpty_r4kx8")
 PropertiesDrawer/styles/section_panel = SubResource("StyleBoxFlat_j60as")

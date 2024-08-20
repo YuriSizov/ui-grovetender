@@ -6,9 +6,6 @@
 
 class_name ElementProxy extends Control
 
-# TODO: Make this adjustible, probably. Possibly together with the "combined size" too.
-const STATE_RENDERER_PADDING := 32.0
-
 @export var element: UIElement = null:
 	set = set_element
 
@@ -43,12 +40,12 @@ func _notification(what: int) -> void:
 # HACK: This is temporary to test the system, ideally the transition-aware view should be separate from the canvas.
 func _process(_delta: float) -> void:
 	if _transition_renderer:
-		var combined_size := element.get_state_preview_spacing()
+		var preview_spacing_size := element.get_state_preview_spacing()
 		
 		var transition_data: BaseElementData = _renderer_data_map[_transition_renderer]
 		_transition_renderer.size = transition_data.size
 		_transition_renderer.position = transition_data.offset
-		_transition_renderer.position.y += combined_size.y + STATE_RENDERER_PADDING
+		_transition_renderer.position.y += preview_spacing_size.y
 		
 		_transition_renderer.queue_redraw()
 
@@ -187,30 +184,16 @@ func _update_renderers() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	var variant_states := element.get_variant_state_data()
-	var combined_size := element.get_state_preview_spacing()
+	var preview_spacing_size := element.get_state_preview_spacing()
 	
 	for renderer: Control in _renderer_data_map:
 		var element_data: BaseElementData = _renderer_data_map[renderer]
-		renderer.position = element_data.offset
 		renderer.size = element_data.size
+		renderer.position = element_data.offset + element_data.preview_offset
 		
-		# For the main renderer, nothing else needs updating changes.
-		if renderer == _main_renderer:
-			continue
-		
-		# For the transition renderer, small adjustment is made.
+		# HACK: For the transition renderer, small adjustment is made manually. This is just for testing.
 		if renderer == _transition_renderer:
-			renderer.position.y += combined_size.y + STATE_RENDERER_PADDING
-			continue
-		
-		# Renderers and states are out of sync, this shouldn't happen.
-		var data_index := variant_states.find(element_data)
-		if data_index < 0:
-			continue
-		
-		renderer.position.x += combined_size.x + STATE_RENDERER_PADDING
-		renderer.position.y += (combined_size.y + STATE_RENDERER_PADDING) * data_index
+			renderer.position.y += preview_spacing_size.y
 
 
 # Helpers.

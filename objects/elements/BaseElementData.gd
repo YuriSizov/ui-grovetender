@@ -41,6 +41,10 @@ var size: Vector2 = Vector2(64, 64)
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
 var debug_color: Color = Color.WHITE
 
+# Runtime properties.
+
+var preview_offset: Vector2 = Vector2.ZERO
+
 
 # HACK: This is only needed for temporary debug. Base element data has nothing to draw normally.
 func draw(proxy: Control) -> void:

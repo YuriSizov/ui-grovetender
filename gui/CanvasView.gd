@@ -361,6 +361,10 @@ func _try_select_element(mouse_position: Vector2, mode: SelectionMode) -> void:
 	
 	var canvas_position := _edited_canvas.to_canvas_coordinates(mouse_position)
 	var found_element := _canvas_elements.find_element_at_position(canvas_position)
+	# A bit hacky, but allows us to manipulate this only when selecting via the viewport.
+	if found_element && mode != SelectionMode.REMOVE_FROM_SELECTION:
+		found_element.set_selected_state(canvas_position)
+	
 	_select_element(found_element, mode)
 
 
@@ -376,5 +380,8 @@ func _select_multiple_elements(elements: Array[UIElement], mode: SelectionMode) 
 
 
 func _try_select_multiple_elements(canvas_rect: Rect2, mode: SelectionMode) -> void:
+	# For area selection state previews are ignored, because there doesn't seem
+	# to be any logical behavior for this case.
+	
 	var found_elements := _canvas_elements.find_elements_in_rect(canvas_rect)
 	_select_multiple_elements(found_elements, mode)

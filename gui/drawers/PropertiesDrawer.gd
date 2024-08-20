@@ -14,6 +14,7 @@ var _active_editors: Array[PropertyEditor] = []
 var _section_containers: Array[VBoxContainer] = []
 
 @onready var _element_title: Label = %ElementTitle
+@onready var _element_state_title: Label = %StateTitle
 @onready var _element_properties: Control = %ElementProperties
 
 
@@ -56,6 +57,17 @@ func _update_theme() -> void:
 	_element_title.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
 	_element_title.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
 	_element_title.end_bulk_theme_override()
+	
+	_element_state_title.begin_bulk_theme_override()
+	_element_state_title.add_theme_font_override("font", get_theme_font("font"))
+	_element_state_title.add_theme_font_size_override("font_size", get_theme_font_size("state_font_size"))
+	_element_state_title.add_theme_color_override("font_color", get_theme_color("font_color"))
+	_element_state_title.add_theme_color_override("font_outline_color", get_theme_color("font_outline_color"))
+	_element_state_title.add_theme_color_override("font_shadow_color", get_theme_color("font_shadow_color"))
+	_element_state_title.add_theme_constant_override("outline_size", get_theme_constant("font_outline_size"))
+	_element_state_title.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
+	_element_state_title.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
+	_element_state_title.end_bulk_theme_override()
 
 
 ## Called when the theme overrides need to be reset, e.g. before the scene is saved.
@@ -78,6 +90,17 @@ func _clear_theme() -> void:
 	_element_title.remove_theme_constant_override("shadow_offset_x")
 	_element_title.remove_theme_constant_override("shadow_offset_y")
 	_element_title.end_bulk_theme_override()
+	
+	_element_state_title.begin_bulk_theme_override()
+	_element_state_title.remove_theme_font_override("font")
+	_element_state_title.remove_theme_font_size_override("font_size")
+	_element_state_title.remove_theme_color_override("font_color")
+	_element_state_title.remove_theme_color_override("font_outline_color")
+	_element_state_title.remove_theme_color_override("font_shadow_color")
+	_element_state_title.remove_theme_constant_override("outline_size")
+	_element_state_title.remove_theme_constant_override("shadow_offset_x")
+	_element_state_title.remove_theme_constant_override("shadow_offset_y")
+	_element_state_title.end_bulk_theme_override()
 
 
 func _draw() -> void:
@@ -137,13 +160,21 @@ func _update_element_title() -> void:
 	
 	if _selection.get_selection_size() > 1:
 		_element_title.text = "Multiple Selected"
+		_element_state_title.text = ""
+		_element_state_title.hide()
 		return
 	
+	var selected_state := _edited_element.get_selected_state_data()
+	
 	_element_title.text = _edited_element.element_name
+	_element_state_title.text = selected_state.state.state_name
+	_element_state_title.show()
 
 
 func _clear_element_title() -> void:
 	_element_title.text = "Nothing Selected"
+	_element_state_title.text = ""
+	_element_state_title.hide()
 
 
 func _update_property_list() -> void:

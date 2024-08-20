@@ -22,6 +22,9 @@ signal visibility_changed()
 signal editor_selected()
 signal editor_deselected()
 
+# TODO: Make this adjustible, probably. Possibly together with the "combined size" too.
+const STATE_RENDERER_PADDING := 32.0
+
 ## The unique name of this element. User-facing and user-adjustible, can be
 ## used when generating the API on export.
 @export var element_name: String = ""
@@ -347,12 +350,11 @@ func is_selected() -> bool:
 	return _selected
 
 
-func set_selected(value: bool, state: BaseElementData = null) -> void:
-	if _selected == value && _selected_state == state:
+func set_selected(value: bool) -> void:
+	if _selected == value:
 		return
 	
 	_selected = value
-	_selected_state = state
 	
 	if _selected:
 		editor_selected.emit()
@@ -365,6 +367,23 @@ func get_selected_state_data() -> BaseElementData:
 		return default_state
 	
 	return _selected_state
+
+
+func set_selected_state(at_position: Vector2) -> void:
+	_selected_state = null
+	
+	var element_rect := get_element_rect()
+	if element_rect.has_point(at_position):
+		return
+	
+	for state_data in variant_states:
+		var state_rect := element_rect
+		state_rect.position += state_data.offset + state_data.preview_offset
+		state_rect.size = state_data.size
+		
+		if state_rect.has_point(at_position):
+			_selected_state = state_data
+			return
 
 
 # Transform management.
@@ -382,6 +401,15 @@ func set_anchor_point(value: Vector2) -> void:
 
 
 func notify_transform_changed() -> void:
+	var preview_spacing_size := get_state_preview_spacing()
+	
+	for i in variant_states.size():
+		var state_data := variant_states[i]
+		state_data.preview_offset = Vector2(
+			preview_spacing_size.x,
+			preview_spacing_size.y * i
+		)
+	
 	transform_changed.emit()
 
 
@@ -412,14 +440,28 @@ func get_state_preview_spacing() -> Vector2:
 	if owner is UIElement:
 		return owner.get_state_preview_spacing()
 	
-	return _combined_size
+	return _combined_size + Vector2(STATE_RENDERER_PADDING, STATE_RENDERER_PADDING)
 
 
 func has_point(at_position: Vector2) -> bool:
 	var element_rect := get_element_rect()
-	return element_rect.has_point(at_position)
+	if element_rect.has_point(at_position):
+		return true
+	
+	for state_data in variant_states:
+		var state_rect := element_rect
+		state_rect.position += state_data.offset + state_data.preview_offset
+		state_rect.size = state_data.size
+		
+		if state_rect.has_point(at_position):
+			return true
+	
+	return false
 
 
 func is_inside_area(area: Rect2) -> bool:
+	# For area selection state previews are ignored, because there doesn't seem
+	# to be any logical behavior for this case.
+	
 	var element_rect := get_element_rect()
 	return area.encloses(element_rect)
