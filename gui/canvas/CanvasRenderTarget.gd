@@ -62,7 +62,7 @@ func _edit_current_canvas() -> void:
 		_edited_canvas.element_created.disconnect(_track_element)
 		_edited_canvas.element_removed.disconnect(_untrack_element)
 		_edited_canvas.element_reparented.disconnect(_reparent_tracked_element)
-		_edited_canvas.element_sorted.disconnect(_renderer.queue_redraw)
+		_edited_canvas.element_sorted.disconnect(_sort_tracked_element)
 		_edited_canvas.canvas_transformed.disconnect(_renderer.queue_redraw)
 	
 	_edited_canvas = Controller.get_current_canvas()
@@ -71,7 +71,7 @@ func _edit_current_canvas() -> void:
 		_edited_canvas.element_created.connect(_track_element)
 		_edited_canvas.element_removed.connect(_untrack_element)
 		_edited_canvas.element_reparented.connect(_reparent_tracked_element)
-		_edited_canvas.element_sorted.connect(_renderer.queue_redraw)
+		_edited_canvas.element_sorted.connect(_sort_tracked_element)
 		_edited_canvas.canvas_transformed.connect(_renderer.queue_redraw)
 	
 	_track_all_elements()
@@ -101,6 +101,10 @@ func _untrack_element(element: UIElement) -> void:
 	element.transform_changed.disconnect(_renderer.queue_redraw)
 	element.visibility_changed.disconnect(_renderer.queue_redraw)
 	_tracked_elements.erase(element)
+
+
+func _sort_tracked_element(_element: UIElement, _to_index: int) -> void:
+	_renderer.queue_redraw()
 
 
 func _reparent_tracked_element(_element: UIElement, _to_index: int) -> void:

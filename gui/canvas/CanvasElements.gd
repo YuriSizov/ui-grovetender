@@ -144,7 +144,8 @@ func _find_child_at_position(owner_control: Control, canvas_position: Vector2) -
 			if child_element:
 				return child_element
 		
-		if proxy_node.element.has_point(canvas_position):
+		# Composite elements aren't selectable from canvas.
+		elif proxy_node.element.has_point(canvas_position):
 			return proxy_node.element
 	
 	return null
@@ -168,5 +169,6 @@ func _find_children_in_rect(owner_control: Control, canvas_rect: Rect2, found_ch
 		if proxy_node.element is UICompositeElement:
 			_find_children_in_rect(proxy_node.get_children_root(), canvas_rect, found_children)
 		
-		if proxy_node.element.is_inside_area(canvas_rect):
+		# Composite elements aren't selectable from canvas.
+		elif proxy_node.element.is_inside_area(canvas_rect):
 			found_children.push_back(proxy_node.element)

@@ -33,6 +33,7 @@ var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 
 @onready var _canvas_elements: CanvasElements = %Elements
 @onready var _canvas_overlay: Control = %Overlay
+@onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
 
 
 func _ready() -> void:
@@ -40,10 +41,7 @@ func _ready() -> void:
 	_edit_current_canvas()
 	
 	_canvas_overlay.draw.connect(_draw_canvas_overlay)
-	# HACK: This is just for debugging purposes while we don't have selection visualization.
-	_selection.selection_changed.connect(func() -> void:
-		prints(_selection.get_selection_size(), _selection.get_selection())
-	)
+	_canvas_drawer.element_selected.connect(_select_element)
 	
 	if not Engine.is_editor_hint():
 		Controller.canvas_changed.connect(_edit_current_canvas)
@@ -126,9 +124,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	
 	var ke := event as InputEventKey
 	if not ke.pressed && not _edited_canvas.element_group.is_empty():
-		if ke.keycode == KEY_1:
-			_print_element_tree(_edited_canvas.element_group)
-		
 		var some_element := _edited_canvas.element_group.fetch(0)
 		
 		if ke.keycode == KEY_0:
@@ -143,29 +138,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			var some_state := some_element.variant_states[2]
 			some_state.state.set_active(not some_state.state.is_active())
 		
-		if ke.keycode == KEY_4:
-			some_element.set_visible(not some_element.is_visible())
-		
 		var element_group := _edited_canvas.element_group
 		if some_element is UICompositeElement:
 			element_group = some_element.element_group
 			some_element = some_element.element_group.fetch(0)
 		
-		if ke.keycode == KEY_2:
-			var random_index := randi_range(0, element_group.elements.size() - 1)
-			_edited_canvas.sort_element(some_element, random_index)
-		
 		if ke.keycode == KEY_3:
 			some_element.default_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
-
-
-# HACK: See above.
-func _print_element_tree(element_group: UIElementGroup, depth: int = 0) -> void:
-	for element in element_group.elements:
-		prints(" ".repeat(depth) + "-", element.get_script().get_global_name(), element.element_name)
-		
-		if element is UICompositeElement:
-			_print_element_tree(element.element_group, depth + 1)
 
 
 # HACK: See above.

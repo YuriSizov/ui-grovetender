@@ -18,6 +18,9 @@ signal element_reparented(element: UIElement, to_index: int)
 
 signal canvas_transformed()
 
+## The display name of this canvas.
+@export var canvas_name: String = "Canvas"
+## The collection of topmost elements in this canvas.
 @export var element_group: UIElementGroup = null
 
 # Runtime properties.
