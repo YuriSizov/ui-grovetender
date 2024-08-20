@@ -15,6 +15,8 @@ class_name UICompositeElement extends UIElement
 func _init(data_class: GDScript) -> void:
 	super(data_class)
 	
+	element_name = "CompositeElement"
+	
 	element_group = UIElementGroup.new(self)
 	element_group.element_added.connect(_track_grouped_element)
 	element_group.element_erased.connect(_untrack_grouped_element)

@@ -34,11 +34,14 @@ var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 @onready var _canvas_elements: CanvasElements = %Elements
 @onready var _canvas_overlay: Control = %Overlay
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
+@onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
 
 
 func _ready() -> void:
 	_update_canvas_grid()
 	_edit_current_canvas()
+	
+	_properties_drawer.connect_to_selection(_selection)
 	
 	_canvas_overlay.draw.connect(_draw_canvas_overlay)
 	_canvas_drawer.element_selected.connect(_select_element)
@@ -152,6 +155,8 @@ func _create_test_states(element: UIElement) -> void:
 	for i in 3:
 		var state_type := 2 + i # Focused, hovered, pressed
 		var extra_state := element.create_state(state_type, StateType.get_state_name(state_type))
+		if not extra_state:
+			continue
 		
 		if element is UICompositeElement:
 			continue

@@ -1,7 +1,21 @@
-[gd_scene load_steps=3 format=3 uid="uid://j84enfriwgtg"]
+[gd_scene load_steps=5 format=3 uid="uid://j84enfriwgtg"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_jnuqu"]
 [ext_resource type="PackedScene" uid="uid://cdjcin7p6vyx1" path="res://gui/CanvasView.tscn" id="1_qedur"]
+[ext_resource type="Shader" path="res://gui/CanvasView.gdshader" id="3_j400j"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uind"]
+resource_local_to_scene = true
+shader = ExtResource("3_j400j")
+shader_parameter/grid_offset = Vector2(0, 0)
+shader_parameter/grid_scale = 1.0
+shader_parameter/render_offset = Vector2(-1.64, -1.64)
+shader_parameter/minor_period = 32.0
+shader_parameter/minor_line_width = 0.07
+shader_parameter/minor_color = Color(0.82142, 0.837962, 0.86443, 1)
+shader_parameter/major_period = 128.0
+shader_parameter/major_line_width = 0.03
+shader_parameter/major_color = Color(0.802984, 0.824771, 0.85943, 1)
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -13,4 +27,5 @@ grow_vertical = 2
 script = ExtResource("1_jnuqu")
 
 [node name="CanvasView" parent="." instance=ExtResource("1_qedur")]
+material = SubResource("ShaderMaterial_1uind")
 layout_mode = 1

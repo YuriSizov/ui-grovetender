@@ -24,7 +24,7 @@ signal editor_deselected()
 
 ## The unique name of this element. User-facing and user-adjustible, can be
 ## used when generating the API on export.
-@export var element_name: String = "Element"
+@export var element_name: String = ""
 ## The anchor point for this element. Element's position is combined from this,
 ## global-facing relationship and the combined data's offset.
 @export var anchor_point: Vector2 = Vector2.ZERO
@@ -50,9 +50,6 @@ var _data_class: GDScript = null
 ## The combined data object that contains all properties of this element, resolved
 ## to account for every enabled/active state, in their current transition state.
 var _active_data: BaseElementData = null
-## The collection of combined data objects which contain all properties of this element,
-## resolved to account for each individual state, regardless of their activity flag.
-var _combined_state_data: Array[BaseElementData] = []
 ## The size that can be used to roughly estimate the element's area, accounting for
 ## every possible state. Used to safely space out state previews in the editor.
 var _combined_size: Vector2 = Vector2.ZERO
@@ -62,18 +59,22 @@ var _property_tweener_map: Dictionary = {}
 ## The instance ID of the element group this element belongs to. This can be either
 ## the group of the owner canvas, or the group of one of the composite elements.
 var _group_id: int = 0
-## The selected state in the editor.
+## The selected flag for the editor.
 var _selected: bool = false
+## The selected state, default or variant, that must be edited.
+var _selected_state: BaseElementData = null
 
 
 func _init(data_class: GDScript) -> void:
+	element_name = "EmptyElement"
+	
 	# This is only going to work with custom types, but that's fine in this case.
 	_data_class = data_class
 	
 	_active_data = _data_class.new()
 	default_state = _data_class.new()
 	# The order matters here. First we update it for states, then for the active data.
-	default_state.property_changed.connect(_update_property_in_all_combined_states)
+	default_state.property_changed.connect(_update_property_in_all_variant_states)
 	default_state.property_changed.connect(_update_stateful_property)
 
 
@@ -103,16 +104,13 @@ func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementDa
 	state_data.state.setup(state_type, state_name)
 	variant_states.push_back(state_data)
 	
-	var combined_data: BaseElementData = _data_class.new()
-	_combined_state_data.push_back(combined_data)
-	
 	# The order matters here. First we update it for the state, then for the active data.
-	state_data.property_changed.connect(_update_property_in_combined_state.bind(state_data, combined_data))
+	state_data.property_changed.connect(_update_property_in_variant_state.bind(state_data))
 	state_data.property_changed.connect(_update_stateful_property)
 	state_data.state.state_activated.connect(_handle_activated_state.bind(state_data))
 	state_data.state.state_deactivated.connect(_handle_deactivated_state.bind(state_data))
 	
-	_update_combined_state(state_data, combined_data)
+	_update_variant_state(state_data)
 	_update_combined_size()
 	states_changed.emit()
 	
@@ -270,23 +268,23 @@ func _abort_transition_stateful_property(property_name) -> void:
 		_property_tweener_map.erase(property_name)
 
 
-func _update_property_in_combined_state(property_name: String, state_data: BaseElementData, combined_data: BaseElementData) -> void:
-	var value: Variant = default_state.get(property_name)
+func _update_property_in_variant_state(property_name: String, state_data: BaseElementData) -> void:
 	if state_data.state.has_property(property_name):
-		value = state_data.get(property_name)
+		return
 	
-	combined_data.set(property_name, value)
+	var value: Variant = default_state.get(property_name)
+	state_data.set(property_name, value)
 
 
-func _update_property_in_all_combined_states(property_name: String) -> void:
+func _update_property_in_all_variant_states(property_name: String) -> void:
 	for i in variant_states.size():
-		_update_property_in_combined_state(property_name, variant_states[i], _combined_state_data[i])
+		_update_property_in_variant_state(property_name, variant_states[i])
 
 
-func _update_combined_state(state_data: BaseElementData, combined_data: BaseElementData) -> void:
+func _update_variant_state(state_data: BaseElementData) -> void:
 	var all_properties := default_state.get_data_properties()
 	for property_name in all_properties:
-		_update_property_in_combined_state(property_name, state_data, combined_data)
+		_update_property_in_variant_state(property_name, state_data)
 
 
 func get_active_data() -> BaseElementData:
@@ -297,8 +295,8 @@ func get_default_state_data() -> BaseElementData:
 	return default_state
 
 
-func get_combined_state_data() -> Array[BaseElementData]:
-	return _combined_state_data.duplicate()
+func get_variant_state_data() -> Array[BaseElementData]:
+	return variant_states.duplicate()
 
 
 # Group metadata.
@@ -349,15 +347,24 @@ func is_selected() -> bool:
 	return _selected
 
 
-func set_selected(value: bool) -> void:
-	if _selected == value:
+func set_selected(value: bool, state: BaseElementData = null) -> void:
+	if _selected == value && _selected_state == state:
 		return
 	
 	_selected = value
+	_selected_state = state
+	
 	if _selected:
 		editor_selected.emit()
 	else:
 		editor_deselected.emit()
+
+
+func get_selected_state_data() -> BaseElementData:
+	if not _selected_state:
+		return default_state
+	
+	return _selected_state
 
 
 # Transform management.

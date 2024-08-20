@@ -70,6 +70,24 @@ func get_data_properties() -> PackedStringArray:
 	return data_properties
 
 
+# Property editors and gizmos.
+
+func get_editable_properties() -> Array[PropertyEditor]:
+	var properties: Array[PropertyEditor] = []
+	
+	var layout_section := PropertyEditorHelper.create_section(self, "Layout", preload("res://assets/icons/base-layout.png"))
+	properties.push_back(layout_section)
+	
+	var size_property := PropertyEditorHelper.create_stepper_property(self, "size", set_size)
+	size_property.label = "Size"
+	size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
+	size_property.set_value_step(1.0)
+	layout_section.connect_property_to_section(size_property)
+	properties.push_back(size_property)
+	
+	return properties
+
+
 # Properties.
 
 func set_offset(value: Vector2) -> void:

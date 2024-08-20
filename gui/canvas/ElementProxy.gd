@@ -43,6 +43,13 @@ func _notification(what: int) -> void:
 # HACK: This is temporary to test the system, ideally the transition-aware view should be separate from the canvas.
 func _process(_delta: float) -> void:
 	if _transition_renderer:
+		var combined_size := element.get_state_preview_spacing()
+		
+		var transition_data: BaseElementData = _renderer_data_map[_transition_renderer]
+		_transition_renderer.size = transition_data.size
+		_transition_renderer.position = transition_data.offset
+		_transition_renderer.position.y += combined_size.y + STATE_RENDERER_PADDING
+		
 		_transition_renderer.queue_redraw()
 
 
@@ -90,8 +97,6 @@ func _update_anchor_position() -> void:
 
 
 func _update_element_transform() -> void:
-	print("updating proxy transform")
-	
 	_update_anchor_position()
 	_update_renderers()
 
@@ -125,7 +130,7 @@ func _create_renderers() -> void:
 	# Update renderer nodes for variant states.
 	
 	var renderers_to_remove: Array[Control] = []
-	var states_to_add := element.get_combined_state_data()
+	var states_to_add := element.get_variant_state_data()
 	
 	# Check existing renderers and track the ones which are no longer needed.
 	# Also ignore the ones which are present and don't need to be added.
@@ -182,7 +187,7 @@ func _update_renderers() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	var variant_states := element.get_combined_state_data()
+	var variant_states := element.get_variant_state_data()
 	var combined_size := element.get_state_preview_spacing()
 	
 	for renderer: Control in _renderer_data_map:

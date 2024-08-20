@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3bfs3ikhudtv"]
+
+[ext_resource type="Script" path="res://gui/widgets/PropertyEditorButton.gd" id="1_peqyk"]
+
+[node name="PropertyEditorButton" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+theme_type_variation = &"PropertyEditorButton"
+script = ExtResource("1_peqyk")
