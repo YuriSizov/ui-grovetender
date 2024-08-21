@@ -421,6 +421,30 @@ func get_element_rect() -> Rect2:
 	return element_rect
 
 
+func get_element_state_rect(state_data: BaseElementData) -> Rect2:
+	var element_rect := get_element_rect()
+	if state_data == default_state:
+		return element_rect
+	
+	var state_rect := element_rect
+	state_rect.position += state_data.offset + state_data.preview_offset
+	state_rect.size = state_data.size
+	
+	return state_rect
+
+
+func get_selected_rect() -> Rect2:
+	var element_rect := get_element_rect()
+	if not _selected_state:
+		return element_rect
+	
+	var state_rect := element_rect
+	state_rect.position += _selected_state.offset + _selected_state.preview_offset
+	state_rect.size = _selected_state.size
+	
+	return state_rect
+
+
 func _update_combined_size() -> void:
 	var base_size := default_state.size
 	

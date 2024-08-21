@@ -32,6 +32,7 @@ var _canvas_dragging: bool = false
 var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 
 @onready var _canvas_elements: CanvasElements = %Elements
+@onready var _canvas_gizmos: CanvasGizmos = %Gizmos
 @onready var _canvas_overlay: Control = %Overlay
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
@@ -41,6 +42,7 @@ func _ready() -> void:
 	_update_canvas_grid()
 	_edit_current_canvas()
 	
+	_canvas_gizmos.connect_to_selection(_selection)
 	_properties_drawer.connect_to_selection(_selection)
 	
 	_canvas_overlay.draw.connect(_draw_canvas_overlay)

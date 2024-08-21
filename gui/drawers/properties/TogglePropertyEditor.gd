@@ -73,7 +73,7 @@ func _update_property_toggle() -> void:
 
 
 func _change_toggle_value() -> void:
-	if not prop_setter.is_valid():
+	if not _prop_setter.is_valid():
 		return
 	
 	var current_value: bool = get_property_value()

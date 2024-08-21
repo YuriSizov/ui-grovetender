@@ -24,22 +24,6 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 corner_detail = 4
 
-[sub_resource type="Gradient" id="Gradient_1upls"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0, 0.5)
-colors = PackedColorArray(0.682353, 0.717647, 0.772549, 0.784314, 0.984314, 0.988235, 0.992157, 0.784314)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_lj8yg"]
-gradient = SubResource("Gradient_1upls")
-width = 8
-height = 8
-fill = 2
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_v6g26"]
-texture = SubResource("GradientTexture2D_lj8yg")
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hnsk6"]
 content_margin_left = 8.0
 content_margin_top = 3.0
@@ -77,6 +61,22 @@ corner_radius_bottom_left = 3
 corner_detail = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3jkdq"]
+
+[sub_resource type="Gradient" id="Gradient_1upls"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.5)
+colors = PackedColorArray(0.682353, 0.717647, 0.772549, 0.784314, 0.984314, 0.988235, 0.992157, 0.784314)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lj8yg"]
+gradient = SubResource("Gradient_1upls")
+width = 8
+height = 8
+fill = 2
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_e0klq"]
+texture = SubResource("GradientTexture2D_lj8yg")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2qgrx"]
 texture = SubResource("GradientTexture2D_lj8yg")
@@ -560,9 +560,6 @@ BorderStyleGizmo/constants/side_handle_thickness = 4
 BorderStyleGizmo/styles/side_handle = SubResource("StyleBoxFlat_i3lu1")
 BorderStyleGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_g02sp")
 BorderStyleGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_vx8vk")
-BoundaryGizmo/base_type = &"BaseGizmo"
-BoundaryGizmo/constants/boundary_size = 2
-BoundaryGizmo/styles/boundary_frame = SubResource("StyleBoxTexture_v6g26")
 CanvasContextMenu/base_type = &"Control"
 CanvasContextMenu/colors/option_font_color = Color(0, 0, 0, 1)
 CanvasContextMenu/colors/option_font_shadow_color = Color(1, 1, 1, 0.862745)
@@ -589,6 +586,9 @@ CanvasDrawer/constants/font_shadow_offset_y = 3
 CanvasDrawer/font_sizes/font_size = 32
 CanvasDrawer/fonts/font = ExtResource("1_8ropx")
 CanvasDrawer/styles/panel = SubResource("StyleBoxEmpty_3jkdq")
+CanvasGizmos/base_type = &"Control"
+CanvasGizmos/constants/boundary_size = 2
+CanvasGizmos/styles/boundary_frame = SubResource("StyleBoxTexture_e0klq")
 CanvasOverlay/base_type = &"MarginContainer"
 CanvasOverlay/constants/margin_bottom = 24
 CanvasOverlay/constants/margin_left = 24

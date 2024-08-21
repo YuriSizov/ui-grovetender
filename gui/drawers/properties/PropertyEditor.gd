@@ -11,12 +11,12 @@ signal before_property_connected()
 signal property_connected()
 signal property_changed()
 
-## The element object that owns the property.
-var element_data: BaseElementData = null
-## The name of the property in the object.
-var prop_name: String = ""
+## The element data object that owns the property.
+var _element_data: BaseElementData = null
+## The name of the property in the data object.
+var _prop_name: String = ""
 ## The setter function that is triggered on changes.
-var prop_setter: Callable = Callable()
+var _prop_setter: Callable = Callable()
 
 ## The custom label for the property. If left empty, the property name is humanized and used as
 ## a label.
@@ -65,49 +65,49 @@ func _clear_theme() -> void:
 
 # Metadata.
 
-func connect_to_property(_element_data: BaseElementData, _name: String, _setter: Callable) -> void:
-	if element_data == _element_data:
+func connect_to_property(element_data: BaseElementData, prop_name: String, prop_setter: Callable) -> void:
+	if _element_data == element_data:
 		return
 	
 	before_property_connected.emit()
 	
-	if element_data:
-		element_data.property_changed.disconnect(_check_property_changes)
-		element_data.properties_changed.disconnect(_check_visibility_condition)
+	if _element_data:
+		_element_data.property_changed.disconnect(_check_property_changes)
+		_element_data.properties_changed.disconnect(_check_visibility_condition)
 	
-	element_data = _element_data
-	prop_name = _name
-	prop_setter = _setter
+	_element_data = element_data
+	_prop_name = prop_name
+	_prop_setter = prop_setter
 	
-	if element_data:
-		element_data.property_changed.connect(_check_property_changes)
-		element_data.properties_changed.connect(_check_visibility_condition)
+	if _element_data:
+		_element_data.property_changed.connect(_check_property_changes)
+		_element_data.properties_changed.connect(_check_visibility_condition)
 	
 	property_connected.emit()
 
 
 func has_property() -> bool:
-	return element_data && not prop_name.is_empty()
+	return _element_data && not _prop_name.is_empty()
 
 
 func get_property_value() -> Variant:
-	if not element_data || prop_name.is_empty():
+	if not _element_data || _prop_name.is_empty():
 		return null
 	
-	return element_data.get(prop_name)
+	return _element_data.get(_prop_name)
 
 
 func set_property_value(value: Variant) -> void:
-	if not element_data || not prop_setter.is_valid():
+	if not _element_data || not _prop_setter.is_valid():
 		return
 	
-	if element_data.state.state_type != StateType.STATE_DEFAULT:
-		element_data.state.override_property(prop_name)
-	prop_setter.call(value)
+	if _element_data.state.state_type != StateType.STATE_DEFAULT:
+		_element_data.state.override_property(_prop_name)
+	_prop_setter.call(value)
 
 
 func _check_property_changes(property_name: String) -> void:
-	if has_property() && property_name == prop_name:
+	if has_property() && property_name == _prop_name:
 		property_changed.emit()
 
 
@@ -131,7 +131,7 @@ func _check_visibility_condition() -> void:
 func _get_editor_label() -> String:
 	if not label.is_empty():
 		return label
-	return prop_name.capitalize()
+	return _prop_name.capitalize()
 
 
 func _start_editing() -> void:

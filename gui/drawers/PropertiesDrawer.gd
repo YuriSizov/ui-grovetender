@@ -220,7 +220,7 @@ func _update_property_list() -> void:
 	queue_redraw()
 
 
-func _clear_property_list() -> void:	
+func _clear_property_list() -> void:
 	# First remove all property editors.
 	for property_editor in _active_editors:
 		property_editor.get_parent().remove_child(property_editor)

@@ -246,7 +246,7 @@ func _handle_stepper_unfocused(stepper: SpinBox) -> void:
 
 
 func _change_property_value(value: float, value_index: int) -> void:
-	if not has_property() || not prop_setter.is_valid():
+	if not has_property() || not _prop_setter.is_valid():
 		return
 	
 	var full_value: Variant = get_property_value()

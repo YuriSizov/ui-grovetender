@@ -96,7 +96,7 @@ func _clear_theme() -> void:
 
 func _draw() -> void:
 	var background_style := get_theme_stylebox("panel")
-	if not prop_name.is_empty() && _hovered:
+	if not _prop_name.is_empty() && _hovered:
 		if _pressed:
 			background_style = get_theme_stylebox("panel_pressed")
 		else:
@@ -159,7 +159,7 @@ func _update_section_toggle() -> void:
 
 
 func _toggle_section() -> void:
-	if not has_property() || not prop_setter.is_valid():
+	if not has_property() || not _prop_setter.is_valid():
 		return
 	
 	var current_value: bool = get_property_value()

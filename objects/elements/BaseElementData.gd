@@ -104,6 +104,17 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	return properties
 
 
+func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
+	var gizmos: Array[BaseGizmo] = []
+	
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
+		var position_gizmo := PositionGizmo.new(element, self)
+		position_gizmo.position_changed.connect(_adjust_offset)
+		gizmos.push_back(position_gizmo)
+	
+	return gizmos
+
+
 # Properties.
 
 func _set_offset(value: Vector2) -> void:
@@ -112,6 +123,10 @@ func _set_offset(value: Vector2) -> void:
 	
 	offset = value
 	_notify_properties_changed([ "offset" ])
+
+
+func _adjust_offset(delta: Vector2) -> void:
+	_set_offset(offset + delta)
 
 
 func _set_size(value: Vector2) -> void:
