@@ -69,7 +69,7 @@ var _selected_state: BaseElementData = null
 
 
 func _init(data_class: GDScript) -> void:
-	element_name = "EmptyElement"
+	element_name = data_class.get_default_name()
 	
 	# This is only going to work with custom types, but that's fine in this case.
 	_data_class = data_class

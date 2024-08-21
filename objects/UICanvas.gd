@@ -49,8 +49,8 @@ func _untrack_grouped_element(element: UIElement) -> void:
 	element.transform_queued.disconnect(element_group.notify_transform)
 
 
-func create_element(owner_element: UICompositeElement, at_position: Vector2) -> void:
-	var element := UIElement.new(BaseElementData)
+func create_element(owner_element: UICompositeElement, data_type: GDScript, at_position: Vector2) -> void:
+	var element := UIElement.new(data_type)
 	element.set_anchor_point(at_position)
 	
 	var owner_group := owner_element.element_group if owner_element else element_group

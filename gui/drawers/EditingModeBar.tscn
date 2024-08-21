@@ -1,0 +1,93 @@
+[gd_scene load_steps=11 format=3 uid="uid://820qb5c6q30s"]
+
+[ext_resource type="Script" path="res://gui/drawers/EditingModeBar.gd" id="1_6ps3l"]
+[ext_resource type="PackedScene" uid="uid://b5vnep7aa8nsh" path="res://gui/widgets/EditingModeButton.tscn" id="2_kkye3"]
+[ext_resource type="Texture2D" uid="uid://rknkjp67gwq1" path="res://assets/icons/editing-layout.png" id="3_31v4j"]
+[ext_resource type="Texture2D" uid="uid://c6aqpqbuceh1r" path="res://assets/icons/editing-styling.png" id="4_1dskk"]
+[ext_resource type="Texture2D" uid="uid://cm78cuu05oh2k" path="res://assets/icons/editing-behavior.png" id="5_6n5jh"]
+[ext_resource type="Texture2D" uid="uid://dynxmdwudlqpp" path="res://assets/icons/editing-animation.png" id="6_huuhi"]
+
+[sub_resource type="Shortcut" id="Shortcut_7t5c1"]
+resource_local_to_scene = true
+
+[sub_resource type="Shortcut" id="Shortcut_msxad"]
+resource_local_to_scene = true
+
+[sub_resource type="Shortcut" id="Shortcut_emoen"]
+resource_local_to_scene = true
+
+[sub_resource type="Shortcut" id="Shortcut_eh7jy"]
+resource_local_to_scene = true
+
+[node name="EditingModeBar" type="MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"EditingModeBar"
+script = ExtResource("1_6ps3l")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 1
+
+[node name="CurrentModeLabel" type="Label" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Current Mode"
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="ButtonSection" type="VBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="ButtonSeparator" type="Panel" parent="Layout/ButtonSection"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Layout/ButtonSection"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 0
+alignment = 1
+
+[node name="LayoutTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_7t5c1")
+icon = ExtResource("3_31v4j")
+shortcut_action = &"grove_tool_layout"
+
+[node name="StylingTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_msxad")
+icon = ExtResource("4_1dskk")
+shortcut_action = &"grove_tool_styling"
+
+[node name="BehaviorTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_emoen")
+icon = ExtResource("5_6n5jh")
+shortcut_action = &"grove_tool_behavior"
+
+[node name="AnimationTools" parent="Layout/ButtonSection/Buttons" instance=ExtResource("2_kkye3")]
+unique_name_in_owner = true
+layout_mode = 2
+shortcut = SubResource("Shortcut_eh7jy")
+icon = ExtResource("6_huuhi")
+shortcut_action = &"grove_tool_animation"

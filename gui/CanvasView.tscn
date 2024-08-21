@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cdjcin7p6vyx1"]
+[gd_scene load_steps=10 format=3 uid="uid://cdjcin7p6vyx1"]
 
 [ext_resource type="Shader" path="res://gui/CanvasView.gdshader" id="1_gduw8"]
 [ext_resource type="Script" path="res://gui/CanvasView.gd" id="1_y0kqo"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dtf5pvibotgjs" path="res://gui/drawers/CanvasDrawer.tscn" id="5_2duo6"]
 [ext_resource type="PackedScene" uid="uid://bcmui3stg187s" path="res://gui/canvas/CanvasRenderTarget.tscn" id="5_f4nd8"]
 [ext_resource type="PackedScene" uid="uid://cuqoe8l4cfyoj" path="res://gui/drawers/PropertiesDrawer.tscn" id="6_3a1rx"]
+[ext_resource type="PackedScene" uid="uid://820qb5c6q30s" path="res://gui/drawers/EditingModeBar.tscn" id="7_dihyy"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8i3rp"]
 resource_local_to_scene = true
@@ -68,6 +69,12 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
+
+[node name="EditingModeBar" parent="Overlay" instance=ExtResource("7_dihyy")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
 
 [node name="CanvasRenderTarget" parent="." instance=ExtResource("5_f4nd8")]
 unique_name_in_owner = true

@@ -39,7 +39,7 @@ func _notification(what: int) -> void:
 
 # HACK: This is temporary to test the system, ideally the transition-aware view should be separate from the canvas.
 func _process(_delta: float) -> void:
-	if _transition_renderer:
+	if _transition_renderer && _transition_renderer.is_visible_in_tree():
 		var preview_spacing_size := element.get_state_preview_spacing()
 		
 		var transition_data: BaseElementData = _renderer_data_map[_transition_renderer]

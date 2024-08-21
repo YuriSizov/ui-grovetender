@@ -23,6 +23,10 @@ func _ready() -> void:
 	
 	resized.connect(queue_redraw)
 	sort_children.connect(queue_redraw)
+	
+	if not Engine.is_editor_hint():
+		Controller.editing_mode_changed.connect(_update_element_title)
+		Controller.editing_mode_changed.connect(_update_property_list)
 
 
 func _notification(what: int) -> void:
@@ -164,11 +168,16 @@ func _update_element_title() -> void:
 		_element_state_title.hide()
 		return
 	
-	var selected_state := _edited_element.get_selected_state_data()
-	
 	_element_title.text = _edited_element.element_name
-	_element_state_title.text = selected_state.state.state_name
-	_element_state_title.show()
+	
+	var editing_mode := Controller.get_editing_mode()
+	if editing_mode == EditingMode.BEHAVIOR_TOOLS:
+		_element_state_title.text = ""
+		_element_state_title.hide()
+	else:
+		var selected_state := _edited_element.get_selected_state_data()
+		_element_state_title.text = selected_state.state.state_name
+		_element_state_title.show()
 
 
 func _clear_element_title() -> void:
@@ -183,8 +192,9 @@ func _update_property_list() -> void:
 	if not _edited_element:
 		return
 	
+	var editing_mode := Controller.get_editing_mode()
 	var selected_state := _edited_element.get_selected_state_data()
-	var active_properties := selected_state.get_editable_properties()
+	var active_properties := selected_state.get_editable_properties(editing_mode)
 	
 	var current_section_container: VBoxContainer = null
 	for i in active_properties.size():

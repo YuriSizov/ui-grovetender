@@ -147,7 +147,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			some_element = some_element.element_group.fetch(0)
 		
 		if ke.keycode == KEY_3:
-			some_element.default_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
+			some_element.default_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
 
 
 # HACK: See above.
@@ -164,11 +164,11 @@ func _create_test_states(element: UIElement) -> void:
 		if i == 0 || i == 2:
 			# When doing this for real, we must set the value to the default state's current value.
 			extra_state.state.override_property("size")
-			extra_state.set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
+			extra_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
 		
-		if i == 1 || i == 2:
-			extra_state.state.override_property("debug_color")
-			extra_state.set_debug_color(Color(randf(), randf(), randf()))
+		if (i == 1 || i == 2) && extra_state is PanelElementData:
+			extra_state.state.override_property("background_color")
+			extra_state._set_background_color(Color(randf(), randf(), randf()))
 		
 		extra_state.state_in_transition.duration = 0.3
 		extra_state.state_out_transition.duration = 0.1
@@ -260,8 +260,10 @@ func _add_element_to_canvas(mouse_position: Vector2) -> void:
 	if not _edited_canvas:
 		return
 	
+	# TODO: Add support for specifying the element data type.
+	
 	var canvas_position := _edited_canvas.to_canvas_coordinates(mouse_position)
-	_edited_canvas.create_element(null, canvas_position)
+	_edited_canvas.create_element(null, PanelElementData, canvas_position)
 
 
 func _handle_created_element(element: UIElement) -> void:

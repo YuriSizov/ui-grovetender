@@ -37,21 +37,22 @@ var offset: Vector2 = Vector2.ZERO
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
 var size: Vector2 = Vector2(64, 64)
 
-# HACK: This property shouldn't exist in the base data object, but is needed for now to debug.
-@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_ELEMENT_DATA)
-var debug_color: Color = Color.WHITE
-
 # Runtime properties.
 
+## The flag that enables debug drawing for this data object.
+var debug_drawing: bool = false
+## The additional offset for the displaying a preview of this state on
+## canvas.
 var preview_offset: Vector2 = Vector2.ZERO
 
 
-# HACK: This is only needed for temporary debug. Base element data has nothing to draw normally.
-func draw(proxy: Control) -> void:
-	# HACK: Debugging the proxy size vs the data size.
-	proxy.draw_rect(Rect2(Vector2.ZERO, proxy.size).grow(2), Color.RED)
-	
-	proxy.draw_rect(Rect2(offset, size), debug_color)
+static func get_default_name() -> String:
+	return "EmptyElement"
+
+
+## Virtual. Called by the proxy control to render this state.
+func draw(_proxy: Control) -> void:
+	pass
 
 
 # Property management.
@@ -76,25 +77,36 @@ func get_data_properties() -> PackedStringArray:
 
 # Property editors and gizmos.
 
-func get_editable_properties() -> Array[PropertyEditor]:
+func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
-	var layout_section := PropertyEditorHelper.create_section(self, "Layout", preload("res://assets/icons/base-layout.png"))
-	properties.push_back(layout_section)
-	
-	var size_property := PropertyEditorHelper.create_stepper_property(self, "size", set_size)
-	size_property.label = "Size"
-	size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
-	size_property.set_value_step(1.0)
-	layout_section.connect_property_to_section(size_property)
-	properties.push_back(size_property)
+	if editing_mode == EditingMode.LAYOUT_TOOLS:
+		
+		# Layout properties.
+		
+		var layout_section := PropertyEditorHelper.create_section(self, "Layout", preload("res://assets/icons/base-layout.png"))
+		properties.push_back(layout_section)
+		
+		var offset_property := PropertyEditorHelper.create_stepper_property(self, "offset", _set_offset)
+		offset_property.label = "Offset"
+		offset_property.set_value_limits(-100.0, 100.0, true, true) # Max value doesn't matter.
+		offset_property.set_value_step(1.0)
+		layout_section.connect_property_to_section(offset_property)
+		properties.push_back(offset_property)
+		
+		var size_property := PropertyEditorHelper.create_stepper_property(self, "size", _set_size)
+		size_property.label = "Size"
+		size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
+		size_property.set_value_step(1.0)
+		layout_section.connect_property_to_section(size_property)
+		properties.push_back(size_property)
 	
 	return properties
 
 
 # Properties.
 
-func set_offset(value: Vector2) -> void:
+func _set_offset(value: Vector2) -> void:
 	if offset == value:
 		return
 	
@@ -102,17 +114,9 @@ func set_offset(value: Vector2) -> void:
 	_notify_properties_changed([ "offset" ])
 
 
-func set_size(value: Vector2) -> void:
+func _set_size(value: Vector2) -> void:
 	if size == value:
 		return
 	
 	size = value
 	_notify_properties_changed([ "size" ])
-
-
-func set_debug_color(value: Color) -> void:
-	if debug_color == value:
-		return
-	
-	debug_color = value
-	_notify_properties_changed([ "debug_color" ])
