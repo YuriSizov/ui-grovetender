@@ -1,10 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://b2nlm3w1rsre4"]
+[gd_scene load_steps=3 format=3 uid="uid://b2nlm3w1rsre4"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/StepperPropertyEditor.gd" id="1_ctr1w"]
+[ext_resource type="PackedScene" uid="uid://cqm2wfqs2aylf" path="res://gui/widgets/PropertyRevertButton.tscn" id="2_ymlm7"]
 
 [node name="StepperPropertyEditor" type="MarginContainer"]
 theme_type_variation = &"StepperPropertyEditor"
 script = ExtResource("1_ctr1w")
+
+[node name="RevertButton" parent="." instance=ExtResource("2_ymlm7")]
+unique_name_in_owner = true
+layout_mode = 2
+button_offset = -40
 
 [node name="Layout" type="HBoxContainer" parent="."]
 unique_name_in_owner = true

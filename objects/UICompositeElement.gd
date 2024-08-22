@@ -107,4 +107,4 @@ func _set_global_transform(global_rect: Rect2) -> void:
 	# but works!
 	anchor_point = global_rect.position
 	default_state.size = global_rect.size
-	default_state._notify_properties_changed([ "size" ])
+	default_state._notify_properties_changed([ "size" ], false)

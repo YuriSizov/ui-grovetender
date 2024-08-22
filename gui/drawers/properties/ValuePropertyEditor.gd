@@ -9,6 +9,7 @@ class_name ValuePropertyEditor extends PropertyEditor
 
 @onready var _layout_container: HBoxContainer = %Layout
 @onready var _property_name: Label = %PropertyName
+@onready var _revert_button: PropertyRevertButton = %RevertButton
 
 var _pressed: bool = false
 var _name_pressed: bool = false
@@ -35,6 +36,7 @@ func _ready() -> void:
 	property_connected.connect(_update_property_name)
 	
 	_property_name.gui_input.connect(_handle_property_name_input)
+	_revert_button.pressed.connect(revert_property_value)
 
 
 func _update_theme() -> void:

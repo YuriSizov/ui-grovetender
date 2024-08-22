@@ -51,17 +51,17 @@ func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
 
 # Properties.
 
-func _toggle_draw_background(value: bool) -> void:
+func _toggle_draw_background(value: bool, override: bool) -> void:
 	if draw_background == value:
 		return
 	
 	draw_background = value
-	_notify_properties_changed([ "draw_background" ])
+	_notify_properties_changed([ "draw_background" ], override)
 
 
-func _set_background_color(value: Color) -> void:
+func _set_background_color(value: Color, override: bool) -> void:
 	if background_color == value:
 		return
 	
 	background_color = value
-	_notify_properties_changed([ "background_color" ])
+	_notify_properties_changed([ "background_color" ], override)

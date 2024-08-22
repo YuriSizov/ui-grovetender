@@ -1,10 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://br72p3v77c4go"]
+[gd_scene load_steps=3 format=3 uid="uid://br72p3v77c4go"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/VariantPropertyEditor.gd" id="1_udgy2"]
+[ext_resource type="PackedScene" uid="uid://cqm2wfqs2aylf" path="res://gui/widgets/PropertyRevertButton.tscn" id="2_44x4a"]
 
 [node name="VariantPropertyEditor" type="MarginContainer"]
 theme_type_variation = &"VariantPropertyEditor"
 script = ExtResource("1_udgy2")
+
+[node name="RevertButton" parent="." instance=ExtResource("2_44x4a")]
+unique_name_in_owner = true
+layout_mode = 2
+button_offset = -40
 
 [node name="Layout" type="HBoxContainer" parent="."]
 unique_name_in_owner = true

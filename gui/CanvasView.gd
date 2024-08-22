@@ -149,7 +149,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			some_element = some_element.element_group.fetch(0)
 		
 		if ke.keycode == KEY_3:
-			some_element.default_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
+			some_element.default_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32, false)
 
 
 # HACK: See above.
@@ -164,13 +164,10 @@ func _create_test_states(element: UIElement) -> void:
 			continue
 		
 		if i == 0 || i == 2:
-			# When doing this for real, we must set the value to the default state's current value.
-			extra_state.state.override_property("size")
-			extra_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32)
+			extra_state._set_size(Vector2(randi_range(1, 3), randi_range(1, 3)) * 32, true)
 		
 		if (i == 1 || i == 2) && extra_state is PanelElementData:
-			extra_state.state.override_property("background_color")
-			extra_state._set_background_color(Color(randf(), randf(), randf()))
+			extra_state._set_background_color(Color(randf(), randf(), randf()), true)
 		
 		extra_state.state_in_transition.duration = 0.3
 		extra_state.state_out_transition.duration = 0.1

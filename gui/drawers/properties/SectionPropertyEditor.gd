@@ -21,6 +21,7 @@ var icon: Texture2D = null:
 @onready var _section_icon: TextureRect = %SectionIcon
 @onready var _section_name: Label = %SectionName
 @onready var _section_toggle: TextureRect = %SectionToggle
+@onready var _revert_button: PropertyRevertButton = %RevertButton
 
 var _hovered: bool = false
 var _pressed: bool = false
@@ -56,6 +57,9 @@ func _ready() -> void:
 	property_changed.connect(func() -> void:
 		_update_section_toggle()
 	)
+	
+	_revert_button.pressed.connect(revert_property_value)
+	_revert_button.pressed.connect(section_toggled.emit)
 
 
 func _update_theme() -> void:
@@ -151,9 +155,11 @@ func _update_section_toggle() -> void:
 		return
 	
 	if not has_property():
+		_revert_button.visible = false
 		_section_toggle.visible = false
 		return
 	
+	_revert_button.visible = true
 	_section_toggle.visible = true
 	_section_toggle.texture = CHECKBOX_ICONS[0] if get_property_value() else CHECKBOX_ICONS[1]
 

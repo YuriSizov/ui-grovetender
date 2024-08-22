@@ -1,12 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://dpcbwua7b531s"]
+[gd_scene load_steps=4 format=3 uid="uid://dpcbwua7b531s"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/SectionPropertyEditor.gd" id="1_qv57r"]
 [ext_resource type="Texture2D" uid="uid://dxidpeq7w13np" path="res://assets/ui/checkbox-checked.png" id="2_5q76a"]
+[ext_resource type="PackedScene" uid="uid://cqm2wfqs2aylf" path="res://gui/widgets/PropertyRevertButton.tscn" id="2_aay8r"]
 
 [node name="SectionPropertyEditor" type="MarginContainer"]
 custom_minimum_size = Vector2(260, 0)
 theme_type_variation = &"SectionPropertyEditor"
 script = ExtResource("1_qv57r")
+
+[node name="RevertButton" parent="." instance=ExtResource("2_aay8r")]
+unique_name_in_owner = true
+layout_mode = 2
+button_offset = -44
 
 [node name="Layout" type="HBoxContainer" parent="."]
 unique_name_in_owner = true

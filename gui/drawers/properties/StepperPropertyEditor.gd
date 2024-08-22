@@ -205,7 +205,7 @@ func _set_stepper_value_safe(stepper: SpinBox, value: float) -> void:
 	if stepper == _focused_stepper:
 		return # Avoid overriding if we're currently editing.
 	
-	stepper.value = value
+	stepper.set_value_no_signal(value)
 
 
 func set_value_limits(min_value: float, max_value: float, allow_lesser: bool = false, allow_greater: bool = false) -> void:

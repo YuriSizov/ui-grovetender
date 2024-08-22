@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dh8unfa1iotqe"]
+[gd_scene load_steps=4 format=3 uid="uid://dh8unfa1iotqe"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/ColorPropertyEditor.gd" id="1_hwrsf"]
+[ext_resource type="PackedScene" uid="uid://cqm2wfqs2aylf" path="res://gui/widgets/PropertyRevertButton.tscn" id="2_x6uw6"]
 [ext_resource type="PackedScene" uid="uid://dfmhjkpb5n6h" path="res://gui/widgets/SimpleColorPicker.tscn" id="3_su2lg"]
 
 [node name="ColorPropertyEditor" type="MarginContainer"]
@@ -8,6 +9,11 @@ offset_right = 190.0
 offset_bottom = 24.0
 theme_type_variation = &"ColorPropertyEditor"
 script = ExtResource("1_hwrsf")
+
+[node name="RevertButton" parent="." instance=ExtResource("2_x6uw6")]
+unique_name_in_owner = true
+layout_mode = 2
+button_offset = -40
 
 [node name="Layout" type="HBoxContainer" parent="."]
 unique_name_in_owner = true

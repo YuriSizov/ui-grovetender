@@ -101,9 +101,18 @@ func set_property_value(value: Variant) -> void:
 	if not _element_data || not _prop_setter.is_valid():
 		return
 	
-	if _element_data.state.state_type != StateType.STATE_DEFAULT:
-		_element_data.state.override_property(_prop_name)
-	_prop_setter.call(value)
+	_prop_setter.call(value, true)
+
+
+func revert_property_value() -> void:
+	if not _element_data || not _prop_setter.is_valid():
+		return
+	
+	# HACK: This is a very ad-hoc solution, and should probably be reworked.
+	var data_class: GDScript = _element_data.get_script()
+	var default_data: BaseElementData = data_class.new()
+	var value: Variant = default_data.get(_prop_name)
+	_prop_setter.call(value, false)
 
 
 func _check_property_changes(property_name: String) -> void:

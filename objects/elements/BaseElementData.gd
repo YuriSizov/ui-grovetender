@@ -57,10 +57,20 @@ func draw(_proxy: Control) -> void:
 
 # Property management.
 
-func _notify_properties_changed(property_names: Array[String]) -> void:
+func _notify_properties_changed(property_names: Array[String], override: bool) -> void:
+	# Update the state metadata, if applicable.
+	
+	if state.state_type != StateType.STATE_DEFAULT:
+		for property_name in property_names:
+			if override:
+				state.override_property(property_name)
+			else:
+				state.clear_property(property_name)
+	
+	# Notify property changes.
+	
 	for property_name in property_names:
 		property_changed.emit(property_name)
-	
 	properties_changed.emit()
 
 
@@ -110,7 +120,7 @@ func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var position_gizmo := PositionGizmo.new(element, self)
 		position_gizmo.anchor_changed.connect(element.adjust_anchor_point)
-		position_gizmo.offset_changed.connect(_adjust_offset)
+		position_gizmo.offset_changed.connect(_adjust_offset.bind(true))
 		gizmos.push_back(position_gizmo)
 	
 	return gizmos
@@ -118,21 +128,21 @@ func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
 
 # Properties.
 
-func _set_offset(value: Vector2) -> void:
+func _set_offset(value: Vector2, override: bool) -> void:
 	if offset == value:
 		return
 	
 	offset = value
-	_notify_properties_changed([ "offset" ])
+	_notify_properties_changed([ "offset" ], override)
 
 
-func _adjust_offset(delta: Vector2) -> void:
-	_set_offset(offset + delta)
+func _adjust_offset(delta: Vector2, override: bool) -> void:
+	_set_offset(offset + delta, override)
 
 
-func _set_size(value: Vector2) -> void:
+func _set_size(value: Vector2, override: bool) -> void:
 	if size == value:
 		return
 	
 	size = value
-	_notify_properties_changed([ "size" ])
+	_notify_properties_changed([ "size" ], override)

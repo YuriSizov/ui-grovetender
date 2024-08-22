@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqm2wfqs2aylf"]
+
+[ext_resource type="Script" path="res://gui/widgets/PropertyRevertButton.gd" id="1_ke36h"]
+
+[node name="RevertAnchor" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 0
+size_flags_vertical = 4
+script = ExtResource("1_ke36h")
+
+[node name="RevertButton" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -12.0
+offset_right = 24.0
+offset_bottom = 12.0
+grow_horizontal = 0
+grow_vertical = 2
+tooltip_text = "Revert the value to its default state."
+focus_mode = 0
+theme_type_variation = &"PropertyRevertButton"
+expand_icon = true

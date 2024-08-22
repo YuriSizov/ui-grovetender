@@ -1,10 +1,11 @@
-[gd_resource type="Theme" load_steps=66 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=71 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
 [ext_resource type="FontVariation" uid="uid://68jb1argqylt" path="res://gui/theme/fonts/main_font_bold.tres" id="1_nbw0c"]
 [ext_resource type="StyleBox" uid="uid://nepoyenppmop" path="res://gui/theme/styles/shortcut_label_style.tres" id="3_obau7"]
 [ext_resource type="Texture2D" uid="uid://bb75hxis3lgwf" path="res://assets/gizmos/position-offset.png" id="4_3n00a"]
+[ext_resource type="Texture2D" uid="uid://csxfsh5vtepnq" path="res://assets/ui/revert.png" id="5_kym2x"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3lu1"]
 bg_color = Color(0.885001, 0.68641, 0.702486, 1)
@@ -338,6 +339,14 @@ corner_detail = 4
 shadow_color = Color(0, 0, 0, 0.392157)
 shadow_size = 1
 shadow_offset = Vector2(1, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_56wm6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wchtp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0r00w"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pwe3m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qeg3n"]
 bg_color = Color(0.517155, 0.588756, 0.671438, 1)
@@ -687,6 +696,15 @@ PropertyEditorButton/fonts/font = ExtResource("1_nbw0c")
 PropertyEditorButton/styles/hover = SubResource("StyleBoxFlat_5lsl3")
 PropertyEditorButton/styles/normal = SubResource("StyleBoxFlat_q13e6")
 PropertyEditorButton/styles/pressed = SubResource("StyleBoxFlat_542rf")
+PropertyRevertButton/base_type = &"Button"
+PropertyRevertButton/colors/icon_hover_color = Color(0.950703, 0.950703, 0.950703, 1)
+PropertyRevertButton/colors/icon_normal_color = Color(1, 1, 1, 0.705882)
+PropertyRevertButton/colors/icon_pressed_color = Color(0.850051, 0.850051, 0.850051, 1)
+PropertyRevertButton/icons/icon = ExtResource("5_kym2x")
+PropertyRevertButton/styles/disabled = SubResource("StyleBoxEmpty_56wm6")
+PropertyRevertButton/styles/hover = SubResource("StyleBoxEmpty_wchtp")
+PropertyRevertButton/styles/normal = SubResource("StyleBoxEmpty_0r00w")
+PropertyRevertButton/styles/pressed = SubResource("StyleBoxEmpty_pwe3m")
 SectionPropertyEditor/base_type = &"PropertyEditor"
 SectionPropertyEditor/constants/base_separation = 8
 SectionPropertyEditor/constants/margin_bottom = 4

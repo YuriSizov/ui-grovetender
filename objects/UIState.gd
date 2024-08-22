@@ -71,4 +71,3 @@ func clear_property(property_name: String) -> void:
 
 func has_property(property_name: String) -> bool:
 	return properties.has(property_name)
-
