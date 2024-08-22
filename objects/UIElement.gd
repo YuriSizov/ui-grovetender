@@ -372,15 +372,12 @@ func get_selected_state_data() -> BaseElementData:
 func set_selected_state(at_position: Vector2) -> void:
 	_selected_state = null
 	
-	var element_rect := get_element_rect()
-	if element_rect.has_point(at_position):
+	var default_rect := get_element_state_rect(default_state)
+	if default_rect.has_point(at_position):
 		return
 	
 	for state_data in variant_states:
-		var state_rect := element_rect
-		state_rect.position += state_data.offset + state_data.preview_offset
-		state_rect.size = state_data.size
-		
+		var state_rect := get_element_state_rect(state_data)
 		if state_rect.has_point(at_position):
 			_selected_state = state_data
 			return
@@ -400,6 +397,10 @@ func set_anchor_point(value: Vector2) -> void:
 	transform_queued.emit()
 
 
+func adjust_anchor_point(delta: Vector2) -> void:
+	set_anchor_point(anchor_point + delta)
+
+
 func notify_transform_changed() -> void:
 	var preview_spacing_size := get_state_preview_spacing()
 	
@@ -413,36 +414,27 @@ func notify_transform_changed() -> void:
 	transform_changed.emit()
 
 
-func get_element_rect() -> Rect2:
-	var element_rect := Rect2()
-	element_rect.position = anchor_point + _active_data.offset
-	element_rect.size = _active_data.size
-	
-	return element_rect
-
-
 func get_element_state_rect(state_data: BaseElementData) -> Rect2:
-	var element_rect := get_element_rect()
-	if state_data == default_state:
-		return element_rect
-	
-	var state_rect := element_rect
-	state_rect.position += state_data.offset + state_data.preview_offset
+	var state_rect := Rect2()
+	state_rect.position = anchor_point + state_data.offset + state_data.preview_offset
 	state_rect.size = state_data.size
 	
 	return state_rect
 
 
+func get_active_state_rect() -> Rect2:
+	return get_element_state_rect(_active_data)
+
+
+func get_default_state_rect() -> Rect2:
+	return get_element_state_rect(default_state)
+
+
 func get_selected_rect() -> Rect2:
-	var element_rect := get_element_rect()
 	if not _selected_state:
-		return element_rect
+		return get_element_state_rect(default_state)
 	
-	var state_rect := element_rect
-	state_rect.position += _selected_state.offset + _selected_state.preview_offset
-	state_rect.size = _selected_state.size
-	
-	return state_rect
+	return get_element_state_rect(_selected_state)
 
 
 func _update_combined_size() -> void:
@@ -468,15 +460,12 @@ func get_state_preview_spacing() -> Vector2:
 
 
 func has_point(at_position: Vector2) -> bool:
-	var element_rect := get_element_rect()
-	if element_rect.has_point(at_position):
+	var default_rect := get_element_state_rect(default_state)
+	if default_rect.has_point(at_position):
 		return true
 	
 	for state_data in variant_states:
-		var state_rect := element_rect
-		state_rect.position += state_data.offset + state_data.preview_offset
-		state_rect.size = state_data.size
-		
+		var state_rect := get_element_state_rect(state_data)
 		if state_rect.has_point(at_position):
 			return true
 	
@@ -487,5 +476,5 @@ func is_inside_area(area: Rect2) -> bool:
 	# For area selection state previews are ignored, because there doesn't seem
 	# to be any logical behavior for this case.
 	
-	var element_rect := get_element_rect()
-	return area.encloses(element_rect)
+	var default_rect := get_element_state_rect(default_state)
+	return area.encloses(default_rect)

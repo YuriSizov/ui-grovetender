@@ -1,9 +1,10 @@
-[gd_resource type="Theme" load_steps=68 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=66 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
 [ext_resource type="FontVariation" uid="uid://68jb1argqylt" path="res://gui/theme/fonts/main_font_bold.tres" id="1_nbw0c"]
 [ext_resource type="StyleBox" uid="uid://nepoyenppmop" path="res://gui/theme/styles/shortcut_label_style.tres" id="3_obau7"]
+[ext_resource type="Texture2D" uid="uid://bb75hxis3lgwf" path="res://assets/gizmos/position-offset.png" id="4_3n00a"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3lu1"]
 bg_color = Color(0.885001, 0.68641, 0.702486, 1)
@@ -268,30 +269,6 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mn3ld"]
-bg_color = Color(0.72549, 0.827451, 0.780392, 0.54902)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_37vs7"]
-bg_color = Color(0.72549, 0.827451, 0.780392, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2fit0"]
-bg_color = Color(0.490196, 0.619608, 0.560784, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r4kx8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j60as"]
@@ -550,6 +527,9 @@ default_font_size = 18
 BaseGizmo/base_type = &"Control"
 BaseGizmo/colors/font_color = Color(1, 1, 1, 0.862745)
 BaseGizmo/colors/font_outline_color = Color(0, 0, 0, 0.784314)
+BaseGizmo/colors/handle_default_tint = Color(1, 1, 1, 0.705882)
+BaseGizmo/colors/handle_hover_tint = Color(0.971775, 0.971775, 0.971775, 1)
+BaseGizmo/colors/handle_pressed_tint = Color(0.82606, 0.82606, 0.82606, 1)
 BaseGizmo/constants/font_outline_size = 4
 BaseGizmo/font_sizes/font_size = 14
 BaseGizmo/fonts/font = ExtResource("1_8ropx")
@@ -664,12 +644,9 @@ LineEdit/fonts/font = ExtResource("1_32up8")
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_hdatb")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_5q6kb")
 PositionGizmo/base_type = &"BaseGizmo"
-PositionGizmo/constants/center_handle_size = 24
-PositionGizmo/constants/center_handle_thickness = 4
+PositionGizmo/constants/handle_render_size = 20
 PositionGizmo/constants/handle_trigger_size = 48
-PositionGizmo/styles/center_handle = SubResource("StyleBoxFlat_mn3ld")
-PositionGizmo/styles/center_handle_hover = SubResource("StyleBoxFlat_37vs7")
-PositionGizmo/styles/center_handle_pressed = SubResource("StyleBoxFlat_2fit0")
+PositionGizmo/icons/offset_handle = ExtResource("4_3n00a")
 PropertiesDrawer/base_type = &"PanelContainer"
 PropertiesDrawer/colors/font_color = Color(1, 1, 1, 1)
 PropertiesDrawer/colors/font_outline_color = Color(0.47451, 0.52549, 0.572549, 1)

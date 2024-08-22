@@ -37,7 +37,7 @@ func _draw_renderer() -> void:
 		return
 	
 	for element in _tracked_elements:
-		var element_rect := element.get_element_rect()
+		var element_rect := element.get_active_state_rect()
 		var local_rect := _edited_canvas.from_canvas_rect(element_rect)
 		local_rect = local_rect.grow(PADDING_SIZE)
 		

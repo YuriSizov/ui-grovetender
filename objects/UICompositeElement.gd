@@ -51,10 +51,10 @@ func _update_grouped_transform() -> void:
 	
 	if not element_group.is_empty():
 		var first_element := element_group.fetch(0)
-		global_rect = first_element.get_element_rect()
+		global_rect = first_element.get_default_state_rect()
 		
 		for element in element_group.elements:
-			var element_rect := element.get_element_rect()
+			var element_rect := element.get_default_state_rect()
 			global_rect = global_rect.merge(element_rect)
 	
 	_set_global_transform(global_rect)
@@ -65,8 +65,8 @@ func _extend_grouped_transform(element: UIElement) -> void:
 		_update_grouped_transform()
 		return
 	
-	var global_rect := get_element_rect()
-	var element_rect := element.get_element_rect()
+	var global_rect := get_default_state_rect()
+	var element_rect := element.get_default_state_rect()
 	global_rect = global_rect.merge(element_rect)
 	
 	_set_global_transform(global_rect)

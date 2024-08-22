@@ -42,7 +42,10 @@ func _draw() -> void:
 	var boundary_size := get_theme_constant("boundary_size")
 	
 	for element in _selection.get_selection():
+		var element_state := element.get_selected_state_data()
 		var element_rect := element.get_selected_rect()
+		element_rect.position -= element_state.offset
+		
 		var boundary_rect := _edited_canvas.from_canvas_rect(element_rect)
 		DrawingUtil.draw_stylebox_frame(get_canvas_item(), boundary_style, boundary_rect, boundary_size)
 
@@ -145,6 +148,8 @@ func _update_gizmos() -> void:
 
 
 func _clear_gizmos() -> void:
+	_grabbed_gizmo = null
+	
 	for gizmo: BaseGizmo in _gizmo_container.get_children():
 		gizmo.gizmo_grabbed.disconnect(_update_grabbed_gizmo.bind(gizmo))
 		gizmo.gizmo_released.disconnect(_update_grabbed_gizmo.bind(null))
@@ -157,6 +162,8 @@ func _clear_gizmos() -> void:
 
 func _try_gizmo_input(gizmo: BaseGizmo, mouse_event: InputEventMouse, forced: bool = false) -> bool:
 	var local_position := mouse_event.global_position - gizmo.global_position
+	# Forcing input without point tests helps when gizmos don't update in time with element
+	# changes, which happens pretty much all the time.
 	if not forced && not gizmo.test_point(local_position):
 		return false
 	
@@ -164,8 +171,6 @@ func _try_gizmo_input(gizmo: BaseGizmo, mouse_event: InputEventMouse, forced: bo
 	gizmo.handle_mouse_input(mouse_event)
 	_update_gizmo_cursor_shape(gizmo.get_handle_cursor_shape())
 	
-	# Always accept event.
-	accept_event()
 	return true
 
 
