@@ -42,13 +42,13 @@ func _ready() -> void:
 	_update_canvas_grid()
 	_edit_current_canvas()
 	
-	_canvas_gizmos.connect_to_selection(_selection)
-	_properties_drawer.connect_to_selection(_selection)
-	
 	_canvas_overlay.draw.connect(_draw_canvas_overlay)
 	_canvas_drawer.element_selected.connect(_select_element)
 	
 	if not Engine.is_editor_hint():
+		_canvas_gizmos.connect_to_selection(_selection)
+		_properties_drawer.connect_to_selection(_selection)
+	
 		Controller.canvas_changed.connect(_edit_current_canvas)
 
 

@@ -13,7 +13,11 @@ var _center_handle_radius: float = 0.0
 
 
 func _draw() -> void:
-	draw_circle(_center_handle_position, _center_handle_radius, Color.RED, true, -1.0, true)
+	var handle_color := Color.RED
+	if is_hovering():
+		handle_color = handle_color.lightened(0.5)
+	
+	draw_circle(_center_handle_position, _center_handle_radius, handle_color, true, -1.0, true)
 
 
 # Implementation.
@@ -30,6 +34,23 @@ func _update_handles_transform() -> void:
 
 # Override.
 func _test_point(point: Vector2) -> bool:
-	_cursor_shape = Control.CURSOR_DRAG
+	set_handle_feedback(Control.CURSOR_DRAG, "Move the element.")
 	
 	return _center_handle_position.distance_to(point) <= (size.x / 2.0)
+
+
+# Override.
+func _handle_mouse_input(event: InputEventMouse) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if not is_grabbing() && mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			start_grabbing()
+		
+		elif is_grabbing() && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			stop_grabbing()
+	
+	if is_grabbing() && event is InputEventMouseMotion:
+		var mm := event as InputEventMouseMotion
+		var relative := mm.relative / _canvas.get_canvas_scale()
+		position_changed.emit(relative)

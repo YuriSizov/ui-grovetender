@@ -19,8 +19,15 @@ var _element_data: BaseElementData = null
 ## The callable that is called to check if the gizmo should be visible. If it's empty/invalid,
 ## the gizmo is always visible.
 var _visibility_condition: Callable = Callable()
-##
-var _cursor_shape: Control.CursorShape = Control.CURSOR_ARROW
+
+## The flag that indicates that the gizmo is being hovered.
+var _hovering: bool = false
+## The flag that indicates that the gizmo is being grabbed.
+var _grabbing: bool = false
+## The current cursor shape for the hovered/grabbed gizmo.
+var _handle_cursor_shape: Control.CursorShape = Control.CURSOR_ARROW
+## Th current tooltip for the hovered/grabbed gizmo.
+var _handle_tooltip: String = ""
 
 ## The cached value of the element rect, translated into UI coordinates.
 var _local_element_rect: Rect2 = Rect2()
@@ -58,12 +65,16 @@ func connect_to_state(element: UIElement, element_data: BaseElementData) -> void
 	if _element == element && _element_data == element_data:
 		return
 	
+	if _element:
+		_element.transform_queued.disconnect(_update_transform)
 	if _element_data:
 		_element_data.properties_changed.disconnect(_check_visibility_condition)
 	
 	_element = element
 	_element_data = element_data
 	
+	if _element:
+		_element.transform_queued.connect(_update_transform)
 	if _element_data:
 		_element_data.properties_changed.connect(_check_visibility_condition)
 	
@@ -102,15 +113,56 @@ func _update_transform() -> void:
 # Interactions.
 
 func test_point(point: Vector2) -> bool:
-	return _test_point(point)
+	return is_visible_in_tree() && _test_point(point)
 
 
-func handle_gui_input(event: InputEvent) -> void:
-	_handle_gui_input(event)
+func handle_mouse_input(event: InputEventMouse) -> void:
+	_handle_mouse_input(event)
+
+
+func is_hovering() -> bool:
+	return _hovering
+
+
+func set_hovering(value: bool) -> void:
+	if _hovering == value:
+		return
+	
+	_hovering = value
+	queue_redraw()
 
 
 func get_handle_cursor_shape() -> Control.CursorShape:
-	return _cursor_shape
+	return _handle_cursor_shape
+
+
+func get_handle_tooltip() -> String:
+	return _handle_tooltip
+
+
+func set_handle_feedback(cursor_shape: Control.CursorShape, tooltip: String) -> void:
+	_handle_cursor_shape = cursor_shape
+	_handle_tooltip = tooltip
+
+
+func is_grabbing() -> bool:
+	return _grabbing
+
+
+func start_grabbing() -> void:
+	if _grabbing:
+		return
+	
+	_grabbing = true
+	gizmo_grabbed.emit()
+
+
+func stop_grabbing() -> void:
+	if not _grabbing:
+		return
+	
+	_grabbing = false
+	gizmo_released.emit()
 
 
 # Implementation.
@@ -131,5 +183,5 @@ func _test_point(point: Vector2) -> bool:
 # Virtual. Called when this gizmo should receive the incoming input event. The
 # event is automatically accepted after this call. For this method to be called
 # _test_point must return true.
-func _handle_gui_input(_event: InputEvent) -> void:
+func _handle_mouse_input(_event: InputEventMouse) -> void:
 	pass
