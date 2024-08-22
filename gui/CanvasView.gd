@@ -36,6 +36,7 @@ var _canvas_drag_last_position: Vector2 = Vector2.ZERO
 @onready var _canvas_overlay: Control = %Overlay
 @onready var _canvas_drawer: CanvasDrawer = %CanvasDrawer
 @onready var _properties_drawer: PropertiesDrawer = %PropertiesDrawer
+@onready var _canvas_context_menu: CanvasContextMenu = %CanvasContextMenu
 
 
 func _ready() -> void:
@@ -55,6 +56,7 @@ func _ready() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
+		_canvas_context_menu.clear_options()
 		
 		if mb.pressed: # Events triggered on mouse press.
 			match mb.button_index:
@@ -89,7 +91,7 @@ func _gui_input(event: InputEvent) -> void:
 						_try_select_element(mb.global_position, selection_mode)
 				
 				MOUSE_BUTTON_RIGHT:
-					_add_element_to_canvas(mb.global_position)
+					_show_create_context_menu(mb.global_position)
 				
 				MOUSE_BUTTON_MIDDLE:
 					_stop_canvas_dragging()
@@ -107,7 +109,7 @@ func _gui_input(event: InputEvent) -> void:
 func _shortcut_input(event: InputEvent) -> void:
 	if event.is_action_pressed("grove_create_element", false, true):
 		var mouse_position := get_global_mouse_position()
-		_add_element_to_canvas(mouse_position)
+		_show_create_context_menu(mouse_position)
 		
 		get_viewport().set_input_as_handled()
 	
@@ -255,14 +257,20 @@ func _edit_current_canvas() -> void:
 	_update_canvas_grid()
 
 
-func _add_element_to_canvas(mouse_position: Vector2) -> void:
+func _add_element_to_canvas(element_type: int, mouse_position: Vector2) -> void:
 	if not _edited_canvas:
 		return
 	
-	# TODO: Add support for specifying the element data type.
+	# TODO: Add support for other data types, eventually.
+	var data_type: Object = BaseElementData
+	match element_type:
+		ElementType.ELEMENT_PANEL:
+			data_type = PanelElementData
+		_:
+			data_type = BaseElementData
 	
 	var canvas_position := _edited_canvas.to_canvas_coordinates(mouse_position)
-	_edited_canvas.create_element(null, PanelElementData, canvas_position)
+	_edited_canvas.create_element(null, data_type, canvas_position)
 
 
 func _handle_created_element(element: UIElement) -> void:
@@ -288,6 +296,28 @@ func _group_elements_on_canvas() -> void:
 	var selected_elements := _selection.get_selection()
 	if not selected_elements.is_empty():
 		_edited_canvas.group_elements(selected_elements)
+
+
+# Canvas actions.
+
+func _show_create_context_menu(mouse_position: Vector2) -> void:
+	_canvas_context_menu.clear_options()
+	
+	if not _edited_canvas:
+		return
+	
+	var context_options: Array[CanvasContextMenu.Option] = []
+	
+	for i in ElementType.MAX:
+		var create_option := CanvasContextMenu.Option.new()
+		create_option.label = ElementType.get_element_name(i)
+		create_option.icon = ElementType.get_element_icon(i)
+		create_option.action = func() -> void:
+			_add_element_to_canvas(i, mouse_position)
+		
+		context_options.push_back(create_option)
+	
+	_canvas_context_menu.show_options(context_options, mouse_position)
 
 
 # Selection management.
