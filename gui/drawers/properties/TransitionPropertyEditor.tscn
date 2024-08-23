@@ -1,0 +1,72 @@
+[gd_scene load_steps=2 format=3 uid="uid://bdsqrfm1edap1"]
+
+[ext_resource type="Script" path="res://gui/drawers/properties/TransitionPropertyEditor.gd" id="1_ot8l4"]
+
+[node name="TransitionPropertyEditor" type="MarginContainer"]
+theme_type_variation = &"TransitionPropertyEditor"
+script = ExtResource("1_ot8l4")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DurationEditor" type="HBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DurationLabel" type="Label" parent="Layout/DurationEditor"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Duration"
+
+[node name="Spacer" type="Control" parent="Layout/DurationEditor"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="DurationValue" type="SpinBox" parent="Layout/DurationEditor"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+max_value = 10.0
+step = 0.01
+allow_greater = true
+allow_lesser = true
+
+[node name="CurveEditor" type="HBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="CurveLabel" type="Label" parent="Layout/CurveEditor"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Curve"
+
+[node name="Spacer" type="Control" parent="Layout/CurveEditor"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CurveValue" type="OptionButton" parent="Layout/CurveEditor"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+
+[node name="EasingEditor" type="HBoxContainer" parent="Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EasingLabel" type="Label" parent="Layout/EasingEditor"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Easing"
+
+[node name="Spacer" type="Control" parent="Layout/EasingEditor"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="EasingValue" type="OptionButton" parent="Layout/EasingEditor"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2

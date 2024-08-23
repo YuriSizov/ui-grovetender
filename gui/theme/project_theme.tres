@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=71 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=73 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -504,6 +504,23 @@ corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ivebc"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w0g1b"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p0bwl"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.164706, 0.164706, 0.164706, 0.862745)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8v7q"]
 bg_color = Color(0.51625, 0.663092, 0.775114, 1)
 corner_radius_top_left = 3
@@ -659,6 +676,7 @@ LineEdit/font_sizes/font_size = 16
 LineEdit/fonts/font = ExtResource("1_32up8")
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_hdatb")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_5q6kb")
+OptionButton/font_sizes/font_size = 16
 PositionGizmo/base_type = &"BaseGizmo"
 PositionGizmo/constants/handle_render_size = 20
 PositionGizmo/constants/handle_trigger_size = 48
@@ -792,6 +810,16 @@ TogglePropertyEditor/base_type = &"ValuePropertyEditor"
 TogglePropertyEditor/font_sizes/font_size = 16
 TogglePropertyEditor/fonts/font = ExtResource("1_nbw0c")
 TogglePropertyEditor/styles/toggle_panel = SubResource("StyleBoxEmpty_ivebc")
+TransitionPropertyEditor/base_type = &"PropertyEditor"
+TransitionPropertyEditor/constants/base_separation = 8
+TransitionPropertyEditor/constants/margin_bottom = 2
+TransitionPropertyEditor/constants/margin_left = 8
+TransitionPropertyEditor/constants/margin_right = 8
+TransitionPropertyEditor/constants/margin_top = 2
+TransitionPropertyEditor/font_sizes/font_size = 16
+TransitionPropertyEditor/fonts/font = ExtResource("1_nbw0c")
+TransitionPropertyEditor/styles/lineedit_panel = SubResource("StyleBoxEmpty_w0g1b")
+TransitionPropertyEditor/styles/stepper_panel = SubResource("StyleBoxFlat_p0bwl")
 ValuePropertyEditor/base_type = &"PropertyEditor"
 ValuePropertyEditor/constants/base_separation = 8
 ValuePropertyEditor/constants/margin_bottom = 2

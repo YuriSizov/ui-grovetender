@@ -140,6 +140,44 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		states_section.connect_editor(states_list)
 		properties.push_back(states_list)
 	
+	elif editing_mode == EditingMode.ANIMATION_TOOLS:
+		# TODO: Add support for custom transitions?
+		# TODO: Add support for complex transitions?
+		
+		# Default state doesn't use its transitions, because it's always active.
+		if state.state_type != StateType.STATE_DEFAULT:
+			# State IN transition.
+			
+			var transition_in_section := SectionPropertyEditor.create(element, self)
+			transition_in_section.label = "Transition In"
+			properties.push_back(transition_in_section)
+			
+			var transition_in_editor := TransitionPropertyEditor.create(element, self)
+			transition_in_editor.connect_to_property("state_in_transition", Callable())
+			transition_in_section.connect_editor(transition_in_editor)
+			properties.push_back(transition_in_editor)
+			
+			# State OUT transition.
+			
+			var transition_out_section := SectionPropertyEditor.create(element, self)
+			transition_out_section.label = "Transition Out"
+			properties.push_back(transition_out_section)
+			
+			var transition_out_editor := TransitionPropertyEditor.create(element, self)
+			transition_out_editor.connect_to_property("state_out_transition", Callable())
+			transition_out_section.connect_editor(transition_out_editor)
+			properties.push_back(transition_out_editor)
+			
+			# State IN/OUT preview.
+			
+			var preview_section := SectionPropertyEditor.create(element, self)
+			preview_section.label = "Preview"
+			properties.push_back(preview_section)
+			
+			var preview_editor := TransitionPropertyPreview.create(element, self)
+			preview_section.connect_editor(preview_editor)
+			properties.push_back(preview_editor)
+	
 	return properties
 
 
