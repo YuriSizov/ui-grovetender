@@ -7,7 +7,8 @@
 @tool
 class_name PropertyEditor extends MarginContainer
 
-signal before_property_connected()
+signal state_disconnected()
+signal state_connected()
 signal property_connected()
 signal property_changed()
 
@@ -85,6 +86,8 @@ func connect_to_state(element: UIElement, element_data: BaseElementData) -> void
 	if _element == element && _element_data == element_data:
 		return
 	
+	state_disconnected.emit()
+	
 	if _element_data:
 		_element_data.property_changed.disconnect(_check_property_changes)
 		_element_data.properties_changed.disconnect(_check_visibility_condition)
@@ -95,13 +98,13 @@ func connect_to_state(element: UIElement, element_data: BaseElementData) -> void
 	if _element_data:
 		_element_data.property_changed.connect(_check_property_changes)
 		_element_data.properties_changed.connect(_check_visibility_condition)
+	
+	state_connected.emit()
 
 
 func connect_to_property(prop_name: String, prop_setter: Callable) -> void:
 	if _prop_name == prop_name && _prop_setter == prop_setter:
 		return
-	
-	before_property_connected.emit()
 	
 	_prop_name = prop_name
 	_prop_setter = prop_setter

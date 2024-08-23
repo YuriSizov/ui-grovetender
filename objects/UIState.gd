@@ -22,6 +22,9 @@ signal state_deactivated()
 ## is always on, so this flag defaults to false to require variant states
 ## to be explicitly enabled.
 @export var active: bool = false
+## The locked flag. If this state is enforced by one of the owner elements,
+## it must be locked, and cannot be removed or renamed.
+@export var locked: bool = false
 ## The collection of properties this state overrides. Only used by variant
 ## states.
 @export var properties: PackedStringArray = PackedStringArray()

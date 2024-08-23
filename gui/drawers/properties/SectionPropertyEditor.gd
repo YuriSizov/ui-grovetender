@@ -168,6 +168,8 @@ func _update_section_toggle() -> void:
 	_section_toggle.texture = CHECKBOX_ICONS[0] if get_property_value() else CHECKBOX_ICONS[1]
 
 
+# Interactions.
+
 func _toggle_section() -> void:
 	if not has_property() || not _prop_setter.is_valid():
 		return
@@ -185,7 +187,7 @@ func is_toggled() -> bool:
 	return get_property_value()
 
 
-func connect_property_to_section(property_editor: PropertyEditor) -> void:
+func connect_editor(property_editor: PropertyEditor) -> void:
 	if not has_property():
 		return # Nothing to do if this is not a togglable section.
 	

@@ -459,24 +459,31 @@ content_margin_top = 2.0
 content_margin_right = 2.0
 content_margin_bottom = 2.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mhi34"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lcu27"]
+bg_color = Color(0.764706, 0.764706, 0.764706, 0.470588)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cvpv1"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-bg_color = Color(1, 1, 1, 0)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dpygf"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmxom"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oy0og"]
+bg_color = Color(0.596078, 0.596078, 0.596078, 0.627451)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b2ki6"]
 content_margin_left = 8.0
@@ -759,6 +766,9 @@ StatePropertyEditor/constants/margin_right = 8
 StatePropertyEditor/constants/margin_top = 2
 StatePropertyEditor/styles/separator = SubResource("StyleBoxLine_v13wo")
 StatePropertyEntry/base_type = &"HBoxContainer"
+StatePropertyEntry/colors/button_icon_hover = Color(0.94902, 0.94902, 0.94902, 1)
+StatePropertyEntry/colors/button_icon_normal = Color(0.94902, 0.94902, 0.94902, 1)
+StatePropertyEntry/colors/button_icon_pressed = Color(0.85098, 0.85098, 0.85098, 1)
 StatePropertyEntry/colors/font_color = Color(1, 1, 1, 1)
 StatePropertyEntry/colors/font_shadow_color = Color(0.145098, 0.145098, 0.145098, 0.784314)
 StatePropertyEntry/constants/font_shadow_offset_x = 1
@@ -766,9 +776,9 @@ StatePropertyEntry/constants/font_shadow_offset_y = 1
 StatePropertyEntry/font_sizes/font_size = 16
 StatePropertyEntry/fonts/font = ExtResource("1_nbw0c")
 StatePropertyEntry/styles/button_focus = SubResource("StyleBoxEmpty_csva5")
-StatePropertyEntry/styles/button_hover = SubResource("StyleBoxFlat_mhi34")
-StatePropertyEntry/styles/button_normal = SubResource("StyleBoxFlat_cvpv1")
-StatePropertyEntry/styles/button_pressed = SubResource("StyleBoxFlat_cmxom")
+StatePropertyEntry/styles/button_hover = SubResource("StyleBoxFlat_lcu27")
+StatePropertyEntry/styles/button_normal = SubResource("StyleBoxEmpty_dpygf")
+StatePropertyEntry/styles/button_pressed = SubResource("StyleBoxFlat_oy0og")
 StepperPropertyEditor/base_type = &"ValuePropertyEditor"
 StepperPropertyEditor/font_sizes/font_size = 16
 StepperPropertyEditor/fonts/font = ExtResource("1_nbw0c")

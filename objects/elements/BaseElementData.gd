@@ -92,8 +92,6 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		
-		# Layout properties.
-		
 		var layout_section := SectionPropertyEditor.create(element, self)
 		layout_section.label = "Layout"
 		layout_section.icon = preload("res://assets/icons/base-layout.png")
@@ -104,7 +102,7 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		offset_property.label = "Offset"
 		offset_property.set_value_limits(-100.0, 100.0, true, true) # Max value doesn't matter.
 		offset_property.set_value_step(1.0)
-		layout_section.connect_property_to_section(offset_property)
+		layout_section.connect_editor(offset_property)
 		properties.push_back(offset_property)
 		
 		var size_property := StepperPropertyEditor.create(element, self)
@@ -112,8 +110,35 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		size_property.label = "Size"
 		size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
 		size_property.set_value_step(1.0)
-		layout_section.connect_property_to_section(size_property)
+		layout_section.connect_editor(size_property)
 		properties.push_back(size_property)
+	
+	elif editing_mode == EditingMode.BEHAVIOR_TOOLS:
+		# These sections only make sense for composite elements, as they can have children.
+		if element is UICompositeElement:
+			
+			# Behavior presets.
+			
+			var preset_section := SectionPropertyEditor.create(element, self)
+			preset_section.label = "Preset"
+			properties.push_back(preset_section)
+		
+			# Slots.
+			
+			var slots_section := SectionPropertyEditor.create(element, self)
+			slots_section.label = "Slots"
+			properties.push_back(slots_section)
+	
+		# States.
+		
+		var states_section := SectionPropertyEditor.create(element, self)
+		states_section.label = "States"
+		states_section.icon = preload("res://assets/icons/behavior-states.png")
+		properties.push_back(states_section)
+		
+		var states_list := StatePropertyEditor.create(element, self)
+		states_section.connect_editor(states_list)
+		properties.push_back(states_list)
 	
 	return properties
 

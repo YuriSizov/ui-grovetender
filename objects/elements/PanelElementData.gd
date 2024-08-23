@@ -44,7 +44,7 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		var background_color_property := ColorPropertyEditor.create(element, self)
 		background_color_property.connect_to_property("background_color", _set_background_color)
 		background_color_property.label = "Color"
-		background_section.connect_property_to_section(background_color_property)
+		background_section.connect_editor(background_color_property)
 		properties.push_back(background_color_property)
 	
 	return properties

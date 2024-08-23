@@ -79,6 +79,8 @@ func _init(data_class: GDScript) -> void:
 	# The order matters here. First we update it for states, then for the active data.
 	default_state.property_changed.connect(_update_property_in_all_variant_states)
 	default_state.property_changed.connect(_update_stateful_property)
+	
+	_update_combined_size()
 
 
 # State management.
@@ -103,8 +105,16 @@ func _check_state_exists(state_type: int, state_name: String) -> bool:
 
 
 func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementData:
+	var state_index := variant_states.size()
+	var preview_spacing_size := get_state_preview_spacing()
+	
 	var state_data: BaseElementData = _data_class.new()
 	state_data.state.setup(state_type, state_name)
+	state_data.preview_offset = Vector2(
+		preview_spacing_size.x,
+		preview_spacing_size.y * state_index
+	)
+
 	variant_states.push_back(state_data)
 	
 	# The order matters here. First we update it for the state, then for the active data.
@@ -141,6 +151,8 @@ func create_state(state_type: int, state_name: String) -> BaseElementData:
 
 
 func ensure_state(state_type: int, state_name: String) -> void:
+	# FIXME: States might exist but be in a different order, which breaks state previews.
+	
 	# We skip the checks like the ones in create_state() because this method should only
 	# be called for a state that is already present on one of the elements. So it should
 	# be valid already.
