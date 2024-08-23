@@ -22,6 +22,10 @@ var _allow_greater_values: bool = false
 var _focused_stepper: SpinBox = null
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> StepperPropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/StepperPropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"StepperPropertyEditor"

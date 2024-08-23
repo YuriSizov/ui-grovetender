@@ -41,9 +41,9 @@ var _local_element_rect: Rect2 = Rect2()
 func _init(element: UIElement, element_data: BaseElementData) -> void:
 	name = &"BaseGizmo"
 	theme_type_variation = &"BaseGizmo"
-	connect_to_state(element, element_data)
-	
 	mouse_filter = MOUSE_FILTER_IGNORE
+	
+	connect_to_state(element, element_data)
 
 
 func _enter_tree() -> void:

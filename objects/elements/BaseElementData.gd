@@ -87,24 +87,28 @@ func get_data_properties() -> PackedStringArray:
 
 # Property editors and gizmos.
 
-func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
+func get_editable_properties(element: UIElement, editing_mode: int) -> Array[PropertyEditor]:
 	var properties: Array[PropertyEditor] = []
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		
 		# Layout properties.
 		
-		var layout_section := PropertyEditorHelper.create_section(self, "Layout", preload("res://assets/icons/base-layout.png"))
+		var layout_section := SectionPropertyEditor.create(element, self)
+		layout_section.label = "Layout"
+		layout_section.icon = preload("res://assets/icons/base-layout.png")
 		properties.push_back(layout_section)
 		
-		var offset_property := PropertyEditorHelper.create_stepper_property(self, "offset", _set_offset)
+		var offset_property := StepperPropertyEditor.create(element, self)
+		offset_property.connect_to_property("offset", _set_offset)
 		offset_property.label = "Offset"
 		offset_property.set_value_limits(-100.0, 100.0, true, true) # Max value doesn't matter.
 		offset_property.set_value_step(1.0)
 		layout_section.connect_property_to_section(offset_property)
 		properties.push_back(offset_property)
 		
-		var size_property := PropertyEditorHelper.create_stepper_property(self, "size", _set_size)
+		var size_property := StepperPropertyEditor.create(element, self)
+		size_property.connect_to_property("size", _set_size)
 		size_property.label = "Size"
 		size_property.set_value_limits(0.0, 200.0, false, true) # Max value doesn't matter.
 		size_property.set_value_step(1.0)

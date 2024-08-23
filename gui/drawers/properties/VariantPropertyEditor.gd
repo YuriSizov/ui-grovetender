@@ -14,6 +14,10 @@ var _variants: Array[Item] = []
 var _focused_button: Button = null
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> VariantPropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/VariantPropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"VariantPropertyEditor"

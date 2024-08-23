@@ -27,6 +27,10 @@ var _hovered: bool = false
 var _pressed: bool = false
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> SectionPropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/SectionPropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"SectionPropertyEditor"

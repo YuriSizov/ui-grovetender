@@ -14,6 +14,10 @@ class_name FontFilePropertyEditor extends ValuePropertyEditor
 var _font_resource_getter: Callable = Callable()
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> FontFilePropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/FontFilePropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"FontFilePropertyEditor"

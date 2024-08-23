@@ -194,7 +194,7 @@ func _update_property_list() -> void:
 	
 	var editing_mode := Controller.get_editing_mode()
 	var selected_state := _edited_element.get_selected_state_data()
-	var active_properties := selected_state.get_editable_properties(editing_mode)
+	var active_properties := selected_state.get_editable_properties(_edited_element, editing_mode)
 	
 	var current_section_container: VBoxContainer = null
 	for i in active_properties.size():

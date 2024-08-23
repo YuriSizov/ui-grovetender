@@ -28,20 +28,21 @@ func draw(proxy: Control) -> void:
 
 # Property editors and gizmos.
 
-func get_editable_properties(editing_mode: int) -> Array[PropertyEditor]:
-	var properties := super(editing_mode)
+func get_editable_properties(element: UIElement, editing_mode: int) -> Array[PropertyEditor]:
+	var properties := super(element, editing_mode)
 	
 	if editing_mode == EditingMode.STYLING_TOOLS:
 		
 		# Background properties.
-			
-		var background_section := PropertyEditorHelper.create_togglable_section(
-			self, "draw_background", _toggle_draw_background,
-			"Fill", preload("res://assets/icons/panel-fill.png")
-		)
+		
+		var background_section := SectionPropertyEditor.create(element, self)
+		background_section.connect_to_property("draw_background", _toggle_draw_background)
+		background_section.label = "Fill"
+		background_section.icon = preload("res://assets/icons/panel-fill.png")
 		properties.push_back(background_section)
 		
-		var background_color_property := PropertyEditorHelper.create_color_property(self, "background_color", _set_background_color)
+		var background_color_property := ColorPropertyEditor.create(element, self)
+		background_color_property.connect_to_property("background_color", _set_background_color)
 		background_color_property.label = "Color"
 		background_section.connect_property_to_section(background_color_property)
 		properties.push_back(background_color_property)

@@ -11,6 +11,8 @@ signal before_property_connected()
 signal property_connected()
 signal property_changed()
 
+## The element that is being edited.
+var _element: UIElement = null
 ## The element data object that owns the property.
 var _element_data: BaseElementData = null
 ## The name of the property in the data object.
@@ -28,9 +30,23 @@ var _visibility_condition: Callable = Callable()
 var _editing_active: bool = false
 
 
+# Static methods.
+
+## The private factory method that instantiates the scene associated with this type. Extending
+## classes must implement a public factory method for their scene and type.
+static func _create(element: UIElement, element_data: BaseElementData, scene: PackedScene) -> PropertyEditor:
+	var instance: PropertyEditor = scene.instantiate()
+	instance.connect_to_state(element, element_data)
+	
+	return instance
+
+
+# Instance methods.
+
 func _init() -> void:
-	mouse_filter = MOUSE_FILTER_PASS
+	name = &"PropertyEditor"
 	theme_type_variation = &"PropertyEditor"
+	mouse_filter = MOUSE_FILTER_PASS
 
 
 func _enter_tree() -> void:
@@ -65,23 +81,30 @@ func _clear_theme() -> void:
 
 # Metadata.
 
-func connect_to_property(element_data: BaseElementData, prop_name: String, prop_setter: Callable) -> void:
-	if _element_data == element_data:
+func connect_to_state(element: UIElement, element_data: BaseElementData) -> void:
+	if _element == element && _element_data == element_data:
 		return
-	
-	before_property_connected.emit()
 	
 	if _element_data:
 		_element_data.property_changed.disconnect(_check_property_changes)
 		_element_data.properties_changed.disconnect(_check_visibility_condition)
 	
+	_element = element
 	_element_data = element_data
-	_prop_name = prop_name
-	_prop_setter = prop_setter
 	
 	if _element_data:
 		_element_data.property_changed.connect(_check_property_changes)
 		_element_data.properties_changed.connect(_check_visibility_condition)
+
+
+func connect_to_property(prop_name: String, prop_setter: Callable) -> void:
+	if _prop_name == prop_name && _prop_setter == prop_setter:
+		return
+	
+	before_property_connected.emit()
+	
+	_prop_name = prop_name
+	_prop_setter = prop_setter
 	
 	property_connected.emit()
 

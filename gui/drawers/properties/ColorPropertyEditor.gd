@@ -11,6 +11,10 @@ class_name ColorPropertyEditor extends ValuePropertyEditor
 @onready var _color_picker: SimpleColorPicker = %ColorPicker
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> ColorPropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/ColorPropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"ColorPropertyEditor"

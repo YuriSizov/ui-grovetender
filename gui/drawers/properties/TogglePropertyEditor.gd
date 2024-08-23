@@ -15,6 +15,10 @@ const CHECKBOX_ICONS := [
 @onready var _property_toggle: Button = %PropertyToggle
 
 
+static func create(element: UIElement, element_data: BaseElementData) -> TogglePropertyEditor:
+	return _create(element, element_data, preload("res://gui/drawers/properties/TogglePropertyEditor.tscn"))
+
+
 func _init() -> void:
 	super()
 	theme_type_variation = &"TogglePropertyEditor"
