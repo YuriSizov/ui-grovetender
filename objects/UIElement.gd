@@ -23,7 +23,7 @@ signal editor_selected()
 signal editor_deselected()
 
 # TODO: Make this adjustible, probably. Possibly together with the "combined size" too.
-const STATE_RENDERER_PADDING := 32.0
+const STATE_RENDERER_PADDING := 64.0
 
 ## The unique name of this element. User-facing and user-adjustible, can be
 ## used when generating the API on export.
@@ -161,6 +161,19 @@ func ensure_state(state_type: int, state_name: String) -> void:
 		return
 	
 	_create_state_nocheck(state_type, state_name)
+
+
+func deactivate_all_states() -> void:
+	for state_data in variant_states:
+		state_data.state.set_active(false, true)
+	
+	for property_name in default_state.get_data_properties():
+		var value: Variant = default_state.get(property_name)
+		_active_data.set(property_name, value)
+	
+	_update_combined_size()
+	data_changed.emit()
+	transform_queued.emit()
 
 
 func _handle_activated_state(state_data: BaseElementData) -> void:

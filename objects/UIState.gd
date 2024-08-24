@@ -43,11 +43,13 @@ func is_active() -> bool:
 	return active
 
 
-func set_active(value: bool) -> void:
+func set_active(value: bool, silent: bool = false) -> void:
 	if active == value:
 		return
 	
 	active = value
+	if silent:
+		return
 	
 	if active:
 		state_activated.emit()

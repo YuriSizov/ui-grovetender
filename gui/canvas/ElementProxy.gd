@@ -12,7 +12,6 @@ class_name ElementProxy extends Control
 var _renderer_data_map: Dictionary = {}
 
 @onready var _main_renderer: Control = %MainRenderer
-@onready var _transition_renderer: Control = %TransitionRenderer
 @onready var _state_renderers: Control = %States
 @onready var _children_root: Control = %Children
 
@@ -24,7 +23,6 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	_main_renderer.draw.connect(_renderer_draw.bind(_main_renderer))
-	_transition_renderer.draw.connect(_renderer_draw.bind(_transition_renderer))
 
 
 func _notification(what: int) -> void:
@@ -33,21 +31,8 @@ func _notification(what: int) -> void:
 	# references.
 	if what == NOTIFICATION_SCENE_INSTANTIATED:
 		_main_renderer = %MainRenderer
-		_transition_renderer = %TransitionRenderer
 		_state_renderers = %States
-
-
-# HACK: This is temporary to test the system, ideally the transition-aware view should be separate from the canvas.
-func _process(_delta: float) -> void:
-	if _transition_renderer && _transition_renderer.is_visible_in_tree():
-		var preview_spacing_size := element.get_state_preview_spacing()
-		
-		var transition_data: BaseElementData = _renderer_data_map[_transition_renderer]
-		_transition_renderer.size = transition_data.size
-		_transition_renderer.position = transition_data.offset
-		_transition_renderer.position.y += preview_spacing_size.y
-		
-		_transition_renderer.queue_redraw()
+		_children_root = %Children
 
 
 func _renderer_draw(renderer: Control) -> void:
@@ -121,8 +106,6 @@ func _create_renderers() -> void:
 	# need to create a node for it.
 	if _main_renderer not in _renderer_data_map:
 		_renderer_data_map[_main_renderer] = element.get_default_state_data()
-	if _transition_renderer not in _renderer_data_map:
-		_renderer_data_map[_transition_renderer] = element.get_active_data()
 	
 	# Update renderer nodes for variant states.
 	
@@ -132,7 +115,7 @@ func _create_renderers() -> void:
 	# Check existing renderers and track the ones which are no longer needed.
 	# Also ignore the ones which are present and don't need to be added.
 	for renderer: Control in _renderer_data_map:
-		if renderer == _main_renderer || renderer == _transition_renderer:
+		if renderer == _main_renderer:
 			continue
 		
 		var element_data: BaseElementData = _renderer_data_map[renderer]
@@ -162,7 +145,7 @@ func _create_renderers() -> void:
 
 func _remove_renderers() -> void:
 	for renderer: Control in _renderer_data_map:
-		if renderer == _main_renderer || renderer == _transition_renderer:
+		if renderer == _main_renderer:
 			continue
 		
 		renderer.draw.disconnect(_renderer_draw.bind(renderer))
@@ -184,16 +167,10 @@ func _update_renderers() -> void:
 	if not element || not is_inside_tree():
 		return
 	
-	var preview_spacing_size := element.get_state_preview_spacing()
-	
 	for renderer: Control in _renderer_data_map:
 		var element_data: BaseElementData = _renderer_data_map[renderer]
 		renderer.size = element_data.size
 		renderer.position = element_data.offset + element_data.preview_offset
-		
-		# HACK: For the transition renderer, small adjustment is made manually. This is just for testing.
-		if renderer == _transition_renderer:
-			renderer.position.y += preview_spacing_size.y
 
 
 # Helpers.

@@ -43,16 +43,8 @@ func _ready() -> void:
 	
 	for stepper: SpinBox in _stepper_grid.get_children():
 		stepper.value_changed.connect(_change_property_value.bind(stepper.get_index()))
-		stepper.gui_input.connect(_handle_stepper_input.bind(stepper))
-		
 		stepper.get_line_edit().focus_entered.connect(_handle_stepper_focused.bind(stepper))
 		stepper.get_line_edit().focus_exited.connect(_handle_stepper_unfocused.bind(stepper))
-		# TODO: Maybe keep a simplified version for copy/paste operations?
-		# FIXME: Spinboxes have hidden behavior where right-clicking sets the value to min/max.
-		# Normally it's activated only by arrows, but if the context menu on the line edit is
-		# disabled, right clicks pass to the parent spinbox and it consumes it no mattere where
-		# the click lands. This is pretty annoying, and doubtfully expected.
-		stepper.get_line_edit().context_menu_enabled = false
 	
 	_stepper_grid.sort_children.connect(queue_redraw)
 
@@ -176,17 +168,6 @@ func set_value_step(step: float) -> void:
 	_value_step = step
 	
 	_update_property_steppers()
-
-
-func _handle_stepper_input(event: InputEvent, stepper: SpinBox) -> void:
-	if event is InputEventMouseButton:
-		var mb := event as InputEventMouseButton
-		
-		# When attempting to use the mouse wheel over one of the steppers, make it active.
-		if mb.pressed && (mb.button_index == MOUSE_BUTTON_WHEEL_DOWN || mb.button_index == MOUSE_BUTTON_WHEEL_UP):
-			if not stepper.get_line_edit().has_focus():
-				stepper.get_line_edit().grab_focus()
-				accept_event()
 
 
 func _handle_stepper_focused(stepper: SpinBox) -> void:

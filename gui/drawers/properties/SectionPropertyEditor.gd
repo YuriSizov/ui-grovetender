@@ -17,6 +17,9 @@ const CHECKBOX_ICONS := [
 var icon: Texture2D = null:
 	set = set_icon
 
+var icon_hidden: bool = false:
+	set = set_icon_hidden
+
 @onready var _layout_container: HBoxContainer = %Layout
 @onready var _section_icon: TextureRect = %SectionIcon
 @onready var _section_name: Label = %SectionName
@@ -118,11 +121,20 @@ func set_icon(value: Texture2D) -> void:
 	_update_section_icon()
 
 
+func set_icon_hidden(value: bool) -> void:
+	if icon_hidden == value:
+		return
+	icon_hidden = value
+	
+	_update_section_icon()
+
+
 func _update_section_icon() -> void:
 	if not is_inside_tree() || Engine.is_editor_hint():
 		return
 	
 	_section_icon.texture = icon
+	_section_icon.visible = not icon_hidden
 
 
 func _update_section_name() -> void:

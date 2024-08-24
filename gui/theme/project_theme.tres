@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=71 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=72 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -500,6 +500,10 @@ thickness = 2
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ivebc"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wlywn"]
+bg_color = Color(0.851309, 0.855903, 0.878926, 1)
+corner_detail = 4
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8v7q"]
 bg_color = Color(0.51625, 0.663092, 0.775114, 1)
 corner_radius_top_left = 3
@@ -798,6 +802,7 @@ TransitionPropertyEditor/constants/margin_left = 8
 TransitionPropertyEditor/constants/margin_right = 8
 TransitionPropertyEditor/constants/margin_top = 2
 TransitionPropertyPreview/base_type = &"PropertyEditor"
+TransitionPropertyPreview/styles/preview_panel = SubResource("StyleBoxFlat_wlywn")
 ValuePropertyEditor/base_type = &"PropertyEditor"
 ValuePropertyEditor/constants/base_separation = 8
 ValuePropertyEditor/constants/margin_bottom = 2

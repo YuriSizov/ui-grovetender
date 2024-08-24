@@ -149,7 +149,7 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 			# State IN transition.
 			
 			var transition_in_section := SectionPropertyEditor.create(element, self)
-			transition_in_section.label = "Transition In"
+			transition_in_section.label = "In Transition"
 			properties.push_back(transition_in_section)
 			
 			var transition_in_editor := TransitionPropertyEditor.create(element, self)
@@ -160,7 +160,7 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 			# State OUT transition.
 			
 			var transition_out_section := SectionPropertyEditor.create(element, self)
-			transition_out_section.label = "Transition Out"
+			transition_out_section.label = "Out Transition"
 			properties.push_back(transition_out_section)
 			
 			var transition_out_editor := TransitionPropertyEditor.create(element, self)
@@ -172,6 +172,7 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 			
 			var preview_section := SectionPropertyEditor.create(element, self)
 			preview_section.label = "Preview"
+			preview_section.icon_hidden = true
 			properties.push_back(preview_section)
 			
 			var preview_editor := TransitionPropertyPreview.create(element, self)

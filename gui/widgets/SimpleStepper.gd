@@ -10,6 +10,13 @@ class_name SimpleStepper extends SpinBox
 
 func _ready() -> void:
 	_update_theme()
+	
+	# FIXME: When value changes not through numeric input, but via the arrows or the mouse wheel
+	# and the length of the resulting string increases, the selection is not updated.
+	
+	# TODO: Maybe keep a simplified version for copy/paste operations?
+	get_line_edit().context_menu_enabled = false
+	get_line_edit().gui_input.connect(_lineedit_gui_input)
 
 
 func _notification(what: int) -> void:
@@ -56,3 +63,27 @@ func _draw() -> void:
 	var updown_size := updown_icon.get_size()
 	var updown_position := Vector2(size.x - updown_size.x, (size.y - updown_size.y) / 2.0)
 	draw_texture_rect(updown_icon, Rect2(updown_position, updown_size), false)
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		# When attempting to use the mouse wheel over the stepper, make it active.
+		if mb.pressed && (mb.button_index == MOUSE_BUTTON_WHEEL_DOWN || mb.button_index == MOUSE_BUTTON_WHEEL_UP):
+			if not get_line_edit().has_focus():
+				get_line_edit().grab_focus()
+				accept_event()
+
+
+func _lineedit_gui_input(event: InputEvent) -> void:
+	# Spinboxes have hidden behavior where right-clicking sets the value to min/max.
+	# Normally it's activated only by arrows, but if the context menu on the line edit is
+	# disabled, right clicks pass to the parent spinbox and it consumes it no mattere where
+	# the click lands. This is pretty annoying, and doubtfully expected.
+	
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			accept_event()
