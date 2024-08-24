@@ -343,7 +343,8 @@ func _try_select_element(mouse_position: Vector2, mode: SelectionMode) -> void:
 	var found_element := _canvas_elements.find_element_at_position(canvas_position)
 	# A bit hacky, but allows us to manipulate this only when selecting via the viewport.
 	if found_element && mode != SelectionMode.REMOVE_FROM_SELECTION:
-		found_element.set_selected_state(canvas_position)
+		var state_data := found_element.find_state_on_canvas(canvas_position)
+		found_element.set_selected_state(state_data)
 	
 	_select_element(found_element, mode)
 

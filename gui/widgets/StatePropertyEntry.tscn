@@ -21,6 +21,7 @@ text = "Empty"
 [node name="Spacer" type="Control" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
 
 [node name="RenameHandle" type="Button" parent="."]
 unique_name_in_owner = true

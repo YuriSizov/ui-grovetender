@@ -74,10 +74,13 @@ func _setup_element_connection() -> void:
 	
 	_update_state_list()
 	_element.states_changed.connect(_update_state_list)
+	_element.editor_state_selected.connect(_update_selected_state)
 
 
 func _update_state_list() -> void:
 	for state_entry: StatePropertyEntry in _states_container.get_children():
+		if state_entry.state_selected.is_connected(_select_element_state):
+			state_entry.state_selected.disconnect(_select_element_state)
 		_states_container.remove_child(state_entry)
 		state_entry.queue_free()
 	
@@ -87,11 +90,25 @@ func _update_state_list() -> void:
 	var default_entry := STATE_ENTRY_SCENE.instantiate()
 	default_entry.set_state_data(_element.default_state)
 	_states_container.add_child(default_entry)
+	default_entry.state_selected.connect(_select_element_state)
 	
 	for state_data in _element.variant_states:
 		var state_entry := STATE_ENTRY_SCENE.instantiate()
 		state_entry.set_state_data(state_data)
 		_states_container.add_child(state_entry)
+		state_entry.state_selected.connect(_select_element_state)
+	
+	_update_selected_state()
+
+
+func _update_selected_state() -> void:
+	if not _element:
+		return
+	
+	var selected_state := _element.get_selected_state_data()
+	for state_entry: StatePropertyEntry in _states_container.get_children():
+		var state_data := state_entry.get_state_data()
+		state_entry.set_selected(state_data == selected_state)
 
 
 # State management.
@@ -107,4 +124,12 @@ func _create_element_state() -> void:
 	# TODO: Handle errors with some user feedback.
 	var state_data := _element.create_state(StateType.STATE_CUSTOM, state_name)
 	if state_data:
+		_element.set_selected_state(state_data)
 		_create_state_name.clear()
+
+
+func _select_element_state(state_data: BaseElementData) -> void:
+	if not _element:
+		return
+	
+	_element.set_selected_state(state_data)

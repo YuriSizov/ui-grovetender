@@ -43,6 +43,11 @@ func _init() -> void:
 
 func _track_grouped_element(element: UIElement) -> void:
 	element.transform_queued.connect(element_group.notify_transform)
+	
+	# DEBUG: Printing printing...
+	element.transform_queued.connect(func() -> void:
+		print("UICanvas: transform_queued")
+	)
 
 
 func _untrack_grouped_element(element: UIElement) -> void:
@@ -121,6 +126,8 @@ func _find_common_owner_group(elements: Array[UIElement]) -> UIElementGroup:
 
 func group_elements(elements: Array[UIElement]) -> void:
 	var owner_group := _find_common_owner_group(elements)
+	
+	# FIXME: Respect global order of elements when grouping.
 	
 	# Remove each element from its current group.
 	# TODO: Dissolve empty composite elements.

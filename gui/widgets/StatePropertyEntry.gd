@@ -7,6 +7,10 @@
 @tool
 class_name StatePropertyEntry extends HBoxContainer
 
+signal state_selected(state_data: BaseElementData)
+signal state_rename_requested()
+signal state_deleted()
+
 var _state_data: BaseElementData = null
 
 @onready var _state_name_label: Label = %StateName
@@ -14,10 +18,49 @@ var _state_data: BaseElementData = null
 @onready var _delete_state_button: Button = %DeleteHandle
 @onready var _locked_state_icon: TextureRect = %LockedHandle
 
+var _selected: bool = false
+var _hovered: bool = false
+var _pressed: bool = false
+
 
 func _ready() -> void:
 	_update_name_label()
 	_update_locked_state()
+	
+	mouse_entered.connect(func() -> void:
+		_hovered = true
+		queue_redraw()
+	)
+	mouse_exited.connect(func() -> void:
+		_hovered = false
+		_pressed = false
+		queue_redraw()
+	)
+	
+	_rename_state_button.pressed.connect(state_rename_requested.emit)
+	_delete_state_button.pressed.connect(state_deleted.emit)
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		
+		if mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_pressed = true
+		elif _pressed && not mb.pressed && mb.button_index == MOUSE_BUTTON_LEFT:
+			_pressed = false
+			
+			state_selected.emit(_state_data)
+
+
+func _draw() -> void:
+	if _selected:
+		var selected_panel := get_theme_stylebox("selected_panel")
+		draw_style_box(selected_panel, Rect2(Vector2.ZERO, size))
+	
+	if _hovered:
+		var hover_panel := get_theme_stylebox("hover_panel")
+		draw_style_box(hover_panel, Rect2(Vector2.ZERO, size))
 
 
 # Properties.
@@ -31,6 +74,14 @@ func set_state_data(data: BaseElementData) -> void:
 	
 	_update_name_label()
 	_update_locked_state()
+
+
+func set_selected(value: bool) -> void:
+	if _selected == value:
+		return
+	
+	_selected = value
+	queue_redraw()
 
 
 func _update_name_label() -> void:

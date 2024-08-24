@@ -95,6 +95,29 @@ func _ensure_grouped_states(states: Array[Array], elements: Array[UIElement]) ->
 			element._ensure_grouped_states(states, element.element_group.elements)
 
 
+func deactivate_all_states() -> void:
+	super()
+	
+	for element in element_group.elements:
+		element.deactivate_all_states()
+
+
+func _handle_activated_state(state_data: BaseElementData) -> void:
+	super(state_data)
+	
+	for element in element_group.elements:
+		var child_state := element.find_state(state_data.state.state_type, state_data.state.state_name)
+		child_state.state.set_active(true)
+
+
+func _handle_deactivated_state(state_data: BaseElementData) -> void:
+	super(state_data)
+	
+	for element in element_group.elements:
+		var child_state := element.find_state(state_data.state.state_type, state_data.state.state_name)
+		child_state.state.set_active(false)
+
+
 # Transform management.
 
 func _set_global_transform(global_rect: Rect2) -> void:

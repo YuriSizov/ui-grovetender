@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=72 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=74 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -498,6 +498,30 @@ grow_begin = 0.0
 grow_end = 0.0
 thickness = 2
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_khe17"]
+bg_color = Color(0.866667, 0.866667, 0.866667, 0.313726)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 3.0
+expand_margin_top = 1.0
+expand_margin_right = 3.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_blgx1"]
+bg_color = Color(0.26369, 0.345434, 0.394847, 0.470588)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 3.0
+expand_margin_top = 1.0
+expand_margin_right = 3.0
+expand_margin_bottom = 1.0
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ivebc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wlywn"]
@@ -788,6 +812,8 @@ StatePropertyEditor/constants/margin_right = 8
 StatePropertyEditor/constants/margin_top = 2
 StatePropertyEditor/styles/separator = SubResource("StyleBoxLine_v13wo")
 StatePropertyEntry/base_type = &"HBoxContainer"
+StatePropertyEntry/styles/hover_panel = SubResource("StyleBoxFlat_khe17")
+StatePropertyEntry/styles/selected_panel = SubResource("StyleBoxFlat_blgx1")
 StepperPropertyEditor/base_type = &"ValuePropertyEditor"
 TextEditGizmo/base_type = &"BaseGizmo"
 TextEditGizmo/colors/caret_color = Color(0.0877386, 0.0889176, 0.103727, 0.784314)

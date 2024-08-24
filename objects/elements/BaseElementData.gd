@@ -185,6 +185,10 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
+	# Composite elements aren't direclty editable right now.
+	if element is UICompositeElement:
+		return gizmos
+	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var position_gizmo := PositionGizmo.new(element, self)
 		position_gizmo.anchor_changed.connect(element.adjust_anchor_point)

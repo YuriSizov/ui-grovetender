@@ -117,11 +117,7 @@ func _edit_selected_element() -> void:
 		_update_gizmos()
 		return
 	
-	var next_element := _selection.get_first_selected()
-	if _edited_element == next_element:
-		return
-	
-	_edited_element = next_element
+	_edited_element = _selection.get_first_selected()
 	
 	if _edited_element:
 		_edited_element.transform_queued.connect(queue_redraw)

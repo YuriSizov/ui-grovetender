@@ -20,6 +20,7 @@ func select(element: UIElement) -> void:
 		return
 	
 	_selected_elements.push_back(element)
+	element.editor_state_selected.connect(selection_changed.emit)
 	element.set_selected(true)
 	selection_changed.emit()
 
@@ -33,6 +34,7 @@ func select_multiple(elements: Array[UIElement]) -> void:
 			continue
 		
 		_selected_elements.push_back(element)
+		element.editor_state_selected.connect(selection_changed.emit)
 		element.set_selected(true)
 	
 	selection_changed.emit()
@@ -45,6 +47,7 @@ func deselect(element: UIElement) -> void:
 		return
 	
 	_selected_elements.erase(element)
+	element.editor_state_selected.disconnect(selection_changed.emit)
 	element.set_selected(false)
 	selection_changed.emit()
 
@@ -58,6 +61,7 @@ func deselect_multiple(elements: Array[UIElement]) -> void:
 			continue
 		
 		_selected_elements.erase(element)
+		element.editor_state_selected.disconnect(selection_changed.emit)
 		element.set_selected(false)
 	
 	selection_changed.emit()
@@ -68,6 +72,7 @@ func clear() -> void:
 		return
 	
 	for element in _selected_elements:
+		element.editor_state_selected.disconnect(selection_changed.emit)
 		element.set_selected(false)
 	
 	_selected_elements.clear()

@@ -21,6 +21,7 @@ signal visibility_changed()
 
 signal editor_selected()
 signal editor_deselected()
+signal editor_state_selected()
 
 # TODO: Make this adjustible, probably. Possibly together with the "combined size" too.
 const STATE_RENDERER_PADDING := 64.0
@@ -85,9 +86,9 @@ func _init(data_class: GDScript) -> void:
 
 # State management.
 
-func _check_state_exists(state_type: int, state_name: String) -> bool:
+func _check_state_exists(state_type: int, state_name: String) -> BaseElementData:
 	if state_type == StateType.STATE_DEFAULT:
-		return true
+		return default_state
 	
 	if state_type == StateType.STATE_CUSTOM:
 		for state_data in variant_states:
@@ -95,13 +96,13 @@ func _check_state_exists(state_type: int, state_name: String) -> bool:
 				continue
 			
 			if state_data.state.state_name == state_name:
-				return true
+				return state_data
 	else:
 		for state_data in variant_states:
 			if state_data.state.state_type == state_type:
-				return true
+				return state_data
 	
-	return false
+	return null
 
 
 func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementData:
@@ -143,7 +144,7 @@ func create_state(state_type: int, state_name: String) -> BaseElementData:
 		state_type = StateType.get_state_type_from_name(state_name)
 	
 	# Make sure the state is unique (only one per special type, unique name for the custom type).
-	if _check_state_exists(state_type, state_name):
+	if _check_state_exists(state_type, state_name) != null:
 		printerr("UIElement: Cannot create a variant state typed as %s (%s), only one state of this type and name is allowed." % [ StateType.get_state_name(state_type), state_name ])
 		return null
 	
@@ -157,10 +158,27 @@ func ensure_state(state_type: int, state_name: String) -> void:
 	# be called for a state that is already present on one of the elements. So it should
 	# be valid already.
 	
-	if _check_state_exists(state_type, state_name):
+	if _check_state_exists(state_type, state_name) != null:
 		return
 	
 	_create_state_nocheck(state_type, state_name)
+
+
+func find_state(state_type: int, state_name: String) -> BaseElementData:
+	return _check_state_exists(state_type, state_name)
+
+
+func find_state_on_canvas(at_position: Vector2) -> BaseElementData:
+	var default_rect := get_element_state_rect(default_state)
+	if default_rect.has_point(at_position):
+		return default_state
+	
+	for state_data in variant_states:
+		var state_rect := get_element_state_rect(state_data)
+		if state_rect.has_point(at_position):
+			return state_data
+	
+	return null
 
 
 func deactivate_all_states() -> void:
@@ -394,18 +412,9 @@ func get_selected_state_data() -> BaseElementData:
 	return _selected_state
 
 
-func set_selected_state(at_position: Vector2) -> void:
-	_selected_state = null
-	
-	var default_rect := get_element_state_rect(default_state)
-	if default_rect.has_point(at_position):
-		return
-	
-	for state_data in variant_states:
-		var state_rect := get_element_state_rect(state_data)
-		if state_rect.has_point(at_position):
-			_selected_state = state_data
-			return
+func set_selected_state(state_data: BaseElementData) -> void:
+	_selected_state = state_data
+	editor_state_selected.emit()
 
 
 # Transform management.
