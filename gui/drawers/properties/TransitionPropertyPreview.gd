@@ -102,6 +102,24 @@ func _draw_preview() -> void:
 	
 	var active_data := _element.get_active_data()
 	active_data.draw(_preview_control)
+	
+	if _element is UICompositeElement:
+		_draw_composite_preview(_element)
+
+
+func _draw_composite_preview(composite_element: UICompositeElement) -> void:
+	var base_position := composite_element.anchor_point
+	
+	for child_element in composite_element.element_group.elements:
+		var child_data := child_element.get_active_data()
+		var child_offset := child_element.anchor_point - base_position
+		
+		_preview_control.draw_set_transform(child_offset)
+		child_data.draw(_preview_control)
+		_preview_control.draw_set_transform(Vector2.ZERO)
+		
+		if child_element is UICompositeElement:
+			_draw_composite_preview(child_element)
 
 
 # Playback management.
@@ -144,6 +162,8 @@ func _reset_playback() -> void:
 func _start_playback_step() -> void:
 	if not _playing:
 		return
+	
+	# FIXME: Currently for composite elements we don't respect the combined length of child transitions.
 	
 	if _playback_direction == PlaybackDirection.PLAYBACK_OUT:
 		_playback_direction = PlaybackDirection.PLAYBACK_IN
