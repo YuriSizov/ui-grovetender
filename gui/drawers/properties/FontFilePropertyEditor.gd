@@ -44,8 +44,8 @@ func _update_theme() -> void:
 		return
 	
 	_font_name_label.begin_bulk_theme_override()
-	_font_name_label.add_theme_font_override("font", get_theme_font("font"))
-	_font_name_label.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
+	_font_name_label.add_theme_font_override("font", get_theme_font("preview_font"))
+	_font_name_label.add_theme_font_size_override("font_size", get_theme_font_size("preview_font_size"))
 	_font_name_label.add_theme_color_override("font_color", get_theme_color("preview_font_color"))
 	_font_name_label.add_theme_color_override("font_shadow_color", get_theme_color("preview_font_shadow_color"))
 	_font_name_label.add_theme_constant_override("shadow_offset_x", get_theme_constant("preview_font_shadow_offset_x"))

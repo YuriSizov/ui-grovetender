@@ -39,23 +39,6 @@ func _update_theme() -> void:
 		return
 	
 	_layout_container.add_theme_constant_override("separation", get_theme_constant("base_separation"))
-	
-	var property_names: Array[Label] = [ _duration_label, _curve_label, _easing_label ]
-	for property_name in property_names:
-		property_name.begin_bulk_theme_override()
-		property_name.add_theme_font_override("font", get_theme_font("font"))
-		property_name.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
-		property_name.add_theme_color_override("font_color", get_theme_color("font_color"))
-		property_name.add_theme_color_override("font_outline_color", get_theme_color("font_outline_color"))
-		property_name.add_theme_color_override("font_shadow_color", get_theme_color("font_shadow_color"))
-		property_name.add_theme_constant_override("outline_size", get_theme_constant("font_outline_size"))
-		property_name.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
-		property_name.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
-		property_name.end_bulk_theme_override()
-	
-	_duration_value.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
-	# Allows to set a more flexible minimum width via control properties.
-	_duration_value.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
 
 
 func _clear_theme() -> void:
@@ -63,32 +46,6 @@ func _clear_theme() -> void:
 		return
 	
 	_layout_container.remove_theme_constant_override("separation")
-	
-	var property_names: Array[Label] = [ _duration_label, _curve_label, _easing_label ]
-	for property_name in property_names:
-		property_name.begin_bulk_theme_override()
-		property_name.remove_theme_font_override("font")
-		property_name.remove_theme_font_size_override("font_size")
-		property_name.remove_theme_color_override("font_color")
-		property_name.remove_theme_color_override("font_outline_color")
-		property_name.remove_theme_color_override("font_shadow_color")
-		property_name.remove_theme_constant_override("outline_size")
-		property_name.remove_theme_constant_override("shadow_offset_x")
-		property_name.remove_theme_constant_override("shadow_offset_y")
-		property_name.end_bulk_theme_override()
-	
-	_duration_value.get_line_edit().remove_theme_stylebox_override("normal")
-	_duration_value.get_line_edit().remove_theme_constant_override("minimum_character_width")
-
-
-func _draw() -> void:
-	var panel_style := get_theme_stylebox("stepper_panel")
-	
-	if _duration_value.visible:
-		var stepper_rect := _duration_value.get_global_rect()
-		stepper_rect.position -= global_position
-		
-		draw_style_box(panel_style, stepper_rect)
 
 
 # Editor management.

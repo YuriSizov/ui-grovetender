@@ -57,55 +57,6 @@ func _ready() -> void:
 	_stepper_grid.sort_children.connect(queue_redraw)
 
 
-func _update_theme() -> void:
-	super()
-	
-	if not is_node_ready():
-		return
-	
-	_property_stepper1.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
-	_property_stepper2.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
-	_property_stepper3.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
-	_property_stepper4.get_line_edit().add_theme_stylebox_override("normal", get_theme_stylebox("lineedit_panel"))
-	
-	# Allows to set a more flexible minimum width via control properties.
-	_property_stepper1.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
-	_property_stepper2.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
-	_property_stepper3.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
-	_property_stepper4.get_line_edit().add_theme_constant_override("minimum_character_width", 1)
-
-
-func _clear_theme() -> void:
-	super()
-	
-	if not is_node_ready():
-		return
-	
-	_property_stepper1.get_line_edit().remove_theme_stylebox_override("normal")
-	_property_stepper2.get_line_edit().remove_theme_stylebox_override("normal")
-	_property_stepper3.get_line_edit().remove_theme_stylebox_override("normal")
-	_property_stepper4.get_line_edit().remove_theme_stylebox_override("normal")
-	
-	_property_stepper1.get_line_edit().remove_theme_constant_override("minimum_character_width")
-	_property_stepper2.get_line_edit().remove_theme_constant_override("minimum_character_width")
-	_property_stepper3.get_line_edit().remove_theme_constant_override("minimum_character_width")
-	_property_stepper4.get_line_edit().remove_theme_constant_override("minimum_character_width")
-
-
-
-func _draw() -> void:
-	var panel_style := get_theme_stylebox("stepper_panel")
-	
-	for stepper: SpinBox in _stepper_grid.get_children():
-		if not stepper.visible:
-			continue
-		
-		var stepper_rect := stepper.get_global_rect()
-		stepper_rect.position -= global_position
-		
-		draw_style_box(panel_style, stepper_rect)
-
-
 # Properties.
 
 func _update_property_steppers() -> void:

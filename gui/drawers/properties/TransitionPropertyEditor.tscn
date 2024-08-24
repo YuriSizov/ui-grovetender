@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bdsqrfm1edap1"]
+[gd_scene load_steps=3 format=3 uid="uid://bdsqrfm1edap1"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/TransitionPropertyEditor.gd" id="1_ot8l4"]
+[ext_resource type="PackedScene" uid="uid://df8gqqhlpvrp5" path="res://gui/widgets/SimpleStepper.tscn" id="2_v7nak"]
 
 [node name="TransitionPropertyEditor" type="MarginContainer"]
 theme_type_variation = &"TransitionPropertyEditor"
@@ -17,6 +18,7 @@ layout_mode = 2
 [node name="DurationLabel" type="Label" parent="Layout/DurationEditor"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"PropertyEditorLabel"
 text = "Duration"
 
 [node name="Spacer" type="Control" parent="Layout/DurationEditor"]
@@ -24,9 +26,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="DurationValue" type="SpinBox" parent="Layout/DurationEditor"]
+[node name="DurationValue" parent="Layout/DurationEditor" instance=ExtResource("2_v7nak")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 max_value = 10.0
 step = 0.01
@@ -40,6 +41,7 @@ layout_mode = 2
 [node name="CurveLabel" type="Label" parent="Layout/CurveEditor"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"PropertyEditorLabel"
 text = "Curve"
 
 [node name="Spacer" type="Control" parent="Layout/CurveEditor"]
@@ -51,6 +53,31 @@ mouse_filter = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
+selected = 0
+item_count = 12
+popup/item_0/text = "Linear"
+popup/item_1/text = "Sine"
+popup/item_1/id = 1
+popup/item_2/text = "Quintic"
+popup/item_2/id = 2
+popup/item_3/text = "Quartic"
+popup/item_3/id = 3
+popup/item_4/text = "Quadratic"
+popup/item_4/id = 4
+popup/item_5/text = "Exponential"
+popup/item_5/id = 5
+popup/item_6/text = "Elastic"
+popup/item_6/id = 6
+popup/item_7/text = "Cubic"
+popup/item_7/id = 7
+popup/item_8/text = "Square Root"
+popup/item_8/id = 8
+popup/item_9/text = "Bounce"
+popup/item_9/id = 9
+popup/item_10/text = "Back out"
+popup/item_10/id = 10
+popup/item_11/text = "Spring"
+popup/item_11/id = 11
 
 [node name="EasingEditor" type="HBoxContainer" parent="Layout"]
 unique_name_in_owner = true
@@ -59,6 +86,7 @@ layout_mode = 2
 [node name="EasingLabel" type="Label" parent="Layout/EasingEditor"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"PropertyEditorLabel"
 text = "Easing"
 
 [node name="Spacer" type="Control" parent="Layout/EasingEditor"]
@@ -70,3 +98,12 @@ mouse_filter = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "Ease In"
+popup/item_1/text = "Ease Out"
+popup/item_1/id = 1
+popup/item_2/text = "Ease In/Out"
+popup/item_2/id = 2
+popup/item_3/text = "Ease Out/In"
+popup/item_3/id = 3

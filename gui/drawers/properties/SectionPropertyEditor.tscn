@@ -31,6 +31,7 @@ stretch_mode = 5
 [node name="SectionName" type="Label" parent="Layout"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"PropertyEditorSectionLabel"
 text = "Section Name"
 
 [node name="Spacer" type="Control" parent="Layout"]

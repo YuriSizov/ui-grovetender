@@ -71,17 +71,6 @@ func _update_theme() -> void:
 		return
 	
 	_layout_container.add_theme_constant_override("separation", get_theme_constant("base_separation"))
-	
-	_section_name.begin_bulk_theme_override()
-	_section_name.add_theme_font_override("font", get_theme_font("font"))
-	_section_name.add_theme_font_size_override("font_size", get_theme_font_size("font_size"))
-	_section_name.add_theme_color_override("font_color", get_theme_color("font_color"))
-	_section_name.add_theme_color_override("font_outline_color", get_theme_color("font_outline_color"))
-	_section_name.add_theme_color_override("font_shadow_color", get_theme_color("font_shadow_color"))
-	_section_name.add_theme_constant_override("outline_size", get_theme_constant("font_outline_size"))
-	_section_name.add_theme_constant_override("shadow_offset_x", get_theme_constant("font_shadow_offset_x"))
-	_section_name.add_theme_constant_override("shadow_offset_y", get_theme_constant("font_shadow_offset_y"))
-	_section_name.end_bulk_theme_override()
 
 
 func _clear_theme() -> void:
@@ -89,17 +78,6 @@ func _clear_theme() -> void:
 		return
 	
 	_layout_container.remove_theme_constant_override("separation")
-	
-	_section_name.begin_bulk_theme_override()
-	_section_name.remove_theme_font_override("font")
-	_section_name.remove_theme_font_size_override("font_size")
-	_section_name.remove_theme_color_override("font_color")
-	_section_name.remove_theme_color_override("font_outline_color")
-	_section_name.remove_theme_color_override("font_shadow_color")
-	_section_name.remove_theme_constant_override("outline_size")
-	_section_name.remove_theme_constant_override("shadow_offset_x")
-	_section_name.remove_theme_constant_override("shadow_offset_y")
-	_section_name.end_bulk_theme_override()
 
 
 func _draw() -> void:

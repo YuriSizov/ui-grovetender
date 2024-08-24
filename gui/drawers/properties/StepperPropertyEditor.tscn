@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://b2nlm3w1rsre4"]
+[gd_scene load_steps=4 format=3 uid="uid://b2nlm3w1rsre4"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/StepperPropertyEditor.gd" id="1_ctr1w"]
 [ext_resource type="PackedScene" uid="uid://cqm2wfqs2aylf" path="res://gui/widgets/PropertyRevertButton.tscn" id="2_ymlm7"]
+[ext_resource type="PackedScene" uid="uid://df8gqqhlpvrp5" path="res://gui/widgets/SimpleStepper.tscn" id="3_pud7r"]
 
 [node name="StepperPropertyEditor" type="MarginContainer"]
 theme_type_variation = &"StepperPropertyEditor"
@@ -21,6 +22,7 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 1
+theme_type_variation = &"PropertyEditorLabel"
 text = "Property Name"
 
 [node name="Spacer" type="Control" parent="Layout"]
@@ -34,26 +36,18 @@ layout_mode = 2
 mouse_filter = 2
 columns = 2
 
-[node name="PropertyValue1" type="SpinBox" parent="Layout/StepperGrid"]
+[node name="PropertyValue1" parent="Layout/StepperGrid" instance=ExtResource("3_pud7r")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-select_all_on_focus = true
 
-[node name="PropertyValue2" type="SpinBox" parent="Layout/StepperGrid"]
+[node name="PropertyValue2" parent="Layout/StepperGrid" instance=ExtResource("3_pud7r")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-select_all_on_focus = true
 
-[node name="PropertyValue3" type="SpinBox" parent="Layout/StepperGrid"]
+[node name="PropertyValue3" parent="Layout/StepperGrid" instance=ExtResource("3_pud7r")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-select_all_on_focus = true
 
-[node name="PropertyValue4" type="SpinBox" parent="Layout/StepperGrid"]
+[node name="PropertyValue4" parent="Layout/StepperGrid" instance=ExtResource("3_pud7r")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-select_all_on_focus = true

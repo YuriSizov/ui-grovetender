@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://ctmaejuu7fk37"]
+[gd_scene load_steps=3 format=3 uid="uid://ctmaejuu7fk37"]
 
 [ext_resource type="Script" path="res://gui/drawers/properties/TransitionPropertyPreview.gd" id="1_amq2l"]
+[ext_resource type="Texture2D" uid="uid://c1oebonnjla4r" path="res://assets/ui/playback-handle-play.png" id="2_g344p"]
 
 [node name="TransitionPropertyPreview" type="MarginContainer"]
+theme_type_variation = &"TransitionPropertyPreview"
 script = ExtResource("1_amq2l")
 
 [node name="PreviewArea" type="Panel" parent="."]
@@ -17,3 +19,24 @@ layout_mode = 2
 anchors_preset = 0
 offset_right = 320.0
 offset_bottom = 240.0
+
+[node name="PreviewControls" type="HBoxContainer" parent="PreviewArea"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="PlaybackHandle" type="Button" parent="PreviewArea/PreviewControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+theme_type_variation = &"LightIconButton"
+icon = ExtResource("2_g344p")
+icon_alignment = 1
+expand_icon = true

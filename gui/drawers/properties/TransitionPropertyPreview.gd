@@ -9,6 +9,7 @@ class_name TransitionPropertyPreview extends PropertyEditor
 
 @onready var _preview_area: Panel = %PreviewArea
 @onready var _preview_control: Control = %Preview
+@onready var _playback_button: Button = %PlaybackHandle
 
 
 static func create(element: UIElement, element_data: BaseElementData) -> TransitionPropertyPreview:

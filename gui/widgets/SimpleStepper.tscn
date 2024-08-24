@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://df8gqqhlpvrp5"]
+
+[ext_resource type="Script" path="res://gui/widgets/SimpleStepper.gd" id="1_e6qf6"]
+
+[node name="SimpleStepper" type="SpinBox"]
+custom_minimum_size = Vector2(80, 0)
+offset_right = 91.4583
+offset_bottom = 31.0
+theme_type_variation = &"SimpleStepper"
+select_all_on_focus = true
+script = ExtResource("1_e6qf6")

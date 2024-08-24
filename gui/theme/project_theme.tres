@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=73 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=71 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -257,6 +257,34 @@ shadow_color = Color(0, 0, 0, 0.313726)
 shadow_size = 1
 shadow_offset = Vector2(2, 2)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0e8mv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_00swg"]
+bg_color = Color(0.764706, 0.764706, 0.764706, 0.470588)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d1ith"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2kv1s"]
+bg_color = Color(0.596078, 0.596078, 0.596078, 0.627451)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+corner_detail = 4
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hdatb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5q6kb"]
@@ -404,6 +432,23 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0lvoi"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sp5wq"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.164706, 0.164706, 0.164706, 0.862745)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ka6dp"]
 bg_color = Color(0.54621, 0.774571, 0.947929, 1)
 corner_radius_top_left = 2
@@ -453,73 +498,7 @@ grow_begin = 0.0
 grow_end = 0.0
 thickness = 2
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_csva5"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lcu27"]
-bg_color = Color(0.764706, 0.764706, 0.764706, 0.470588)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dpygf"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oy0og"]
-bg_color = Color(0.596078, 0.596078, 0.596078, 0.627451)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b2ki6"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gv0jq"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-bg_color = Color(0.164706, 0.164706, 0.164706, 0.862745)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ivebc"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w0g1b"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p0bwl"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-bg_color = Color(0.164706, 0.164706, 0.164706, 0.862745)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8v7q"]
 bg_color = Color(0.51625, 0.663092, 0.775114, 1)
@@ -612,8 +591,6 @@ CanvasOverlay/styles/selection_frame = SubResource("StyleBoxTexture_2qgrx")
 ColorPropertyEditor/base_type = &"ValuePropertyEditor"
 ColorPropertyEditor/constants/picker_offset_x = 8
 ColorPropertyEditor/constants/picker_offset_y = 8
-ColorPropertyEditor/font_sizes/font_size = 16
-ColorPropertyEditor/fonts/font = ExtResource("1_nbw0c")
 CompositeElementEntry/base_type = &"VBoxContainer"
 CompositeElementEntry/constants/base_separation = 8
 CompositeElementEntry/constants/separation = 8
@@ -670,8 +647,16 @@ FontFilePropertyEditor/colors/preview_font_color = Color(1, 1, 1, 1)
 FontFilePropertyEditor/colors/preview_font_shadow_color = Color(0.145098, 0.145098, 0.145098, 0.784314)
 FontFilePropertyEditor/constants/preview_font_shadow_offset_x = 1
 FontFilePropertyEditor/constants/preview_font_shadow_offset_y = 1
-FontFilePropertyEditor/font_sizes/font_size = 16
-FontFilePropertyEditor/fonts/font = ExtResource("1_nbw0c")
+FontFilePropertyEditor/font_sizes/preview_font_size = 16
+FontFilePropertyEditor/fonts/preview_font = ExtResource("1_nbw0c")
+LightIconButton/base_type = &"Button"
+LightIconButton/colors/icon_hover_color = Color(1, 1, 1, 1)
+LightIconButton/colors/icon_normal_color = Color(0.94902, 0.94902, 0.94902, 1)
+LightIconButton/colors/icon_pressed_color = Color(0.85098, 0.85098, 0.85098, 1)
+LightIconButton/styles/focus = SubResource("StyleBoxEmpty_0e8mv")
+LightIconButton/styles/hover = SubResource("StyleBoxFlat_00swg")
+LightIconButton/styles/normal = SubResource("StyleBoxEmpty_d1ith")
+LightIconButton/styles/pressed = SubResource("StyleBoxFlat_2kv1s")
 LineEdit/font_sizes/font_size = 16
 LineEdit/fonts/font = ExtResource("1_32up8")
 LineEdit/styles/focus = SubResource("StyleBoxEmpty_hdatb")
@@ -707,6 +692,8 @@ PropertyEditor/constants/margin_bottom = 0
 PropertyEditor/constants/margin_left = 0
 PropertyEditor/constants/margin_right = 0
 PropertyEditor/constants/margin_top = 0
+PropertyEditor/font_sizes/font_size = 16
+PropertyEditor/fonts/font = ExtResource("1_nbw0c")
 PropertyEditorButton/base_type = &"Button"
 PropertyEditorButton/colors/font_color = Color(0, 0, 0, 0)
 PropertyEditorButton/colors/font_focus_color = Color(0, 0, 0, 0)
@@ -721,6 +708,18 @@ PropertyEditorButton/fonts/font = ExtResource("1_nbw0c")
 PropertyEditorButton/styles/hover = SubResource("StyleBoxFlat_5lsl3")
 PropertyEditorButton/styles/normal = SubResource("StyleBoxFlat_q13e6")
 PropertyEditorButton/styles/pressed = SubResource("StyleBoxFlat_542rf")
+PropertyEditorLabel/base_type = &"Label"
+PropertyEditorLabel/colors/font_color = Color(0.960784, 0.960784, 0.960784, 1)
+PropertyEditorLabel/colors/font_outline_color = Color(0.0627451, 0.0627451, 0.0627451, 1)
+PropertyEditorLabel/colors/font_shadow_color = Color(0, 0, 0, 0.470588)
+PropertyEditorLabel/constants/outline_size = 2
+PropertyEditorLabel/constants/shadow_offset_x = 2
+PropertyEditorLabel/constants/shadow_offset_y = 1
+PropertyEditorLabel/font_sizes/font_size = 16
+PropertyEditorLabel/fonts/font = ExtResource("1_nbw0c")
+PropertyEditorSectionLabel/base_type = &"PropertyEditorLabel"
+PropertyEditorSectionLabel/font_sizes/font_size = 18
+PropertyEditorSectionLabel/fonts/font = ExtResource("1_nbw0c")
 PropertyRevertButton/base_type = &"Button"
 PropertyRevertButton/colors/icon_hover_color = Color(0.950703, 0.950703, 0.950703, 1)
 PropertyRevertButton/colors/icon_normal_color = Color(1, 1, 1, 0.705882)
@@ -736,8 +735,6 @@ SectionPropertyEditor/constants/margin_bottom = 4
 SectionPropertyEditor/constants/margin_left = 12
 SectionPropertyEditor/constants/margin_right = 12
 SectionPropertyEditor/constants/margin_top = 4
-SectionPropertyEditor/font_sizes/font_size = 18
-SectionPropertyEditor/fonts/font = ExtResource("1_nbw0c")
 SectionPropertyEditor/styles/panel = SubResource("StyleBoxFlat_qeg3n")
 SectionPropertyEditor/styles/panel_hover = SubResource("StyleBoxFlat_tp3sd")
 SectionPropertyEditor/styles/panel_pressed = SubResource("StyleBoxFlat_ba8a4")
@@ -762,6 +759,9 @@ ShortcutLabel/font_sizes/font_size = 12
 ShortcutLabel/styles/normal = ExtResource("3_obau7")
 SimpleColorPicker/base_type = &"PanelContainer"
 SimpleColorPicker/styles/panel = SubResource("StyleBoxFlat_shuin")
+SimpleStepper/base_type = &"SpinBox"
+SimpleStepper/styles/lineedit_panel = SubResource("StyleBoxEmpty_0lvoi")
+SimpleStepper/styles/stepper_panel = SubResource("StyleBoxFlat_sp5wq")
 SizeGizmo/base_type = &"BaseGizmo"
 SizeGizmo/constants/corner_handle_size = 16
 SizeGizmo/constants/corner_handle_thickness = 4
@@ -784,31 +784,12 @@ StatePropertyEditor/constants/margin_right = 8
 StatePropertyEditor/constants/margin_top = 2
 StatePropertyEditor/styles/separator = SubResource("StyleBoxLine_v13wo")
 StatePropertyEntry/base_type = &"HBoxContainer"
-StatePropertyEntry/colors/button_icon_hover = Color(0.94902, 0.94902, 0.94902, 1)
-StatePropertyEntry/colors/button_icon_normal = Color(0.94902, 0.94902, 0.94902, 1)
-StatePropertyEntry/colors/button_icon_pressed = Color(0.85098, 0.85098, 0.85098, 1)
-StatePropertyEntry/colors/font_color = Color(1, 1, 1, 1)
-StatePropertyEntry/colors/font_shadow_color = Color(0.145098, 0.145098, 0.145098, 0.784314)
-StatePropertyEntry/constants/font_shadow_offset_x = 1
-StatePropertyEntry/constants/font_shadow_offset_y = 1
-StatePropertyEntry/font_sizes/font_size = 16
-StatePropertyEntry/fonts/font = ExtResource("1_nbw0c")
-StatePropertyEntry/styles/button_focus = SubResource("StyleBoxEmpty_csva5")
-StatePropertyEntry/styles/button_hover = SubResource("StyleBoxFlat_lcu27")
-StatePropertyEntry/styles/button_normal = SubResource("StyleBoxEmpty_dpygf")
-StatePropertyEntry/styles/button_pressed = SubResource("StyleBoxFlat_oy0og")
 StepperPropertyEditor/base_type = &"ValuePropertyEditor"
-StepperPropertyEditor/font_sizes/font_size = 16
-StepperPropertyEditor/fonts/font = ExtResource("1_nbw0c")
-StepperPropertyEditor/styles/lineedit_panel = SubResource("StyleBoxEmpty_b2ki6")
-StepperPropertyEditor/styles/stepper_panel = SubResource("StyleBoxFlat_gv0jq")
 TextEditGizmo/base_type = &"BaseGizmo"
 TextEditGizmo/colors/caret_color = Color(0.0877386, 0.0889176, 0.103727, 0.784314)
 TextEditGizmo/colors/selection_color = Color(0.239216, 0.309804, 0.411765, 0.470588)
 TextEditGizmo/constants/caret_size = 2
 TogglePropertyEditor/base_type = &"ValuePropertyEditor"
-TogglePropertyEditor/font_sizes/font_size = 16
-TogglePropertyEditor/fonts/font = ExtResource("1_nbw0c")
 TogglePropertyEditor/styles/toggle_panel = SubResource("StyleBoxEmpty_ivebc")
 TransitionPropertyEditor/base_type = &"PropertyEditor"
 TransitionPropertyEditor/constants/base_separation = 8
@@ -816,10 +797,7 @@ TransitionPropertyEditor/constants/margin_bottom = 2
 TransitionPropertyEditor/constants/margin_left = 8
 TransitionPropertyEditor/constants/margin_right = 8
 TransitionPropertyEditor/constants/margin_top = 2
-TransitionPropertyEditor/font_sizes/font_size = 16
-TransitionPropertyEditor/fonts/font = ExtResource("1_nbw0c")
-TransitionPropertyEditor/styles/lineedit_panel = SubResource("StyleBoxEmpty_w0g1b")
-TransitionPropertyEditor/styles/stepper_panel = SubResource("StyleBoxFlat_p0bwl")
+TransitionPropertyPreview/base_type = &"PropertyEditor"
 ValuePropertyEditor/base_type = &"PropertyEditor"
 ValuePropertyEditor/constants/base_separation = 8
 ValuePropertyEditor/constants/margin_bottom = 2
@@ -827,9 +805,7 @@ ValuePropertyEditor/constants/margin_left = 8
 ValuePropertyEditor/constants/margin_right = 8
 ValuePropertyEditor/constants/margin_top = 2
 VariantPropertyEditor/base_type = &"ValuePropertyEditor"
-VariantPropertyEditor/font_sizes/font_size = 16
 VariantPropertyEditor/font_sizes/variant_font_size = 2
-VariantPropertyEditor/fonts/font = ExtResource("1_nbw0c")
 VariantPropertyEditor/styles/button_hover = SubResource("StyleBoxFlat_x8v7q")
 VariantPropertyEditor/styles/button_normal = SubResource("StyleBoxFlat_p4dq1")
 VariantPropertyEditor/styles/button_pressed = SubResource("StyleBoxFlat_gfq45")
