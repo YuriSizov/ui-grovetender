@@ -114,21 +114,6 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		properties.push_back(size_property)
 	
 	elif editing_mode == EditingMode.BEHAVIOR_TOOLS:
-		# These sections only make sense for composite elements, as they can have children.
-		if element is UICompositeElement:
-			
-			# Behavior presets.
-			
-			var preset_section := SectionPropertyEditor.create(element, self)
-			preset_section.label = "Preset"
-			properties.push_back(preset_section)
-		
-			# Slots.
-			
-			var slots_section := SectionPropertyEditor.create(element, self)
-			slots_section.label = "Slots"
-			properties.push_back(slots_section)
-	
 		# States.
 		
 		var states_section := SectionPropertyEditor.create(element, self)
@@ -147,30 +132,27 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 		# Default state doesn't use its transitions, because it's always active.
 		if state.state_type != StateType.STATE_DEFAULT:
 			
-			# Composite elements aren't directly editable right now. So no transitions either.
-			if element is not UICompositeElement:
+			# State IN transition.
 			
-				# State IN transition.
-				
-				var transition_in_section := SectionPropertyEditor.create(element, self)
-				transition_in_section.label = "In Transition"
-				properties.push_back(transition_in_section)
-				
-				var transition_in_editor := TransitionPropertyEditor.create(element, self)
-				transition_in_editor.connect_to_property("state_in_transition", Callable())
-				transition_in_section.connect_editor(transition_in_editor)
-				properties.push_back(transition_in_editor)
-				
-				# State OUT transition.
-				
-				var transition_out_section := SectionPropertyEditor.create(element, self)
-				transition_out_section.label = "Out Transition"
-				properties.push_back(transition_out_section)
-				
-				var transition_out_editor := TransitionPropertyEditor.create(element, self)
-				transition_out_editor.connect_to_property("state_out_transition", Callable())
-				transition_out_section.connect_editor(transition_out_editor)
-				properties.push_back(transition_out_editor)
+			var transition_in_section := SectionPropertyEditor.create(element, self)
+			transition_in_section.label = "In Transition"
+			properties.push_back(transition_in_section)
+			
+			var transition_in_editor := TransitionPropertyEditor.create(element, self)
+			transition_in_editor.connect_to_property("state_in_transition", Callable())
+			transition_in_section.connect_editor(transition_in_editor)
+			properties.push_back(transition_in_editor)
+			
+			# State OUT transition.
+			
+			var transition_out_section := SectionPropertyEditor.create(element, self)
+			transition_out_section.label = "Out Transition"
+			properties.push_back(transition_out_section)
+			
+			var transition_out_editor := TransitionPropertyEditor.create(element, self)
+			transition_out_editor.connect_to_property("state_out_transition", Callable())
+			transition_out_section.connect_editor(transition_out_editor)
+			properties.push_back(transition_out_editor)
 			
 			# State IN/OUT preview.
 			
@@ -188,10 +170,6 @@ func get_editable_properties(element: UIElement, editing_mode: int) -> Array[Pro
 
 func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
-	
-	# Composite elements aren't directly editable right now.
-	if element is UICompositeElement:
-		return gizmos
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
 		var position_gizmo := PositionGizmo.new(element, self)

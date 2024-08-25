@@ -12,10 +12,8 @@ class_name UICompositeElement extends UIElement
 @export var element_group: UIElementGroup = null
 
 
-func _init(data_class: GDScript) -> void:
-	super(data_class)
-	
-	element_name = "CompositeElement"
+func _init() -> void:
+	super(CompositeElementData)
 	
 	element_group = UIElementGroup.new(self)
 	element_group.element_added.connect(_track_grouped_element)

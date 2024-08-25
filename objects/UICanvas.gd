@@ -132,7 +132,7 @@ func group_elements(elements: Array[UIElement]) -> void:
 		var group := element.get_group()
 		group.erase(element)
 	
-	var composite := UICompositeElement.new(BaseElementData)
+	var composite := UICompositeElement.new()
 	
 	# TODO: Insert at the position of the highest (lowest index) affected element in the common owner.
 	owner_group.add(composite)
