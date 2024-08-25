@@ -110,7 +110,7 @@ func _edit_selected_element() -> void:
 		return
 	
 	if _edited_element:
-		_edited_element.transform_queued.disconnect(queue_redraw)
+		_edited_element.transform_changed.disconnect(queue_redraw)
 	
 	if _selection.get_selection_size() != 1:
 		_edited_element = null
@@ -120,7 +120,7 @@ func _edit_selected_element() -> void:
 	_edited_element = _selection.get_first_selected()
 	
 	if _edited_element:
-		_edited_element.transform_queued.connect(queue_redraw)
+		_edited_element.transform_changed.connect(queue_redraw)
 	
 	_update_gizmos()
 

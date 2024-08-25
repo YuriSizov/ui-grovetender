@@ -123,11 +123,14 @@ func _handle_deactivated_state(state_data: BaseElementData) -> void:
 func _set_global_transform(global_rect: Rect2) -> void:
 	# Nothing changed, no need to propagate further.
 	if anchor_point == global_rect.position && default_state.size == global_rect.size:
-		element_group.notify_transform()
+		if not _transform_queued: # If the flag is set, wait for the higher-order call to notify about transforms.
+			element_group.notify_transform()
 		return
 	
-	# Do some changes manually to avoid triggering transform_queued multiple times. Hacky,
-	# but works!
-	anchor_point = global_rect.position
-	default_state.size = global_rect.size
-	default_state._notify_properties_changed([ "size" ], false)
+	set_anchor_point(global_rect.position)
+	default_state._set_size(global_rect.size, false)
+
+
+func notify_transform_changed() -> void:
+	super()
+	element_group.notify_transform()

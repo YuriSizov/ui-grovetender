@@ -73,7 +73,7 @@ func connect_to_state(element: UIElement, element_data: BaseElementData) -> void
 		return
 	
 	if _element:
-		_element.transform_queued.disconnect(_update_transform)
+		_element.transform_changed.disconnect(_update_transform)
 	if _element_data:
 		_element_data.properties_changed.disconnect(_check_visibility_condition)
 	
@@ -81,7 +81,7 @@ func connect_to_state(element: UIElement, element_data: BaseElementData) -> void
 	_element_data = element_data
 	
 	if _element:
-		_element.transform_queued.connect(_update_transform)
+		_element.transform_changed.connect(_update_transform)
 	if _element_data:
 		_element_data.properties_changed.connect(_check_visibility_condition)
 	

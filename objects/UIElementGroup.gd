@@ -95,6 +95,3 @@ func is_empty() -> bool:
 func notify_transform() -> void:
 	for element in elements:
 		element.notify_transform_changed()
-		
-		if element is UICompositeElement:
-			element.element_group.notify_transform()

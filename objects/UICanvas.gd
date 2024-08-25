@@ -29,8 +29,18 @@ const SCALE_STEP := 1.2
 const MIN_SCALE := 1.0 / pow(SCALE_STEP, 8.0)
 const MAX_SCALE := 1.0 * pow(SCALE_STEP, 4.0)
 
+## The runtime offset of the canvas view, i.e. the camera position.
 var _canvas_offset: Vector2 = Vector2.ZERO
+## The runtime scale of the canvas view, i.e. the camera zoom.
 var _canvas_scale: float = 1.0
+
+## The safeguard flag that keeps track of queued transforms for canvas
+## elements.
+var _element_transform_queued: bool = false
+## The set of elements with their transforms queued. We don't need to
+## update the entire canvas, since top level elements are independent
+## from each other.
+var _element_transform_set: Dictionary = {} # Kind of like a hashset, since keys are unique.
 
 
 func _init() -> void:
@@ -40,19 +50,6 @@ func _init() -> void:
 
 
 # Element management.
-
-func _track_grouped_element(element: UIElement) -> void:
-	element.transform_queued.connect(element_group.notify_transform)
-	
-	# DEBUG: Printing printing...
-	element.transform_queued.connect(func() -> void:
-		print("UICanvas: transform_queued")
-	)
-
-
-func _untrack_grouped_element(element: UIElement) -> void:
-	element.transform_queued.disconnect(element_group.notify_transform)
-
 
 func create_element(owner_element: UICompositeElement, data_type: GDScript, at_position: Vector2) -> void:
 	var element := UIElement.new(data_type)
@@ -145,6 +142,38 @@ func group_elements(elements: Array[UIElement]) -> void:
 		var element := elements[i]
 		composite.element_group.add(element)
 		element_reparented.emit(element, i)
+
+
+func _track_grouped_element(element: UIElement) -> void:
+	if element.is_transform_queued():
+		_queue_element_transform(element)
+	
+	element.transform_queued.connect(_queue_element_transform.bind(element))
+
+
+func _untrack_grouped_element(element: UIElement) -> void:
+	element.transform_queued.disconnect(_queue_element_transform.bind(element))
+
+
+func _queue_element_transform(element: UIElement) -> void:
+	# Only the key is relevant, we use it as a hashset.
+	_element_transform_set[element] = true
+	
+	if _element_transform_queued:
+		return
+	
+	_element_transform_queued = true
+	_notify_element_transform.call_deferred()
+
+
+func _notify_element_transform() -> void:
+	if not _element_transform_queued:
+		return
+	
+	for element in _element_transform_set:
+		element.notify_transform_changed()
+	_element_transform_set.clear()
+	_element_transform_queued = false
 
 
 # Transform management.

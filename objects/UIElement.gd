@@ -68,6 +68,11 @@ var _selected: bool = false
 ## The selected state, default or variant, that must be edited.
 var _selected_state: BaseElementData = null
 
+## The safeguard flag that keeps track of transform queued requests. It's enough to
+## signal it once until we receive a call to trigger transform_changed. Note, that
+## it can be set out of canvas, which must be accounted for when elements are added.
+var _transform_queued: bool = false
+
 
 func _init(data_class: GDScript) -> void:
 	element_name = data_class.get_default_name()
@@ -191,7 +196,7 @@ func deactivate_all_states() -> void:
 	
 	_update_combined_size()
 	data_changed.emit()
-	transform_queued.emit()
+	queue_transform()
 
 
 func _handle_activated_state(state_data: BaseElementData) -> void:
@@ -220,7 +225,7 @@ func _handle_activated_state(state_data: BaseElementData) -> void:
 	if not affected_properties.is_empty():
 		data_changed.emit()
 		if affected_properties.has("size") || affected_properties.has("offset"):
-			transform_queued.emit()
+			queue_transform()
 
 
 func _handle_deactivated_state(state_data: BaseElementData) -> void:
@@ -258,7 +263,7 @@ func _handle_deactivated_state(state_data: BaseElementData) -> void:
 	if not affected_properties.is_empty():
 		data_changed.emit()
 		if affected_properties.has("size") || affected_properties.has("offset"):
-			transform_queued.emit()
+			queue_transform()
 
 
 # Data management.
@@ -284,7 +289,7 @@ func _update_stateful_property(property_name: String) -> void:
 	
 	data_changed.emit()
 	if property_name == "size" || property_name == "offset":
-		transform_queued.emit()
+		queue_transform()
 
 
 func _transition_stateful_property(property_name: String, state_data: BaseElementData, transition: UITransition) -> void:
@@ -428,11 +433,23 @@ func set_anchor_point(value: Vector2) -> void:
 		return
 	
 	anchor_point = value
-	transform_queued.emit()
+	queue_transform()
 
 
 func adjust_anchor_point(delta: Vector2) -> void:
 	set_anchor_point(anchor_point + delta)
+
+
+func queue_transform() -> void:
+	if _transform_queued:
+		return
+	
+	_transform_queued = true
+	transform_queued.emit()
+
+
+func is_transform_queued() -> bool:
+	return _transform_queued
 
 
 func notify_transform_changed() -> void:
@@ -446,6 +463,7 @@ func notify_transform_changed() -> void:
 		)
 	
 	transform_changed.emit()
+	_transform_queued = false
 
 
 func get_element_state_rect(state_data: BaseElementData) -> Rect2:

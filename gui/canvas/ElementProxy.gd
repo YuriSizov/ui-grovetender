@@ -81,6 +81,7 @@ func _update_anchor_position() -> void:
 func _update_element_transform() -> void:
 	_update_anchor_position()
 	_update_renderers()
+	_redraw_renderers()
 
 
 func _update_visibility() -> void:

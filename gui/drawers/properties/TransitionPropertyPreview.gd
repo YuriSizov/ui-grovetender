@@ -114,7 +114,7 @@ func _draw_composite_preview(composite_element: UICompositeElement) -> void:
 		var child_data := child_element.get_active_data()
 		var child_offset := child_element.anchor_point - base_position
 		
-		_preview_control.draw_set_transform(child_offset)
+		_preview_control.draw_set_transform(child_offset + child_data.offset)
 		child_data.draw(_preview_control)
 		_preview_control.draw_set_transform(Vector2.ZERO)
 		
