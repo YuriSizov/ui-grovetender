@@ -87,7 +87,7 @@ size_flags_vertical = 0
 [node name="EditingModeBar" parent="Overlay" instance=ExtResource("7_dihyy")]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 size_flags_vertical = 8
 
 [node name="CanvasContextMenu" type="Control" parent="."]

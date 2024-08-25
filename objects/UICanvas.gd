@@ -58,6 +58,8 @@ func create_element(owner_element: UICompositeElement, data_type: GDScript, at_p
 	var owner_group := owner_element.element_group if owner_element else element_group
 	owner_group.add(element)
 	element_created.emit(element)
+	
+	Controller.current_project.mark_dirty()
 
 
 func remove_element(element: UIElement) -> void:
@@ -70,12 +72,16 @@ func remove_element(element: UIElement) -> void:
 	var owner_group := element.get_group()
 	if owner_group.erase(element):
 		element_removed.emit(element)
+	
+	Controller.current_project.mark_dirty()
 
 
 func sort_element(element: UIElement, to_index: int) -> void:
 	var owner_group := element.get_group()
 	if owner_group.move(element, to_index):
 		element_sorted.emit(element, to_index)
+	
+	Controller.current_project.mark_dirty()
 
 
 func _find_common_owner_group(elements: Array[UIElement]) -> UIElementGroup:
@@ -142,6 +148,8 @@ func group_elements(elements: Array[UIElement]) -> void:
 		var element := elements[i]
 		composite.element_group.add(element)
 		element_reparented.emit(element, i)
+	
+	Controller.current_project.mark_dirty()
 
 
 func _track_grouped_element(element: UIElement) -> void:

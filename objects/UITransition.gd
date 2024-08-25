@@ -30,6 +30,7 @@ func set_duration(value: float) -> void:
 	
 	duration = value
 	transition_changed.emit()
+	Controller.current_project.mark_dirty()
 
 
 func set_curve(value: Tween.TransitionType) -> void:
@@ -38,6 +39,7 @@ func set_curve(value: Tween.TransitionType) -> void:
 	
 	curve = value
 	transition_changed.emit()
+	Controller.current_project.mark_dirty()
 
 
 func set_easing(value: Tween.EaseType) -> void:
@@ -46,3 +48,4 @@ func set_easing(value: Tween.EaseType) -> void:
 	
 	easing = value
 	transition_changed.emit()
+	Controller.current_project.mark_dirty()

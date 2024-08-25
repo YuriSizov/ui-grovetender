@@ -20,11 +20,8 @@ resource_local_to_scene = true
 resource_local_to_scene = true
 
 [node name="EditingModeBar" type="MarginContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 304.0
+offset_bottom = 106.0
 mouse_filter = 2
 theme_type_variation = &"EditingModeBar"
 script = ExtResource("1_6ps3l")
@@ -37,7 +34,7 @@ alignment = 1
 [node name="CurrentModeLabel" type="Label" parent="Layout"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 text = "Current Mode"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -46,7 +43,7 @@ uppercase = true
 [node name="ButtonSection" type="VBoxContainer" parent="Layout"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 mouse_filter = 2
 
 [node name="ButtonSeparator" type="Panel" parent="Layout/ButtonSection"]

@@ -58,6 +58,7 @@ func _toggle_draw_background(value: bool, override: bool) -> void:
 	
 	draw_background = value
 	_notify_properties_changed([ "draw_background" ], override)
+	Controller.current_project.mark_dirty()
 
 
 func _set_background_color(value: Color, override: bool) -> void:
@@ -66,3 +67,4 @@ func _set_background_color(value: Color, override: bool) -> void:
 	
 	background_color = value
 	_notify_properties_changed([ "background_color" ], override)
+	Controller.current_project.mark_dirty()

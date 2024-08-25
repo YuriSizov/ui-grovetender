@@ -135,6 +135,7 @@ func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementDa
 	_update_variant_state(state_data)
 	_update_combined_size()
 	states_changed.emit()
+	Controller.current_project.mark_dirty()
 	
 	return state_data
 
@@ -392,6 +393,7 @@ func set_visible(value: bool) -> void:
 	
 	visible = value
 	visibility_changed.emit()
+	Controller.current_project.mark_dirty()
 
 
 # Selection.
@@ -436,6 +438,7 @@ func set_anchor_point(value: Vector2) -> void:
 	
 	anchor_point = value
 	queue_transform()
+	Controller.current_project.mark_dirty()
 
 
 func adjust_anchor_point(delta: Vector2) -> void:

@@ -197,6 +197,7 @@ func _set_offset(value: Vector2, override: bool) -> void:
 	
 	offset = value
 	_notify_properties_changed([ "offset" ], override)
+	Controller.current_project.mark_dirty()
 
 
 func _adjust_offset(delta: Vector2, override: bool) -> void:
@@ -209,3 +210,4 @@ func _set_size(value: Vector2, override: bool) -> void:
 	
 	size = value
 	_notify_properties_changed([ "size" ], override)
+	Controller.current_project.mark_dirty()
