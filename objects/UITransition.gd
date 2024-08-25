@@ -19,6 +19,11 @@ signal transition_changed()
 @export var easing: Tween.EaseType = Tween.EASE_IN_OUT
 
 
+func get_full_duration() -> float:
+	# TODO: We don't have a delay, but maybe we should?
+	return duration
+
+
 func set_duration(value: float) -> void:
 	if duration == value:
 		return

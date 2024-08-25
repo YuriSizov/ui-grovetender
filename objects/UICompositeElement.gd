@@ -26,6 +26,7 @@ func _init() -> void:
 
 func _track_grouped_element(element: UIElement) -> void:
 	element.transform_queued.connect(_update_grouped_transform)
+	element.transitions_changed.connect(_update_grouped_transitions)
 	
 	# Ensure that the grouped element has all the states from this composite element.
 	var states: Array[Array] = []
@@ -34,14 +35,16 @@ func _track_grouped_element(element: UIElement) -> void:
 		states.push_back(state_tuple)
 	
 	_ensure_grouped_states(states, [ element ])
-	
 	_extend_grouped_transform(element)
+	_update_grouped_transitions()
 
 
 func _untrack_grouped_element(element: UIElement) -> void:
 	element.transform_queued.disconnect(_update_grouped_transform)
+	element.transitions_changed.disconnect(_update_grouped_transitions)
 	
 	_update_grouped_transform()
+	_update_grouped_transitions()
 
 
 func _update_grouped_transform() -> void:
@@ -80,6 +83,8 @@ func create_state(state_type: int, state_name: String) -> BaseElementData:
 		var state_tuple := [ state_data.state.state_type, state_data.state.state_name ]
 		_ensure_grouped_states([ state_tuple ], element_group.elements)
 	
+	_update_grouped_transitions()
+	
 	return state_data
 
 
@@ -114,6 +119,23 @@ func _handle_deactivated_state(state_data: BaseElementData) -> void:
 	for element in element_group.elements:
 		var child_state := element.find_state(state_data.state.state_type, state_data.state.state_name)
 		child_state.state.set_active(false)
+
+
+func _update_grouped_transitions() -> void:
+	# FIXME: This can be done by index, if we ensure the state order in grouped elements.
+	
+	for state_data in variant_states:
+		state_data.state_in_transition.duration = 0.0
+		state_data.state_out_transition.duration = 0.0
+		
+		for element in element_group.elements:
+			var sub_element_data := element.find_state(state_data.state.state_type, state_data.state.state_name)
+			
+			if state_data.state_in_transition.duration < sub_element_data.state_in_transition.get_full_duration():
+				state_data.state_in_transition.duration = sub_element_data.state_in_transition.get_full_duration()
+			
+			if state_data.state_out_transition.duration < sub_element_data.state_out_transition.get_full_duration():
+				state_data.state_out_transition.duration = sub_element_data.state_out_transition.get_full_duration()
 
 
 # Transform management.

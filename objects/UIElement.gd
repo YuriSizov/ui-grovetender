@@ -17,6 +17,7 @@ signal data_changed()
 signal transform_queued()
 signal transform_changed()
 signal states_changed()
+signal transitions_changed()
 signal visibility_changed()
 
 signal editor_selected()
@@ -85,6 +86,7 @@ func _init(data_class: GDScript) -> void:
 	# The order matters here. First we update it for states, then for the active data.
 	default_state.property_changed.connect(_update_property_in_all_variant_states)
 	default_state.property_changed.connect(_update_stateful_property)
+	default_state.transitions_changed.connect(transitions_changed.emit)
 	
 	_update_combined_size()
 
@@ -126,6 +128,7 @@ func _create_state_nocheck(state_type: int, state_name: String) -> BaseElementDa
 	# The order matters here. First we update it for the state, then for the active data.
 	state_data.property_changed.connect(_update_property_in_variant_state.bind(state_data))
 	state_data.property_changed.connect(_update_stateful_property)
+	state_data.transitions_changed.connect(transitions_changed.emit)
 	state_data.state.state_activated.connect(_handle_activated_state.bind(state_data))
 	state_data.state.state_deactivated.connect(_handle_deactivated_state.bind(state_data))
 	
@@ -296,16 +299,15 @@ func _transition_stateful_property(property_name: String, state_data: BaseElemen
 	_abort_transition_stateful_property(property_name)
 	
 	var value: Variant = state_data.get(property_name)
-	var transition_duration := transition.duration
 	
-	if transition_duration <= 0.0: # No transition, set immediately.
+	if transition.get_full_duration() <= 0.0: # No transition, set immediately.
 		_active_data.set(property_name, value)
 		return
 	
 	var scene_tree: SceneTree = Engine.get_main_loop()
 	var tweener := scene_tree.create_tween()
 	tweener\
-		.tween_property(_active_data, property_name, value, transition_duration)\
+		.tween_property(_active_data, property_name, value, transition.duration)\
 		.set_trans(transition.curve)\
 		.set_ease(transition.easing)
 	
@@ -503,10 +505,15 @@ func _update_combined_size() -> void:
 	_combined_size = base_size
 
 
+func get_combined_size() -> Vector2:
+	return _combined_size
+
+
 func get_state_preview_spacing() -> Vector2:
-	var owner := get_group().get_owner()
-	if owner is UIElement:
-		return owner.get_state_preview_spacing()
+	if has_group():
+		var owner := get_group().get_owner()
+		if owner is UIElement:
+			return owner.get_state_preview_spacing()
 	
 	return _combined_size + Vector2(STATE_RENDERER_PADDING, STATE_RENDERER_PADDING)
 

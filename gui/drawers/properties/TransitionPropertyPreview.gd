@@ -88,10 +88,9 @@ func _clear_preview() -> void:
 
 
 func _update_preview_transform() -> void:
-	var element_rect := _element.get_active_state_rect()
 	var element_data := _element.get_active_data()
 	
-	_preview_control.size = element_rect.size
+	_preview_control.size = _element.get_combined_size()
 	_preview_control.position = (_preview_area.size - _preview_control.size) / 2.0 + element_data.offset
 	_preview_control.queue_redraw()
 
@@ -167,7 +166,7 @@ func _start_playback_step() -> void:
 	
 	if _playback_direction == PlaybackDirection.PLAYBACK_OUT:
 		_playback_direction = PlaybackDirection.PLAYBACK_IN
-		_playback_timer = get_tree().create_timer(_element_data.state_in_transition.duration + PLAYBACK_STEP_DELAY)
+		_playback_timer = get_tree().create_timer(_element_data.state_in_transition.get_full_duration() + PLAYBACK_STEP_DELAY)
 		_playback_timer.timeout.connect(_start_playback_step)
 		
 		_element_data.state.set_active(true)
@@ -175,7 +174,7 @@ func _start_playback_step() -> void:
 	
 	elif _playback_direction == PlaybackDirection.PLAYBACK_IN:
 		_playback_direction = PlaybackDirection.PLAYBACK_OUT
-		_playback_timer = get_tree().create_timer(_element_data.state_out_transition.duration + PLAYBACK_STEP_DELAY)
+		_playback_timer = get_tree().create_timer(_element_data.state_out_transition.get_full_duration() + PLAYBACK_STEP_DELAY)
 		_playback_timer.timeout.connect(_start_playback_step)
 		
 		_element_data.state.set_active(false)

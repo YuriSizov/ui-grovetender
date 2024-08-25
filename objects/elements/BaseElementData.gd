@@ -12,6 +12,7 @@ class_name BaseElementData extends Resource
 
 signal property_changed(property_name: String)
 signal properties_changed()
+signal transitions_changed()
 
 # Stealing this unused property usage flag for our needs. Let's hope it is
 # never reclaimed by the engine.
@@ -23,9 +24,9 @@ const PROPERTY_USAGE_ELEMENT_DATA := PROPERTY_USAGE_SCRIPT_DEFAULT_VALUE
 ## property overrides and the activity flag.
 @export var state: UIState = UIState.new()
 ## The instance of the transition object used when activating the state.
-@export var state_in_transition: UITransition = UITransition.new()
+@export var state_in_transition: UITransition = null
 ## The instance of the transition object used when deactivating the state.
-@export var state_out_transition: UITransition = UITransition.new()
+@export var state_out_transition: UITransition = null
 
 # Common element data.
 
@@ -48,6 +49,14 @@ var preview_offset: Vector2 = Vector2.ZERO
 
 static func get_default_name() -> String:
 	return "EmptyElement"
+
+
+func _init() -> void:
+	state_in_transition = UITransition.new()
+	state_out_transition = UITransition.new()
+	
+	state_in_transition.transition_changed.connect(transitions_changed.emit)
+	state_out_transition.transition_changed.connect(transitions_changed.emit)
 
 
 ## Virtual. Called by the proxy control to render this state.
