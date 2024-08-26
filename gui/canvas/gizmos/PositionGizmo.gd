@@ -78,6 +78,9 @@ func _test_point(point: Vector2) -> bool:
 
 # Override.
 func _handle_mouse_input(event: InputEventMouse) -> void:
+	if _hovered_handle_id == HandleType.HANDLE_NONE:
+		return
+	
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		

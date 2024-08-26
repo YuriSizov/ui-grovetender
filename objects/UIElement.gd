@@ -87,6 +87,7 @@ func _init(data_class: GDScript) -> void:
 	default_state.property_changed.connect(_update_property_in_all_variant_states)
 	default_state.property_changed.connect(_update_stateful_property)
 	default_state.transitions_changed.connect(transitions_changed.emit)
+	default_state.anchor_changed_from_size.connect(adjust_anchor_point)
 	
 	_update_combined_size()
 

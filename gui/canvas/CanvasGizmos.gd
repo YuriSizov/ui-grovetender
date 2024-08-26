@@ -60,7 +60,10 @@ func _gui_input(event: InputEvent) -> void:
 		# If not, check every gizmo. We iterate through all of them to clear
 		# some intermediate states, if necessary.
 		var handled := false
-		for gizmo: BaseGizmo in _gizmo_container.get_children():
+		var gizmos := _gizmo_container.get_children()
+		gizmos.reverse() # Iterate backwards, so gizmos drawn on top are handled first.
+		
+		for gizmo: BaseGizmo in gizmos:
 			if not handled && _try_gizmo_input(gizmo, event):
 				handled = true
 				continue

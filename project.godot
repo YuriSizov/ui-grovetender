@@ -31,6 +31,7 @@ naming/script_name_casing=1
 
 [gui]
 
+common/snap_controls_to_pixels=false
 theme/custom="res://gui/theme/project_theme.tres"
 
 [input]

@@ -36,6 +36,11 @@ var _handle_tooltip: String = ""
 var _local_element_anchor: Vector2 = Vector2.ZERO
 ## The cached value of the element rect, translated into UI coordinates.
 var _local_element_rect: Rect2 = Rect2()
+## The cached values for element corners, translated into UI coordinates.
+var _local_element_corner: PackedVector2Array = PackedVector2Array()
+## The cached values for element sides, translated into UI coordinates. Vector4 values
+## should be read as x1, y1, x2, y2, defining a rectangle.
+var _local_element_side: PackedVector4Array = PackedVector4Array()
 
 
 func _init(element: UIElement, element_data: BaseElementData) -> void:
@@ -109,12 +114,40 @@ func _update_transform() -> void:
 	if not _canvas || not _element:
 		return
 	
+	# Always request a redraw.
 	queue_redraw()
+	
+	# Update value caches.
 	
 	var element_rect := _element.get_element_state_rect(_element_data)
 	_local_element_rect = _canvas.from_canvas_rect(element_rect)
 	_local_element_anchor = _canvas.from_canvas_coordinates(_element.anchor_point)
 	
+	_local_element_corner.resize(4)
+	_local_element_corner[CORNER_TOP_LEFT]     = Vector2(_local_element_rect.position.x, _local_element_rect.position.y)
+	_local_element_corner[CORNER_TOP_RIGHT]    = Vector2(_local_element_rect.end.x,      _local_element_rect.position.y)
+	_local_element_corner[CORNER_BOTTOM_RIGHT] = Vector2(_local_element_rect.end.x,      _local_element_rect.end.y)
+	_local_element_corner[CORNER_BOTTOM_LEFT]  = Vector2(_local_element_rect.position.x, _local_element_rect.end.y)
+	
+	_local_element_side.resize(4)
+	_local_element_side[SIDE_LEFT] = Vector4(
+		_local_element_corner[CORNER_TOP_LEFT].x, _local_element_corner[CORNER_TOP_LEFT].y,
+		_local_element_corner[CORNER_BOTTOM_LEFT].x, _local_element_corner[CORNER_BOTTOM_LEFT].y
+	)
+	_local_element_side[SIDE_TOP] = Vector4(
+		_local_element_corner[CORNER_TOP_LEFT].x, _local_element_corner[CORNER_TOP_LEFT].y,
+		_local_element_corner[CORNER_TOP_RIGHT].x, _local_element_corner[CORNER_TOP_RIGHT].y
+	)
+	_local_element_side[SIDE_RIGHT] = Vector4(
+		_local_element_corner[CORNER_TOP_RIGHT].x, _local_element_corner[CORNER_TOP_RIGHT].y,
+		_local_element_corner[CORNER_BOTTOM_RIGHT].x, _local_element_corner[CORNER_BOTTOM_RIGHT].y
+	)
+	_local_element_side[SIDE_BOTTOM] = Vector4(
+		_local_element_corner[CORNER_BOTTOM_LEFT].x, _local_element_corner[CORNER_BOTTOM_LEFT].y,
+		_local_element_corner[CORNER_BOTTOM_RIGHT].x, _local_element_corner[CORNER_BOTTOM_RIGHT].y
+	)
+	
+	# Let gizmo implementations update their transforms.
 	_update_handles_transform()
 
 

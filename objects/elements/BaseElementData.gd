@@ -14,6 +14,8 @@ signal property_changed(property_name: String)
 signal properties_changed()
 signal transitions_changed()
 
+signal anchor_changed_from_size(delta: Vector2)
+
 # Stealing this unused property usage flag for our needs. Let's hope it is
 # never reclaimed by the engine.
 const PROPERTY_USAGE_ELEMENT_DATA := PROPERTY_USAGE_SCRIPT_DEFAULT_VALUE
@@ -181,9 +183,25 @@ func get_gizmos(element: UIElement, editing_mode: int) -> Array[BaseGizmo]:
 	var gizmos: Array[BaseGizmo] = []
 	
 	if editing_mode == EditingMode.LAYOUT_TOOLS:
+		# TODO: Implement constraints, snapping, alignment.
+		# TODO: Keep track of the size at the start of the operation, accumulate deltas, and apply current modifier key effects retroactively.
+		
+		var size_gizmo := SizeGizmo.new(element, self)
+		size_gizmo.corner_size_changed.connect(_resize_by_corner.bind(false, true))
+		size_gizmo.corner_size_all_changed.connect(_resize_by_all_corners.bind(false, true))
+		size_gizmo.corner_size_ratio_changed.connect(_resize_by_corner.bind(true, true))
+		size_gizmo.corner_size_ratio_all_changed.connect(_resize_by_all_corners.bind(true, true))
+		
+		size_gizmo.side_size_changed.connect(_resize_by_side.bind(true))
+		size_gizmo.side_size_all_changed.connect(_resize_by_all_sides.bind(true))
+		size_gizmo.side_size_opposite_changed.connect(_resize_by_opposite_sides.bind(true))
+		
+		gizmos.push_back(size_gizmo)
+		
 		var position_gizmo := PositionGizmo.new(element, self)
 		position_gizmo.anchor_changed.connect(element.adjust_anchor_point)
 		position_gizmo.offset_changed.connect(_adjust_offset.bind(true))
+		
 		gizmos.push_back(position_gizmo)
 	
 	return gizmos
@@ -205,9 +223,161 @@ func _adjust_offset(delta: Vector2, override: bool) -> void:
 
 
 func _set_size(value: Vector2, override: bool) -> void:
-	if size == value:
+	var sanitized_value := _ensure_positive_size(value)
+	if size == sanitized_value:
 		return
 	
-	size = value
+	size = sanitized_value
 	_notify_properties_changed([ "size" ], override)
 	Controller.current_project.mark_dirty()
+
+
+func _adjust_anchor_with_size(value: Vector2, x_factor: float, y_factor: float) -> void:
+	var position_delta := value - size
+	
+	# These depend on which handle we're dragging.
+	position_delta.x *= x_factor
+	position_delta.y *= y_factor
+	
+	anchor_changed_from_size.emit(position_delta)
+
+
+func _ensure_positive_size(value: Vector2) -> Vector2:
+	if value.x < 0:
+		value.x = 0
+	if value.y < 0:
+		value.y = 0
+	
+	return value
+
+
+func _ensure_ratio_size(value: Vector2, ratio: Vector2) -> Vector2:
+	if ratio.x == 0 || ratio.y == 0:
+		return value
+	
+	if ratio.x > ratio.y:
+		value.y = (ratio.y / ratio.x) * value.x
+	else:
+		value.x = (ratio.x / ratio.y) * value.y
+	
+	return _ensure_positive_size(value)
+
+
+func _resize_by_corner(corner: Corner, delta: Vector2, keep_ratio: bool, override: bool) -> void:
+	var adjusted_size := size
+	
+	match corner:
+		CORNER_TOP_LEFT:
+			adjusted_size -= delta # Inverted on both axes.
+		CORNER_TOP_RIGHT:
+			adjusted_size += Vector2(delta.x, -delta.y)
+		CORNER_BOTTOM_RIGHT:
+			adjusted_size += delta
+		CORNER_BOTTOM_LEFT:
+			adjusted_size += Vector2(-delta.x, delta.y)
+	
+	adjusted_size = _ensure_positive_size(adjusted_size)
+	if keep_ratio:
+		adjusted_size = _ensure_ratio_size(adjusted_size, size)
+	
+	_adjust_anchor_with_size(
+		adjusted_size,
+		-1.0 if corner == CORNER_TOP_LEFT || corner == CORNER_BOTTOM_LEFT else 0.0,
+		-1.0 if corner == CORNER_TOP_LEFT || corner == CORNER_TOP_RIGHT else 0.0
+	)
+	_set_size(adjusted_size, override)
+
+
+func _resize_by_all_corners(corner: Corner, delta: Vector2, keep_ratio: bool, override: bool) -> void:
+	var adjusted_size := size
+	
+	match corner:
+		CORNER_TOP_LEFT:
+			adjusted_size -= delta * 2.0 # Inverted on both axes.
+		CORNER_TOP_RIGHT:
+			adjusted_size += Vector2(delta.x, -delta.y) * 2.0
+		CORNER_BOTTOM_RIGHT:
+			adjusted_size += delta * 2.0
+		CORNER_BOTTOM_LEFT:
+			adjusted_size += Vector2(-delta.x, delta.y) * 2.0
+	
+	adjusted_size = _ensure_positive_size(adjusted_size)
+	if keep_ratio:
+		adjusted_size = _ensure_ratio_size(adjusted_size, size)
+	
+	_adjust_anchor_with_size(
+		adjusted_size,
+		-0.5,
+		-0.5
+	)
+	_set_size(adjusted_size, override)
+
+
+func _resize_by_side(side: Side, delta: Vector2, override: bool) -> void:
+	var adjusted_size := size
+	
+	match side:
+		SIDE_LEFT:
+			adjusted_size.x -= delta.x
+		SIDE_RIGHT:
+			adjusted_size.x += delta.x
+		SIDE_TOP:
+			adjusted_size.y -= delta.y
+		SIDE_BOTTOM:
+			adjusted_size.y += delta.y
+	
+	adjusted_size = _ensure_positive_size(adjusted_size)
+	_adjust_anchor_with_size(
+		adjusted_size,
+		-1.0 if side == SIDE_LEFT else 0.0,
+		-1.0 if side == SIDE_TOP else 0.0
+	)
+	_set_size(adjusted_size, override)
+
+
+func _resize_by_all_sides(side: Side, delta: Vector2, override: bool) -> void:
+	var adjusted_size := size
+	
+	match side:
+		SIDE_LEFT:
+			adjusted_size.x -= delta.x * 2.0
+			adjusted_size.y -= delta.x * 2.0
+		SIDE_RIGHT:
+			adjusted_size.x += delta.x * 2.0
+			adjusted_size.y += delta.x * 2.0
+		SIDE_TOP:
+			adjusted_size.y -= delta.y * 2.0
+			adjusted_size.x -= delta.y * 2.0
+		SIDE_BOTTOM:
+			adjusted_size.y += delta.y * 2.0
+			adjusted_size.x += delta.y * 2.0
+	
+	adjusted_size = _ensure_positive_size(adjusted_size)
+	_adjust_anchor_with_size(
+		adjusted_size,
+		-0.5,
+		-0.5
+	)
+	_set_size(adjusted_size, override)
+
+
+func _resize_by_opposite_sides(side: Side, delta: Vector2, override: bool) -> void:
+	var adjusted_size := size
+	
+	match side:
+		SIDE_LEFT:
+			adjusted_size.x -= delta.x * 2.0
+		SIDE_RIGHT:
+			adjusted_size.x += delta.x * 2.0
+		SIDE_TOP:
+			adjusted_size.y -= delta.y * 2.0
+		SIDE_BOTTOM:
+			adjusted_size.y += delta.y * 2.0
+	
+	adjusted_size = _ensure_positive_size(adjusted_size)
+	_adjust_anchor_with_size(
+		adjusted_size,
+		-0.5 if side == SIDE_LEFT || side == SIDE_RIGHT else 0.0,
+		-0.5 if side == SIDE_TOP || side == SIDE_BOTTOM else 0.0
+	)
+	_set_size(adjusted_size, override)

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=74 format=3 uid="uid://jgqsy0ei8blc"]
+[gd_resource type="Theme" load_steps=73 format=3 uid="uid://jgqsy0ei8blc"]
 
 [ext_resource type="FontVariation" uid="uid://dn6h7jdi3wgnr" path="res://gui/theme/fonts/main_font_black.tres" id="1_8ropx"]
 [ext_resource type="FontVariation" uid="uid://dew0v0pshnv38" path="res://gui/theme/fonts/main_font_normal.tres" id="1_32up8"]
@@ -6,6 +6,11 @@
 [ext_resource type="StyleBox" uid="uid://nepoyenppmop" path="res://gui/theme/styles/shortcut_label_style.tres" id="3_obau7"]
 [ext_resource type="Texture2D" uid="uid://bb75hxis3lgwf" path="res://assets/gizmos/position-offset.png" id="4_3n00a"]
 [ext_resource type="Texture2D" uid="uid://csxfsh5vtepnq" path="res://assets/ui/revert.png" id="5_kym2x"]
+[ext_resource type="Texture2D" uid="uid://dhkxt0d03nc52" path="res://assets/gizmos/size-corner-bl.png" id="7_n5i2j"]
+[ext_resource type="Texture2D" uid="uid://ckpnv1xdyc0bl" path="res://assets/gizmos/size-corner-br.png" id="8_pwfm5"]
+[ext_resource type="Texture2D" uid="uid://baw7x3qns0wqj" path="res://assets/gizmos/size-corner-tl.png" id="9_uktp3"]
+[ext_resource type="Texture2D" uid="uid://i560tyj40di7" path="res://assets/gizmos/size-corner-tr.png" id="10_37to4"]
+[ext_resource type="Texture2D" uid="uid://b3paaepk70yc4" path="res://assets/gizmos/size-side.png" id="11_465ld"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3lu1"]
 bg_color = Color(0.885001, 0.68641, 0.702486, 1)
@@ -449,49 +454,6 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ka6dp"]
-bg_color = Color(0.54621, 0.774571, 0.947929, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0wlwl"]
-bg_color = Color(0.423529, 0.658824, 0.803922, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m50em"]
-bg_color = Color(0.188235, 0.482353, 0.682353, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bf384"]
-bg_color = Color(0.54621, 0.774571, 0.947929, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ry4p3"]
-bg_color = Color(0.423529, 0.658824, 0.803922, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tilfi"]
-bg_color = Color(0.188235, 0.482353, 0.682353, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-corner_detail = 4
-
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_v13wo"]
 color = Color(0.588235, 0.588235, 0.588235, 1)
 grow_begin = 0.0
@@ -791,19 +753,17 @@ SimpleStepper/base_type = &"SpinBox"
 SimpleStepper/styles/lineedit_panel = SubResource("StyleBoxEmpty_0lvoi")
 SimpleStepper/styles/stepper_panel = SubResource("StyleBoxFlat_sp5wq")
 SizeGizmo/base_type = &"BaseGizmo"
-SizeGizmo/constants/corner_handle_size = 16
-SizeGizmo/constants/corner_handle_thickness = 4
-SizeGizmo/constants/handle_trigger_size = 24
-SizeGizmo/constants/label_offset_x = 6
-SizeGizmo/constants/label_offset_y = 2
+SizeGizmo/constants/corner_handle_render_size = 20
+SizeGizmo/constants/corner_handle_trigger_size = 48
 SizeGizmo/constants/side_handle_percent = 50
-SizeGizmo/constants/side_handle_thickness = 4
-SizeGizmo/styles/corner_handle = SubResource("StyleBoxFlat_ka6dp")
-SizeGizmo/styles/corner_handle_hover = SubResource("StyleBoxFlat_0wlwl")
-SizeGizmo/styles/corner_handle_pressed = SubResource("StyleBoxFlat_m50em")
-SizeGizmo/styles/side_handle = SubResource("StyleBoxFlat_bf384")
-SizeGizmo/styles/side_handle_hover = SubResource("StyleBoxFlat_ry4p3")
-SizeGizmo/styles/side_handle_pressed = SubResource("StyleBoxFlat_tilfi")
+SizeGizmo/constants/side_handle_render_size = 6
+SizeGizmo/constants/side_handle_stretch_margin = 5
+SizeGizmo/constants/side_handle_trigger_size = 48
+SizeGizmo/icons/corner_bl_handle = ExtResource("7_n5i2j")
+SizeGizmo/icons/corner_br_handle = ExtResource("8_pwfm5")
+SizeGizmo/icons/corner_tl_handle = ExtResource("9_uktp3")
+SizeGizmo/icons/corner_tr_handle = ExtResource("10_37to4")
+SizeGizmo/icons/side_handle = ExtResource("11_465ld")
 StatePropertyEditor/base_type = &"PropertyEditor"
 StatePropertyEditor/constants/base_separation = 8
 StatePropertyEditor/constants/margin_bottom = 2
