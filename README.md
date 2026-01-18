@@ -1,3 +1,5 @@
+_This project has been archived during migration from GitHub. The project will likely be restarted in some form later on, so this repository cannot be kept as an active mirror._
+
 ## UI Grovetender
 
 **UI Grovetender** is an intuitive app for quickly creating game UIs.
